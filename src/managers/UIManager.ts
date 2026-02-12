@@ -328,7 +328,14 @@ export class UIManager {
     const currentTurn = this.scene.gameState.currentTurn;
     const myTurn = this.scene.gameState.activePlayer == "PLAYER";
 
-    const isEffectCard = card.getType() === "TRAP" || card.getType() == "EFFECT_MONSTER";
+    //attack phase
+    const currentPhase = this.scene.currentPhase;
+    const isAttackPosition = card.angle == 0;
+    const canAttack =
+      cardData.atk !== undefined && isAttackPosition && !card.isFaceDown;
+
+    const isEffectCard =
+      card.getType() === "TRAP" || card.getType() == "EFFECT_MONSTER";
     const hasWaitedOneTurn = currentTurn > card.setTurn;
 
     if (card.isFaceDown && isPlayerCard && myTurn) {
@@ -360,6 +367,27 @@ export class UIManager {
 
     //always visible
     if (!card.isFaceDown || isPlayerCard) {
+      if (currentPhase == "BATTLE" && canAttack && myTurn) {
+        const attackBtn = new ToonButton(this.scene, {
+          text: "ATACAR",
+          x: x + 70,
+          y: y - 35,
+          height: 42,
+          width: 120,
+          fontSize: "16px",
+          color: 0x302b1f,
+          textColor: "#FFD966",
+          hoverColor: 0x4d4533,
+          borderColor: 0xeee5ae,
+        }).setDepth(10002);
+
+        attackBtn.on("pointerdown", () => {
+          this.clearSelectionMenu();
+          console.log("atk", card);
+        });
+
+        buttons.push(attackBtn);
+      }
       const detailsBtn = new ToonButton(this.scene, {
         text: buttonTexts.details,
         x: x - 70,
