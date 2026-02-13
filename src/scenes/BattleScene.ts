@@ -381,6 +381,8 @@ export class BattleScene extends Phaser.Scene {
   }
 
   public cardActivation(card: Card, side: GameSide) {
+    const isEffectMonster = card.getType() === "EFFECT_MONSTER";
+
     card.activate();
 
     //creating a temporary point to store position data
@@ -415,6 +417,7 @@ export class BattleScene extends Phaser.Scene {
       targets: card,
       x: 640, // x center (1280 / 2)
       y: 360, // y center (720 / 2)
+      angle: 0,
       scale: 1,
       duration: 400,
       ease: "Back.easeOut",
@@ -431,11 +434,27 @@ export class BattleScene extends Phaser.Scene {
           this.add.existing(card);
           this.currentHand.showHand();
 
-          // remove card from slot
-          this.fieldManager.releaseSlot(card, side);
+          if (!isEffectMonster) {
+            // remove card from slot
+            this.fieldManager.releaseSlot(card, side);
 
-          // move card to graveyard
-          this.fieldManager.moveToGraveyard(card, side);
+            // move card to graveyard
+            this.fieldManager.moveToGraveyard(card, side);
+          } else {
+            //effect monster returns into original position after active effect
+            this.tweens.add({
+              targets: card,
+              x: card.x,
+              y: card.y,
+              angle: card.angle,
+              scale: card.scale,
+              duration: 400,
+              ease: "Power2.easeOut",
+              onComplete: () => {
+                this.currentHand.showHand();
+              },
+            });
+          }
         },
       });
     });
