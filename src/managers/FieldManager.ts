@@ -140,11 +140,12 @@ export class FieldManager {
 
     const isDefense = mode === "DEF";
     const isSet = mode === "SET";
+    const isMonster = card.getType().includes("MONSTER");
 
     const finalAngle = isDefense ? 270 : 0;
     const finalScale = isDefense ? 0.3 : 0.32;
 
-    if (isSet) {
+    if (isSet || (isMonster && isDefense)) {
       card.setFaceDown();
     } else {
       // mode == ATK or FACE_UP, card face up
