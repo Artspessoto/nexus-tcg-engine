@@ -229,6 +229,12 @@ export class FieldManager {
       const currentX = card.x;
       const currentY = card.y;
 
+      //card in battle mode
+      if(this.scene.combatManager.isSelectingTarget){
+        this.scene.combatManager.handleCardSelection(card); 
+        return; 
+      }
+
       switch (card.location) {
         case "FIELD":
           this.scene.playerUI.showFieldCardMenu(currentX, currentY, card);
@@ -247,6 +253,14 @@ export class FieldManager {
           console.warn("card without local");
           break;
       }
+    });
+  }
+
+  public resetAttackFlags(side: GameSide) {
+    const monsters = this.monsterSlots[side];
+
+    monsters.forEach((card) => {
+      if (card) card.hasAttacked = false;
     });
   }
 }
