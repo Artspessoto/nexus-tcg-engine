@@ -64,6 +64,8 @@ export class PhaseManager {
 
         currentUI.showNotice(translations.turn_ended, "NEUTRAL");
 
+        this.scene.fieldManager.resetAttackFlags();
+
         this.scene.time.delayedCall(1200, () => {
           currentUI.showNotice(`TURNO ${currentTurn}`, "PHASE");
 
