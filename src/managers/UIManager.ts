@@ -392,7 +392,7 @@ export class UIManager {
 
     if (currentPhase == "BATTLE" && canAttack && myTurn) {
       const attackBtn = new ToonButton(this.scene, {
-        text: "ATACAR",
+        text: buttonTexts.attack,
         x: x + 70,
         y: y - 35,
         height: 42,
