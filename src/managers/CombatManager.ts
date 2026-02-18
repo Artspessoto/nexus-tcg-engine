@@ -1,5 +1,6 @@
 import type { Card } from "../objects/Card";
 import type { BattleScene } from "../scenes/BattleScene";
+import type { GameSide } from "../types/GameTypes";
 
 export class CombatManager {
   private scene: BattleScene;
@@ -10,16 +11,39 @@ export class CombatManager {
     this.scene = scene;
   }
 
+  private get notices() {
+    return this.scene.translationText.combat_notices;
+  }
+
   public prepareTargeting(attacker: Card) {
     this.currentAttacker = attacker;
     this.isSelectingTarget = true;
 
-    this.scene.playerUI.showNotice("Selecione o alvo do ataque", "NEUTRAL");
+    const msg = this.notices.select_target;
+
+    this.scene.playerUI.showNotice(msg, "NEUTRAL");
     attacker.setAlpha(0.7);
   }
 
   public handleCardSelection(target: Card) {
     if (!this.isSelectingTarget || !this.currentAttacker) return;
+    
+    if (this.scene.currentPhase !== "BATTLE") {
+      this.cancelTarget();
+      return;
+    }
+    const attackOwnCard = target.owner === this.currentAttacker.owner;
+    const isValidTargetType = target.getType().includes("MONSTER");
+
+    if (attackOwnCard) {
+      this.scene.playerUI.showNotice(this.notices.invalid_own_card, "WARNING");
+      return;
+    }
+
+    if (!isValidTargetType) {
+      this.scene.playerUI.showNotice(this.notices.select_target, "WARNING");
+      return;
+    }
 
     if (target.owner !== this.currentAttacker.owner) {
       this.executeAttack(this.currentAttacker, target);
@@ -29,17 +53,151 @@ export class CombatManager {
   }
 
   public cancelTarget() {
-    if (this.currentAttacker) this.currentAttacker.setAlpha(1);
+    if (this.currentAttacker) {
+      if (!this.currentAttacker.hasAttacked) {
+        this.currentAttacker.setAlpha(1);
+      }
+    }
     this.isSelectingTarget = false;
     this.currentAttacker = null;
   }
 
   private executeAttack(attacker: Card, target: Card) {
-    const atkData = attacker.getCardData();
-    const targetData = target.getCardData();
+    this.scene.tweens.add({
+      targets: attacker,
+      x: target.x,
+      y: target.y,
+      duration: 300,
+      ease: "Back.easeIn",
+      yoyo: true, //attacker return into original pos
+      onYoyo: () => {
+        this.triggerImpactEffects(target);
 
-    console.log(atkData.nameKey, targetData.nameKey);
+        if (target.isFaceDown) target.setFaceUp();
+        const isTargetDefenseMode = target.angle === 270;
 
-    attacker.hasAttacked = true;
+        if (isTargetDefenseMode) {
+          this.resolveAtkVsDef(attacker, target);
+        } else {
+          this.resolveAtkVsAtk(attacker, target);
+        }
+      },
+      onComplete: () => {
+        attacker.hasAttacked = true;
+        attacker.setAlpha(0.7);
+      },
+    });
+  }
+
+  private resolveAtkVsDef(attacker: Card, target: Card) {
+    const attackerAtk = attacker.getCardData().atk ?? 0;
+    const targetDef = target.getCardData().def ?? 0;
+
+    const attackerSide = attacker.owner;
+    const targetSide = target.owner;
+
+    let diff: number;
+
+    switch (true) {
+      case attackerAtk > targetDef:
+        this.destroyCard(target, targetSide);
+        break;
+      case attackerAtk < targetDef:
+        diff = targetDef - attackerAtk;
+        this.getUIManager(attackerSide).updateLP(attackerSide, -diff);
+        break;
+      default:
+        break;
+    }
+  }
+
+  private resolveAtkVsAtk(attacker: Card, target: Card) {
+    const attackerAtk = attacker.getCardData().atk ?? 0;
+    const targetAtk = target.getCardData().atk ?? 0;
+
+    const attackerSide = attacker.owner;
+    const targetSide = target.owner;
+
+    let damageToApply: number;
+
+    switch (true) {
+      case attackerAtk > targetAtk: {
+        damageToApply = attackerAtk - targetAtk;
+        this.destroyCard(target, targetSide);
+        this.getUIManager(targetSide).updateLP(targetSide, -damageToApply);
+        break;
+      }
+      case targetAtk > attackerAtk: {
+        damageToApply = targetAtk - attackerAtk;
+        this.destroyCard(attacker, attackerSide);
+        this.getUIManager(attackerSide).updateLP(attackerSide, -damageToApply);
+        break;
+      }
+      default:
+        //destroy both
+        this.destroyCard(target, targetSide);
+        this.destroyCard(attacker, attackerSide, true);
+        break;
+    }
+  }
+
+  private triggerImpactEffects(target: Card) {
+    this.scene.cameras.main.shake(100, 0.003);
+
+    this.applyTint(target, 0xff0000);
+    this.scene.time.delayedCall(100, () => this.applyTint(target, null));
+  }
+
+  private destroyCard(
+    card: Card,
+    side: GameSide,
+    silentEffect: boolean = false,
+  ) {
+    if (silentEffect) {
+      this.scene.tweens.add({
+        targets: card,
+        alpha: 0,
+        duration: 300,
+        onComplete: () => {
+          this.scene.fieldManager.releaseSlot(card, side);
+          this.scene.fieldManager.moveToGraveyard(card, side);
+          card.setAlpha(1);
+        },
+      });
+      return;
+    }
+
+    this.scene.tweens.add({
+      targets: card,
+      alpha: 0,
+      scale: 1.4,
+      duration: 500,
+      ease: "Expo.easeOut",
+      onStart: () => {
+        this.applyTint(card, 0xff0000);
+      },
+      onComplete: () => {
+        this.scene.fieldManager.releaseSlot(card, side);
+        this.scene.fieldManager.moveToGraveyard(card, side);
+
+        card.setAlpha(1);
+        card.setScale(1);
+        this.applyTint(card, null);
+      },
+    });
+  }
+
+  private applyTint(card: Card, color: number | null) {
+    card.visualElements.iterate((child: Phaser.GameObjects.Sprite) => {
+      if (color === null) {
+        if (child.clearTint) child.clearTint();
+      } else {
+        if (child.setTint) child.setTint(color);
+      }
+    });
+  }
+
+  private getUIManager(side: GameSide) {
+    return side === "PLAYER" ? this.scene.playerUI : this.scene.opponentUI;
   }
 }
