@@ -27,7 +27,7 @@ export class CombatManager {
 
   public handleCardSelection(target: Card) {
     if (!this.isSelectingTarget || !this.currentAttacker) return;
-    
+
     if (this.scene.currentPhase !== "BATTLE") {
       this.cancelTarget();
       return;
@@ -153,13 +153,22 @@ export class CombatManager {
     side: GameSide,
     silentEffect: boolean = false,
   ) {
+    const currentSlots = card.getType().includes("MONSTER")
+      ? this.scene.fieldManager["monsterSlots"][side]
+      : this.scene.fieldManager["spellSlots"][side];
+
+    // if card isnt in slot returns
+    if (currentSlots.indexOf(card) === -1) return;
+
+    this.scene.fieldManager.releaseSlot(card, side);
+    card.disableInteractive();
+
     if (silentEffect) {
       this.scene.tweens.add({
         targets: card,
         alpha: 0,
         duration: 300,
         onComplete: () => {
-          this.scene.fieldManager.releaseSlot(card, side);
           this.scene.fieldManager.moveToGraveyard(card, side);
           card.setAlpha(1);
         },
@@ -177,7 +186,6 @@ export class CombatManager {
         this.applyTint(card, 0xff0000);
       },
       onComplete: () => {
-        this.scene.fieldManager.releaseSlot(card, side);
         this.scene.fieldManager.moveToGraveyard(card, side);
 
         card.setAlpha(1);
