@@ -2,9 +2,9 @@ name: Toon Castle CI
 
 on:
   push:
-    branches: [ main, feature/** ]
+    branches: [ main, develop, feature/** ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
   build-and-test:
@@ -21,7 +21,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Audit Security
         run: npm audit --audit-level=high 
@@ -31,6 +31,9 @@ jobs:
 
       - name: Type Check
         run: npm run type-check
+
+      - name: Test quality
+        run: npm run test:cov
 
       - name: Generate build
         run: npm run build
