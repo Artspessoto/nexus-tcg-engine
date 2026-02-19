@@ -141,14 +141,14 @@ export class CombatManager {
     }
   }
 
-  private triggerImpactEffects(target: Card) {
+  public triggerImpactEffects(target: Card) {
     this.scene.cameras.main.shake(100, 0.003);
 
     this.applyTint(target, 0xff0000);
     this.scene.time.delayedCall(100, () => this.applyTint(target, null));
   }
 
-  private destroyCard(
+  public destroyCard(
     card: Card,
     side: GameSide,
     silentEffect: boolean = false,
