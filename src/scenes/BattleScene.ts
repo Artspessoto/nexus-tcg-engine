@@ -32,7 +32,7 @@ export class BattleScene extends Phaser.Scene {
   public combatManager: CombatManager;
 
   public phaseButton!: ToonButton;
-  private selectedCard: Card | null = null;
+  public selectedCard: Card | null = null;
   private overlayLayer!: Phaser.GameObjects.Container;
 
   constructor() {
@@ -121,7 +121,7 @@ export class BattleScene extends Phaser.Scene {
       this.handleNextPhase();
     });
 
-    this.setupGlobalInputs();
+    this.inputManager.setupGlobalInputs();
 
     this.startInitialDraw();
   }
@@ -144,46 +144,6 @@ export class BattleScene extends Phaser.Scene {
     return this.getActiveManager(this.playerUI, this.opponentUI);
   }
 
-  private setupGlobalInputs() {
-    this.input.on(
-      "pointerdown",
-      (
-        _pointer: Phaser.Input.Pointer,
-        currentlyOver: Phaser.GameObjects.GameObject[],
-      ) => {
-        if (currentlyOver.length === 0) {
-          this.currentUI.clearSelectionMenu();
-          this.playerHand.showHand();
-        }
-      },
-    );
-
-    this.input.keyboard?.on("keydown-SPACE", () => {
-      this.handlePlayerCard();
-    });
-
-    this.input.keyboard?.on("keydown-ESC", () => {
-      this.cancelPlacement();
-    });
-
-    this.input.keyboard?.on("keydown-T", () => {
-      this.gameState.nextTurn();
-      this.setPhase("DRAW");
-    });
-
-    this.input.on("pointerdown", () => {
-      if (this.selectedCard) {
-        this.time.delayedCall(50, () => this.cancelPlacement());
-      }
-    });
-
-    this.input.on("pointerdown", (pointer: { x: number; y: number }) => {
-      console.log(
-        `Debug: X: ${Math.round(pointer.x)}, Y: ${Math.round(pointer.y)}`,
-      );
-    });
-  }
-
   private startInitialDraw() {
     let delay = 0;
     for (let i = 0; i < 5; i++) {
@@ -204,7 +164,7 @@ export class BattleScene extends Phaser.Scene {
     }
   }
 
-  private setPhase(newPhase: GamePhase) {
+  public setPhase(newPhase: GamePhase) {
     this.playerUI.clearSelectionMenu();
     this.combatManager.cancelTarget();
     this.playerHand.showHand();
@@ -303,7 +263,7 @@ export class BattleScene extends Phaser.Scene {
     }
   }
 
-  private cancelPlacement() {
+  public cancelPlacement() {
     this.currentUI.clearSelectionMenu();
     this.currentHand.showHand();
 

@@ -6,7 +6,7 @@ export class FieldManager {
   private scene: BattleScene;
 
   //null = empty slot, Card = slot full
-  private monsterSlots = {
+  public monsterSlots = {
     PLAYER: [null, null, null] as (Card | null)[],
     OPPONENT: [null, null, null] as (Card | null)[],
   };
