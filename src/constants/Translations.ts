@@ -50,6 +50,7 @@ export const TRANSLATIONS = {
       combat_notices: {
         select_target: "SELECIONE O ALVO DO ATAQUE",
         invalid_own_card: "VOCÊ NÃO PODE ATACAR SUAS PRÓPRIAS CARTAS!",
+        direct_attack: "ATAQUE DIRETO",
       },
     },
   },
@@ -104,6 +105,7 @@ export const TRANSLATIONS = {
       combat_notices: {
         select_target: "SELECT THE ATTACK TARGET",
         invalid_own_card: "YOU CANNOT ATTACK YOUR OWN CARDS!",
+        direct_attack: "DIRECT ATTACK"
       },
     },
   },
