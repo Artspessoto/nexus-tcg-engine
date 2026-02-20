@@ -16,12 +16,25 @@ export class CombatManager {
   }
 
   public prepareTargeting(attacker: Card) {
+    const opponentSide = attacker.owner == "PLAYER" ? "OPPONENT" : "PLAYER";
+    const existsMonstersIntoField = this.scene.fieldManager.monsterSlots[
+      opponentSide
+    ].some((slot) => slot !== null);
+
+    if (!existsMonstersIntoField) {
+      this.scene.playerUI.showNotice(this.notices.direct_attack, "WARNING");
+      attacker.setAlpha(0.7);
+
+      this.scene.time.delayedCall(100, () => {
+        this.executeDirectAttack(attacker, opponentSide);
+        this.currentAttacker = null;
+      });
+      return;
+    }
+
     this.currentAttacker = attacker;
     this.isSelectingTarget = true;
-
-    const msg = this.notices.select_target;
-
-    this.scene.playerUI.showNotice(msg, "NEUTRAL");
+    this.scene.playerUI.showNotice(this.notices.select_target, "NEUTRAL");
     attacker.setAlpha(0.7);
   }
 
@@ -81,6 +94,28 @@ export class CombatManager {
         } else {
           this.resolveAtkVsAtk(attacker, target);
         }
+      },
+      onComplete: () => {
+        attacker.hasAttacked = true;
+        attacker.setAlpha(0.7);
+      },
+    });
+  }
+
+  private executeDirectAttack(attacker: Card, targetSide: GameSide) {
+    const damage = attacker.getCardData().atk ?? 0;
+
+    const targetY = targetSide === "OPPONENT" ? 50 : 650;
+
+    this.scene.tweens.add({
+      targets: attacker,
+      y: targetY,
+      duration: 300,
+      ease: "Back.easeIn",
+      yoyo: true, //attacker return into original pos
+      onYoyo: () => {
+        this.scene.cameras.main.shake(100, 0.003);
+        this.getUIManager(targetSide).updateLP(targetSide, -damage);
       },
       onComplete: () => {
         attacker.hasAttacked = true;
