@@ -45,7 +45,8 @@ export const TRANSLATIONS = {
         details: "DETALHES",
         active: "ATIVAR",
         set: "BAIXAR",
-        attack: "ATACAR"
+        attack: "ATACAR",
+        change_pos: "MUDAR POS.",
       },
       combat_notices: {
         select_target: "SELECIONE O ALVO DO ATAQUE",
@@ -100,12 +101,13 @@ export const TRANSLATIONS = {
         details: "DETAILS",
         active: "ACTIVE",
         set: "SET",
-        attack: "ATTACK"
+        attack: "ATTACK",
+        change_pos: "CHANGE POS.",
       },
       combat_notices: {
         select_target: "SELECT THE ATTACK TARGET",
         invalid_own_card: "YOU CANNOT ATTACK YOUR OWN CARDS!",
-        direct_attack: "DIRECT ATTACK"
+        direct_attack: "DIRECT ATTACK",
       },
     },
   },
