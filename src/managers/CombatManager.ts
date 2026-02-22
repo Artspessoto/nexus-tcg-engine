@@ -115,7 +115,7 @@ export class CombatManager {
       yoyo: true, //attacker return into original pos
       onYoyo: () => {
         this.scene.cameras.main.shake(100, 0.003);
-        this.getUIManager(targetSide).updateLP(targetSide, -damage);
+        this.scene.getUIManager(targetSide).updateLP(targetSide, -damage);
       },
       onComplete: () => {
         attacker.hasAttacked = true;
@@ -139,7 +139,7 @@ export class CombatManager {
         break;
       case attackerAtk < targetDef:
         diff = targetDef - attackerAtk;
-        this.getUIManager(attackerSide).updateLP(attackerSide, -diff);
+        this.scene.getUIManager(attackerSide).updateLP(attackerSide, -diff);
         break;
       default:
         break;
@@ -159,13 +159,17 @@ export class CombatManager {
       case attackerAtk > targetAtk: {
         damageToApply = attackerAtk - targetAtk;
         this.destroyCard(target, targetSide);
-        this.getUIManager(targetSide).updateLP(targetSide, -damageToApply);
+        this.scene
+          .getUIManager(targetSide)
+          .updateLP(targetSide, -damageToApply);
         break;
       }
       case targetAtk > attackerAtk: {
         damageToApply = targetAtk - attackerAtk;
         this.destroyCard(attacker, attackerSide);
-        this.getUIManager(attackerSide).updateLP(attackerSide, -damageToApply);
+        this.scene
+          .getUIManager(attackerSide)
+          .updateLP(attackerSide, -damageToApply);
         break;
       }
       default:
@@ -238,9 +242,5 @@ export class CombatManager {
         if (child.setTint) child.setTint(color);
       }
     });
-  }
-
-  private getUIManager(side: GameSide) {
-    return side === "PLAYER" ? this.scene.playerUI : this.scene.opponentUI;
   }
 }
