@@ -1,4 +1,4 @@
-import type { CardData } from "../types/GameTypes";
+import type { CardData } from "../types/CardTypes";
 
 export const CARD_DATABASE: Record<string, CardData> = {
   SENTINEL_01: {
@@ -30,6 +30,18 @@ export const CARD_DATABASE: Record<string, CardData> = {
     type: "SPELL",
     nameKey: "Bola de Fogo",
     descriptionKey: "Causa 10 de dano a todos os inimigos.",
+    effects: { type: "BURN", value: 10, targetSide: "OPPONENT" },
+    manaCost: 2,
+    imageKey: "spell_fireball",
+    width: 300,
+    height: 400,
+  },
+  DRAW_CARD: {
+    id: "DRAW_CARD",
+    type: "SPELL",
+    nameKey: "Pote da ganância",
+    descriptionKey: "Compre 1 carta.",
+    effects: { type: "DRAW_CARDS", value: 1, targetSide: "OWNER" },
     manaCost: 2,
     imageKey: "spell_fireball",
     width: 300,
