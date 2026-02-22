@@ -257,28 +257,6 @@ export class BattleScene extends Phaser.Scene {
     this.selectedCard = null;
   }
 
-  private requestPlayCard(
-    card: Card,
-    side: GameSide,
-    type: "MONSTER" | "SPELL",
-  ) {
-    const cardData = card.getCardData();
-    const currentMana =
-      side == "PLAYER"
-        ? this.gameState.playerMana
-        : this.gameState.opponentMana;
-
-    if (cardData.manaCost > currentMana) {
-      return null;
-    }
-
-    if (this.gameState.currentPhase !== "MAIN") {
-      return null;
-    }
-
-    return this.fieldManager.getFirstAvailableSlot(side, type);
-  }
-
   private executePlay(
     card: Card,
     side: GameSide,
