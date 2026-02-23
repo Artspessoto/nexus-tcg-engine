@@ -34,7 +34,7 @@ export class CombatManager {
 
     this.currentAttacker = attacker;
     this.isSelectingTarget = true;
-    this.scene.playerUI.showNotice(this.notices.select_target, "NEUTRAL");
+    this.scene.playerUI.showNotice(this.notices.select_attack_target, "NEUTRAL");
     attacker.setAlpha(0.7);
   }
 
@@ -54,7 +54,7 @@ export class CombatManager {
     }
 
     if (!isValidTargetType) {
-      this.scene.playerUI.showNotice(this.notices.select_target, "WARNING");
+      this.scene.playerUI.showNotice(this.notices.select_attack_target, "WARNING");
       return;
     }
 

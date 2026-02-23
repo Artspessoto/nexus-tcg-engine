@@ -296,6 +296,12 @@ export class FieldManager {
         return;
       }
 
+      //effect card activated
+      if (this.scene.effectManager.isSelectingTarget) {
+        this.scene.effectManager.handleCardSelection(card);
+        return;
+      }
+
       switch (card.location) {
         case "FIELD":
           this.scene.playerUI.showFieldCardMenu(currentX, currentY, card);
