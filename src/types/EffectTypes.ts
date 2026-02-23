@@ -20,7 +20,7 @@ interface ActionEffect {
 }
 
 interface UtilityEffect {
-  type: "PROTECT" | "NEGATE" | "DRAW_CARDS";
+  type: "PROTECT" | "NEGATE" | "DRAW_CARD";
   value?: number;
   targetSide?: EffectTargetSide;
 }

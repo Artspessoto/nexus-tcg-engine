@@ -5,9 +5,23 @@ import type { GameSide } from "../types/GameTypes";
 
 export class EffectManager {
   private scene: BattleScene;
+  private handlerEffects: Record<
+    string,
+    (effect: CardEffect, side: GameSide, source: Card) => void
+  >;
 
   constructor(scene: BattleScene) {
     this.scene = scene;
+
+    this.handlerEffects = {
+      BURN: (effect, side) =>
+        this.scene.getUIManager(side).updateLP(side, -(effect.value || 0)),
+      HEAL: (effect, side) =>
+        this.scene.getUIManager(side).updateLP(side, effect.value || 0),
+      DRAW_CARD: (effect, side) => this.handleDraw(effect, side),
+      GAIN_MANA: (effect, side) =>
+        this.scene.getUIManager(side).updateMana(effect.value || 0),
+    };
   }
 
   public applyCardEffect(card: Card) {
@@ -29,40 +43,21 @@ export class EffectManager {
     side: GameSide,
     sourceCard: Card,
   ) {
-    const { type, value } = effect;
-    const cardData = sourceCard.getCardData();
+    const handler = this.handlerEffects[effect.type];
 
-    switch (type) {
-      case "BURN":
-        this.scene.getUIManager(side).updateLP(side, -(value || 0));
-        break;
-      case "DRAW_CARDS":
-        for (let i = 0; i < (value || 0); i++) {
-          this.scene
-            .getHandManager(side)
-            .drawCard(this.scene.getDeckManager(side).position);
-        }
-        break;
-      case "DESTROY_MONSTER":
-        //target card to destroy
-        break;
-      case "DESTROY_SPELL":
-        //target card to destroy
-        break;
-      case "DESTROY_TRAP":
-        //target card to destroy
-        break;
-      case "NERF_ATK":
-        //target card to update stats
-        break;
-      case "BOOST_ATK": {
-        //target card to update stats
-        const bonus = (cardData.atk || 0) + (effect.value || 0);
-        console.log(bonus);
-        break;
-      }
-      default:
-        break;
+    if (handler) {
+      handler(effect, side, sourceCard);
+    } else {
+      console.log(`${effect.type} não criado até o momento`);
+    }
+  }
+
+  private handleDraw(effect: CardEffect, side: GameSide) {
+    const count = effect.value || 0;
+    const hand = this.scene.getHandManager(side);
+    const deck = this.scene.getDeckManager(side);
+    for (let i = 0; i < count; i++) {
+      hand.drawCard(deck.position);
     }
   }
 
