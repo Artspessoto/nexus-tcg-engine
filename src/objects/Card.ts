@@ -199,4 +199,51 @@ export class Card extends Phaser.GameObjects.Container {
 
     this.setFaceUp();
   }
+
+  public animateFlip(onComplete?: () => void) {
+    this.hasChangedPosition = true;
+
+    this.scene.tweens.add({
+      targets: this,
+      angle: 0,
+      scale: 0.45,
+      duration: 250,
+      ease: "Back.easeOut",
+      onStart: () => this.setFaceUp(),
+      onComplete: () => {
+        this.scene.tweens.add({
+          targets: this,
+          scale: 0.32, // back to original scale
+          duration: 150,
+          onComplete: () => {
+            if (onComplete) onComplete();
+          },
+        });
+      },
+    });
+  }
+
+  public animateChangePosition(onComplete?: () => void) {
+    this.hasChangedPosition = true;
+    const isAtk = this.angle === 0;
+    const targetAngle = isAtk ? 270 : 0;
+
+    this.scene.tweens.add({
+      targets: this,
+      angle: targetAngle,
+      scale: 0.45,
+      duration: 250,
+      ease: "Power2",
+      onComplete: () => {
+        this.scene.tweens.add({
+          targets: this,
+          scale: 0.32,
+          duration: 150,
+          onComplete: () => {
+            if (onComplete) onComplete();
+          },
+        });
+      },
+    });
+  }
 }
