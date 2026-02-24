@@ -492,51 +492,19 @@ export class UIManager {
     return btn;
   }
 
-  private handleFlipSummon(card: Card) {
-    card.hasChangedPosition = true;
-
-    this.scene.tweens.add({
-      targets: card,
-      angle: 0,
-      scale: 0.45,
-      duration: 250,
-      ease: "Back.easeOut",
-      onStart: () => card.setFaceUp(),
-      onComplete: () => {
-        this.scene.tweens.add({
-          targets: card,
-          scale: 0.32, // back to original scale
-          duration: 150,
-        });
-        // card impact animation effect
-        this.scene.cameras.main.shake(100, 0.002);
-        this.scene.playerHand.showHand();
-      },
+  public handleFlipSummon(card: Card) {
+    card.animateFlip(() => {
+      // card impact animation effect
+      this.scene.cameras.main.shake(100, 0.002);
+      this.scene.playerHand.showHand();
     });
   }
 
-  private handleChangePosition(card: Card) {
-    card.hasChangedPosition = true;
-    const isAtk = card.angle == 0;
-    const targetAngle = isAtk ? 270 : 0;
-
-    // rotation animation
-    this.scene.tweens.add({
-      targets: card,
-      angle: targetAngle,
-      scale: 0.45,
-      duration: 250,
-      ease: "Power2",
-      onComplete: () => {
-        this.scene.tweens.add({
-          targets: card,
-          scale: 0.32, // back to original scale
-          duration: 150,
-        });
-        // card impact animation effect
-        this.scene.cameras.main.shake(100, 0.002);
-        this.scene.playerHand.showHand();
-      },
+  public handleChangePosition(card: Card) {
+    card.animateChangePosition(() => {
+      // card impact animation effect
+      this.scene.cameras.main.shake(100, 0.002);
+      this.scene.playerHand.showHand();
     });
   }
 
