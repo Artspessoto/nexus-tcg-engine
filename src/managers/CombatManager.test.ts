@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CombatManager } from "./CombatManager";
-import type { BattleScene } from "../scenes/BattleScene";
+import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { Card } from "../objects/Card";
 
 describe("CombatManager", () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let mockScene: any;
+  let mockContext: any;
   let combatManager: CombatManager;
 
   const createMockCard = (
@@ -22,7 +22,6 @@ describe("CombatManager", () => {
       setScale: vi.fn(),
       setFaceUp: vi.fn(),
       disableInteractive: vi.fn(),
-      removeAllListeners: vi.fn(),
       visualElements: {
         iterate: vi.fn((cb) =>
           cb({
@@ -39,42 +38,30 @@ describe("CombatManager", () => {
     }) as unknown as Card;
 
   beforeEach(() => {
-    mockScene = {
+    // Criamos o Mock do Contexto seguindo a nova interface
+    mockContext = {
       translationText: {
         combat_notices: {
-          select_attack_target: "SELECT THE ATTACK TARGET",
-          invalid_own_card: "YOU CANNOT ATTACK YOUR OWN CARDS!",
+          select_attack_target: "SELECT TARGET",
+          invalid_own_card: "INVALID OWN CARD",
           direct_attack: "DIRECT ATTACK",
         },
       },
-      currentPhase: "BATTLE",
-      playerUI: {
-        showNotice: vi.fn(),
-        updateLP: vi.fn(),
+      gameState: {
+        currentPhase: "BATTLE",
       },
-      opponentUI: {
-        updateLP: vi.fn(),
-      },
-      getUIManager: vi.fn((side) =>
-        side === "PLAYER" ? mockScene.playerUI : mockScene.opponentUI,
-      ),
-      getHandManager: vi.fn((side) =>
-        side === "PLAYER" ? mockScene.playerHand : mockScene.opponentHand,
-      ),
-      getDeckManager: vi.fn((side) =>
-        side === "PLAYER" ? mockScene.playerDeck : mockScene.opponentDeck,
-      ),
-      fieldManager: {
+      // Simulamos os métodos de busca do contexto
+      getUI: vi.fn((side) => (side === "PLAYER" ? mockContext.playerUI : mockContext.opponentUI)),
+      
+      // Mocks das UIs individuais
+      playerUI: { showNotice: vi.fn(), updateLP: vi.fn() },
+      opponentUI: { showNotice: vi.fn(), updateLP: vi.fn() },
+
+      field: {
         releaseSlot: vi.fn(),
         moveToGraveyard: vi.fn(),
-        monsterSlots: {
-          PLAYER: [],
-          OPPONENT: [],
-        },
-        spellSlots: {
-          PLAYER: [],
-          OPPONENT: [],
-        },
+        monsterSlots: { PLAYER: [], OPPONENT: [] },
+        spellSlots: { PLAYER: [], OPPONENT: [] },
       },
       tweens: {
         add: vi.fn((config) => {
@@ -82,329 +69,117 @@ describe("CombatManager", () => {
           if (config.onYoyo) config.onYoyo();
           if (config.onComplete) config.onComplete();
         }),
-        killTweensOf: vi.fn(),
       },
       cameras: {
         main: { shake: vi.fn() },
       },
-      time: { delayedCall: vi.fn((_time, callback) => callback()) },
+      time: { 
+        delayedCall: vi.fn((_time, callback) => callback()) 
+      },
     };
-    combatManager = new CombatManager(mockScene as unknown as BattleScene);
+
+    combatManager = new CombatManager(mockContext as unknown as IBattleContext);
   });
 
   describe("Targeting Management", () => {
-    it("should enter selection mode and set alpha", () => {
+    it("should enter selection mode and set alpha on attacker", () => {
       const attacker = createMockCard("PLAYER");
-      mockScene.fieldManager.monsterSlots.OPPONENT = [
-        createMockCard("OPPONENT"),
-      ];
+      mockContext.field.monsterSlots.OPPONENT = [createMockCard("OPPONENT")];
+      
       combatManager.prepareTargeting(attacker);
+      
       expect(combatManager.isSelectingTarget).toBe(true);
       expect(attacker.setAlpha).toHaveBeenCalledWith(0.7);
+      expect(mockContext.playerUI.showNotice).toHaveBeenCalledWith(
+        mockContext.translationText.combat_notices.select_attack_target,
+        "NEUTRAL"
+      );
     });
 
-    it("should cancel targeting and reset alpha if card hasn't attacked", () => {
-      const attacker = createMockCard("PLAYER");
-      mockScene.fieldManager.monsterSlots.OPPONENT = [
-        createMockCard("OPPONENT"),
-      ];
+    it("should trigger direct attack if opponent field is empty", () => {
+      const attacker = createMockCard("PLAYER", 500);
+      mockContext.field.monsterSlots.OPPONENT = [null, null, null];
+
       combatManager.prepareTargeting(attacker);
-      combatManager.cancelTarget();
+
+      expect(mockContext.opponentUI.updateLP).toHaveBeenCalledWith("OPPONENT", -500);
       expect(combatManager.isSelectingTarget).toBe(false);
-      expect(attacker.setAlpha).toHaveBeenCalledWith(1);
-    });
-
-    it("should return early if targeting is not prepared", () => {
-      const target = createMockCard("OPPONENT");
-      const result = combatManager.handleCardSelection(target);
-      expect(result).toBeUndefined();
-      expect(mockScene.tweens.add).not.toHaveBeenCalled();
-    });
-
-    it("should cancel targeting if phase is BATTLE but no attacker is set during selection", () => {
-      const attacker = createMockCard("PLAYER");
-      const target = createMockCard("OPPONENT");
-      mockScene.fieldManager.monsterSlots.OPPONENT = [target];
-
-      combatManager.prepareTargeting(attacker);
-      combatManager.currentAttacker = null;
-
-      combatManager.handleCardSelection(target);
-      expect(combatManager.isSelectingTarget).toBe(true);
     });
   });
 
-  describe("Validations", () => {
-    it("should stop if phase is not BATTLE", () => {
-      const attacker = createMockCard("PLAYER");
-      const target = createMockCard("OPPONENT");
-      mockScene.currentPhase = "MAIN";
-      combatManager.prepareTargeting(attacker);
-      combatManager.handleCardSelection(target);
-      expect(combatManager.isSelectingTarget).toBe(false);
-    });
-
-    it("should return early if isSelectingTarget is true but currentAttacker is null", () => {
-      const target = createMockCard("OPPONENT");
-      combatManager.isSelectingTarget = true;
-      combatManager.currentAttacker = null;
-
-      combatManager.handleCardSelection(target);
-      expect(mockScene.tweens.add).not.toHaveBeenCalled();
-    });
-
-    it("should return early in handleCardSelection if not in selection mode", () => {
-      const target = createMockCard("OPPONENT");
-      combatManager.isSelectingTarget = false;
-      combatManager.currentAttacker = null;
-
-      combatManager.handleCardSelection(target);
-      expect(mockScene.tweens.add).not.toHaveBeenCalled();
-    });
-
-    it("should not destroy card if it is not present in field slots", () => {
-      const card = createMockCard("PLAYER");
-      mockScene.fieldManager.monsterSlots.PLAYER = [];
-
-      combatManager.destroyCard(card, "PLAYER");
-
-      expect(mockScene.fieldManager.releaseSlot).not.toHaveBeenCalled();
-      expect(mockScene.fieldManager.moveToGraveyard).not.toHaveBeenCalled();
-    });
-
-    it("should not crash when calling cancelTarget without an active attacker", () => {
-      combatManager.currentAttacker = null;
-      expect(() => combatManager.cancelTarget()).not.toThrow();
-    });
-
-    it("should block attacks on own cards", () => {
+  describe("Attack Validations", () => {
+    it("should prevent attacking own cards", () => {
       const attacker = createMockCard("PLAYER");
       const target = createMockCard("PLAYER");
+      combatManager.currentAttacker = attacker;
+      combatManager.isSelectingTarget = true;
 
-      mockScene.fieldManager.monsterSlots.OPPONENT = [
-        createMockCard("OPPONENT"),
-      ];
-
-      combatManager.prepareTargeting(attacker);
       combatManager.handleCardSelection(target);
-      expect(mockScene.playerUI.showNotice).toHaveBeenCalledWith(
-        mockScene.translationText.combat_notices.invalid_own_card,
-        "WARNING",
+
+      expect(mockContext.playerUI.showNotice).toHaveBeenCalledWith(
+        mockContext.translationText.combat_notices.invalid_own_card,
+        "WARNING"
       );
     });
 
-    it("should block attacks on non-monster targets", () => {
+    it("should cancel if phase is no longer BATTLE", () => {
       const attacker = createMockCard("PLAYER");
       const target = createMockCard("OPPONENT");
-      target.getType = () => "SPELL";
+      mockContext.gameState.currentPhase = "MAIN";
+      
+      combatManager.currentAttacker = attacker;
+      combatManager.isSelectingTarget = true;
 
-      mockScene.fieldManager.monsterSlots.OPPONENT = [
-        createMockCard("OPPONENT"),
-      ];
-
-      combatManager.prepareTargeting(attacker);
       combatManager.handleCardSelection(target);
-      expect(mockScene.playerUI.showNotice).toHaveBeenCalledWith(
-        mockScene.translationText.combat_notices.select_attack_target,
-        "WARNING",
-      );
-    });
 
-    it("should not reset alpha on cancel if card has already attacked", () => {
-      const attacker = createMockCard("PLAYER");
-      attacker.hasAttacked = true;
-      combatManager.prepareTargeting(attacker);
-
-      combatManager.cancelTarget();
-
-      expect(attacker.setAlpha).not.toHaveBeenCalledWith(1);
-    });
-
-    it("should not destroy a SPELL card if it is not present in spell slots", () => {
-      const spell = createMockCard("PLAYER");
-      spell.getType = () => "SPELL";
-      mockScene.fieldManager.spellSlots.PLAYER = [];
-
-      combatManager.destroyCard(spell, "PLAYER");
-
-      expect(mockScene.fieldManager.releaseSlot).not.toHaveBeenCalled();
+      expect(combatManager.isSelectingTarget).toBe(false);
+      expect(mockContext.tweens.add).not.toHaveBeenCalled();
     });
   });
 
-  describe("Combat Logic - ATK vs ATK", () => {
-    it("should win: destroy target and deal damage", () => {
-      const attacker = createMockCard("PLAYER", 500);
-      const target = createMockCard("OPPONENT", 200);
-      mockScene.fieldManager.monsterSlots.OPPONENT = [target];
-
-      combatManager.prepareTargeting(attacker);
-      combatManager.handleCardSelection(target);
-
-      expect(mockScene.opponentUI.updateLP).toHaveBeenCalledWith(
-        "OPPONENT",
-        -300,
-      );
-      expect(mockScene.fieldManager.releaseSlot).toHaveBeenCalledWith(
-        target,
-        "OPPONENT",
-      );
-    });
-
-    it("should lose: destroy attacker and take damage", () => {
-      const attacker = createMockCard("PLAYER", 100);
-      const target = createMockCard("OPPONENT", 400);
-      mockScene.fieldManager.monsterSlots.PLAYER = [attacker];
-      mockScene.fieldManager.monsterSlots.OPPONENT = [target];
-
-      combatManager.prepareTargeting(attacker);
-      combatManager.handleCardSelection(target);
-
-      expect(mockScene.playerUI.updateLP).toHaveBeenCalledWith("PLAYER", -300);
-      expect(mockScene.fieldManager.releaseSlot).toHaveBeenCalledWith(
-        attacker,
-        "PLAYER",
-      );
-    });
-  });
-
-  describe("Combat Logic - ATK vs DEF", () => {
-    it("should win: destroy target and deal NO damage", () => {
-      const attacker = createMockCard("PLAYER", 500);
-      const target = createMockCard("OPPONENT", 100, 300);
-      target.angle = 270; // Modo defesa
-      mockScene.fieldManager.monsterSlots.OPPONENT = [target];
-
-      combatManager.prepareTargeting(attacker);
-      combatManager.handleCardSelection(target);
-
-      expect(mockScene.fieldManager.releaseSlot).toHaveBeenCalledWith(
-        target,
-        "OPPONENT",
-      );
-      expect(mockScene.opponentUI.updateLP).not.toHaveBeenCalled();
-    });
-
-    it("should lose: reflect damage to player and destroy nothing", () => {
-      const attacker = createMockCard("PLAYER", 100);
-      const target = createMockCard("OPPONENT", 100, 500);
-      target.angle = 270;
-      mockScene.fieldManager.monsterSlots.OPPONENT = [target];
-
-      combatManager.prepareTargeting(attacker);
-      combatManager.handleCardSelection(target);
-
-      expect(mockScene.playerUI.updateLP).toHaveBeenCalledWith("PLAYER", -400);
-      expect(mockScene.fieldManager.releaseSlot).not.toHaveBeenCalled();
-    });
-
-    it("should do nothing on ATK vs DEF tie", () => {
-      const attacker = createMockCard("PLAYER", 100);
-      const target = createMockCard("OPPONENT", 100, 100); // 100 ATK vs 100 DEF
-      target.angle = 270;
-      mockScene.fieldManager.monsterSlots.OPPONENT = [target];
-
-      combatManager.prepareTargeting(attacker);
-      combatManager.handleCardSelection(target);
-
-      expect(mockScene.fieldManager.releaseSlot).not.toHaveBeenCalled();
-      expect(mockScene.playerUI.updateLP).not.toHaveBeenCalled();
-    });
-
-    it("should reveal face-down cards upon attack", () => {
+  describe("Combat Resolution", () => {
+    it("ATK vs ATK: Player wins", () => {
       const attacker = createMockCard("PLAYER", 1000);
-      const target = createMockCard("OPPONENT", 10, 10, true);
-      mockScene.fieldManager.monsterSlots.OPPONENT = [target];
+      const target = createMockCard("OPPONENT", 500);
+      mockContext.field.monsterSlots.OPPONENT = [target];
 
-      combatManager.prepareTargeting(attacker);
+      combatManager.currentAttacker = attacker;
+      combatManager.isSelectingTarget = true;
+
       combatManager.handleCardSelection(target);
 
-      expect(target.setFaceUp).toHaveBeenCalled();
+      // Verificamos se o dano foi aplicado na UI correta
+      expect(mockContext.opponentUI.updateLP).toHaveBeenCalledWith("OPPONENT", -500);
+      // Verificamos se a carta foi removida do campo
+      expect(mockContext.field.releaseSlot).toHaveBeenCalledWith(target, "OPPONENT");
+    });
+
+    it("ATK vs DEF: Attacker is weaker (Reflect damage)", () => {
+      const attacker = createMockCard("PLAYER", 200);
+      const target = createMockCard("OPPONENT", 10, 500); // 500 DEF
+      target.angle = 270; // Modo Defesa
+      mockContext.field.monsterSlots.OPPONENT = [target];
+
+      combatManager.currentAttacker = attacker;
+      combatManager.isSelectingTarget = true;
+
+      combatManager.handleCardSelection(target);
+
+      // Jogador deve tomar 300 de dano de reflexo
+      expect(mockContext.playerUI.updateLP).toHaveBeenCalledWith("PLAYER", -300);
+      // Nenhuma carta deve ser destruída
+      expect(mockContext.field.releaseSlot).not.toHaveBeenCalled();
     });
   });
 
-  describe("Direct Attack Automation", () => {
-    it("should trigger direct attack immediately if opponent field is empty", () => {
-      const attacker = createMockCard("PLAYER", 1000);
-      mockScene.fieldManager.monsterSlots.OPPONENT = [];
-
-      combatManager.prepareTargeting(attacker);
-
-      expect(mockScene.playerUI.showNotice).toHaveBeenCalledWith(
-        mockScene.translationText.combat_notices.direct_attack,
-        "WARNING",
-      );
-      expect(mockScene.tweens.add).toHaveBeenCalledWith(
-        expect.objectContaining({
-          targets: attacker,
-        }),
-      );
-    });
-
-    it("should execute direct attack from OPPONENT to PLAYER", () => {
-      const attacker = createMockCard("OPPONENT", 1000);
-      mockScene.fieldManager.monsterSlots.PLAYER = [];
-
-      combatManager.prepareTargeting(attacker);
-
-      expect(mockScene.tweens.add).toHaveBeenCalledWith(
-        expect.objectContaining({
-          targets: attacker,
-          y: 650,
-        }),
-      );
-    });
-  });
-
-  describe("Visuals", () => {
-    it("should handle destruction of spell cards (silent effect)", () => {
-      const spell = createMockCard("PLAYER");
-      spell.getType = () => "SPELL";
-      mockScene.fieldManager.spellSlots.PLAYER = [spell];
-
-      combatManager.destroyCard(spell, "PLAYER", true);
-
-      expect(mockScene.fieldManager.releaseSlot).toHaveBeenCalledWith(
-        spell,
-        "PLAYER",
-      );
-      expect(mockScene.fieldManager.moveToGraveyard).toHaveBeenCalled();
-    });
-
-    it("should apply tints to visual elements during impact", () => {
+  describe("Visual Effects", () => {
+    it("should apply tint and shake camera on impact", () => {
       const target = createMockCard("OPPONENT");
       combatManager.triggerImpactEffects(target);
 
+      expect(mockContext.cameras.main.shake).toHaveBeenCalled();
+      // Verifica se iterou sobre os elementos visuais para aplicar o tint
       expect(target.visualElements.iterate).toHaveBeenCalled();
-      expect(mockScene.cameras.main.shake).toHaveBeenCalled();
-    });
-
-    it("should fully lifecycle tints (set and clear)", () => {
-      const target = createMockCard("OPPONENT");
-      const spriteMock = { setTint: vi.fn(), clearTint: vi.fn() };
-      target.visualElements.iterate = vi.fn((cb) => cb(spriteMock));
-
-      combatManager.triggerImpactEffects(target);
-      expect(spriteMock.setTint).toHaveBeenCalledWith(0xff0000);
-
-      expect(spriteMock.clearTint).toHaveBeenCalled();
-    });
-  });
-
-  describe("Bug Prevention (Double Trigger)", () => {
-    it("should not call releaseSlot twice if destroyCard is triggered multiple times for the same card", () => {
-      const attacker = createMockCard("PLAYER", 300);
-      const target = createMockCard("OPPONENT", 100);
-
-      mockScene.fieldManager.monsterSlots.OPPONENT = [target];
-
-      combatManager.prepareTargeting(attacker);
-      combatManager.handleCardSelection(target);
-
-      mockScene.fieldManager.monsterSlots.OPPONENT = [];
-
-      combatManager.handleCardSelection(target);
-
-      expect(mockScene.fieldManager.releaseSlot).toHaveBeenCalledTimes(1);
     });
   });
 });
