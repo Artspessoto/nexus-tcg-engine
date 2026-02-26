@@ -115,10 +115,12 @@ export class CombatManager implements ICombatManager {
     const damage = attacker.getCardData().atk ?? 0;
 
     const targetY = targetSide === "OPPONENT" ? 50 : 650;
+    const targetX = 650;
 
     this.context.tweens.add({
       targets: attacker,
       y: targetY,
+      x: targetX,
       duration: 300,
       ease: "Back.easeIn",
       yoyo: true, //attacker return into original pos
