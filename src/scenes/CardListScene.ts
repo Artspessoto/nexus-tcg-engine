@@ -1,3 +1,4 @@
+import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { Card } from "../objects/Card";
 import { ToonButton } from "../objects/ToonButton";
 import type { CardData } from "../types/CardTypes";
@@ -20,36 +21,43 @@ export class CardListScene extends Phaser.Scene {
   }
 
   create() {
-    const panelWidth = 800;
-    const panelHeight = 600;
-    const gridZoneWidth = 500; //card list
-    const detailZoneWidth = 300; //card detail
+    const { SCREEN, MODAL } = LAYOUT_CONFIG;
+    const { LIST } = MODAL;
 
-    const startX = (1280 - panelWidth) / 2; //240 margin left and right
-    const startY = (720 - panelHeight) / 2; //60 margin top and bottom
+    const startX = (SCREEN.WIDTH - LIST.WIDTH) / 2; //240 margin left and right
+    const startY = (SCREEN.HEIGHT - LIST.HEIGHT) / 2; //60 margin top and bottom
 
     const panel = this.add.graphics();
 
-    this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.3).setInteractive();
+    this.add
+      .rectangle(
+        SCREEN.CENTER_X,
+        SCREEN.CENTER_Y,
+        SCREEN.WIDTH,
+        SCREEN.HEIGHT,
+        0x000000,
+        0.3,
+      )
+      .setInteractive();
     panel.fillStyle(0x1a1a20, 0.95);
 
     //box
     panel.lineStyle(4, this.border, 1);
-    panel.fillRoundedRect(startX, startY, panelWidth, panelHeight, 20);
-    panel.strokeRoundedRect(startX, startY, panelWidth, panelHeight, 20);
+    panel.fillRoundedRect(startX, startY, LIST.WIDTH, LIST.HEIGHT, 20);
+    panel.strokeRoundedRect(startX, startY, LIST.WIDTH, LIST.HEIGHT, 20);
 
     //vertical line divisor between the zones
-    const dividerX = startX + gridZoneWidth;
+    const dividerX = startX + LIST.GRID_WIDTH;
     panel.lineBetween(
       dividerX,
       startY + 20,
       dividerX,
-      startY + panelHeight - 20,
+      startY + LIST.HEIGHT - 20,
     );
 
-    const cols = 4; // card columns qtd
-    const cellWidth = gridZoneWidth / cols; //125px (4 cols into 500px width)
-    const cellHeight = 135; // 5 lines x 135 height (card scale -> card height 450h x 0.30 = 135px)
+    const cols = LIST.COLS; // card columns qtd
+    const cellWidth = LIST.GRID_WIDTH / cols; //125px (4 cols into 500px width)
+    const cellHeight = LIST.CELL_HEIGHT; // 5 lines x 135 height (card scale -> card height 450h x 0.30 = 135px)
 
     this.selectionHighlight = this.add.graphics();
     this.selectionHighlight.setDepth(10);
@@ -91,9 +99,9 @@ export class CardListScene extends Phaser.Scene {
     }
 
     const defaultCardView = this.cardList[0];
-    const detailCenterX = startX + gridZoneWidth + detailZoneWidth / 2;
+    const detailCenterX = startX + LIST.GRID_WIDTH + LIST.DETAIL_WIDTH / 2;
+    const textPaddingY = startY + LIST.TEXT_Y_START;
 
-    const textPaddingY = startY + 380;
     const { nameKey, descriptionKey, type } = defaultCardView.getCardData();
     const initialColor = this.getTypeColor(type);
 
@@ -112,7 +120,7 @@ export class CardListScene extends Phaser.Scene {
         color: "#FFFFFF",
         stroke: "#000000",
         strokeThickness: 4,
-        wordWrap: { width: detailZoneWidth - 40 },
+        wordWrap: { width: LIST.DETAIL_WIDTH - 40 },
       })
       .setOrigin(0.5);
 
@@ -128,13 +136,13 @@ export class CardListScene extends Phaser.Scene {
       .text(detailCenterX, textPaddingY + 60, descriptionKey, {
         fontSize: "14px",
         color: "#CCCCCC",
-        wordWrap: { width: detailZoneWidth - 40 },
+        wordWrap: { width: LIST.DETAIL_WIDTH - 40 },
         align: "center",
       })
       .setOrigin(0.5, 0);
 
     new ToonButton(this, {
-      x: startX + panelWidth - 30,
+      x: startX + LIST.WIDTH - 30,
       y: startY + 30,
       text: "X",
       width: 50,

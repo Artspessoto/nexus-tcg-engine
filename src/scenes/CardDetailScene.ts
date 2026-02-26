@@ -1,3 +1,4 @@
+import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { Card } from "../objects/Card";
 import { ToonButton } from "../objects/ToonButton";
 import type { CardData, CardLocation } from "../types/CardTypes";
@@ -17,36 +18,42 @@ export class CardDetailScene extends Phaser.Scene {
   }
 
   create() {
-    const width = 800;
-    const height = 500;
-    const centerX = 1280 / 2;
-    const centerY = 720 / 2;
-    const startX = centerX - width / 2;
-    const startY = centerY - height / 2;
+    const { SCREEN, MODAL } = LAYOUT_CONFIG;
+    const { DETAIL } = MODAL;
+
+    const startX = SCREEN.CENTER_X - DETAIL.WIDTH / 2;
+    const startY = SCREEN.CENTER_Y - DETAIL.HEIGHT / 2;
+
+    const typeColors: Record<string, number> = {
+      SPELL: 0x55aaff,
+      MONSTER: 0xddaa55,
+      TRAP: 0xbc55ff,
+    };
+    const borderColor = typeColors[this.cardData.type] || 0xffd966;
+
+    this.add
+      .rectangle(
+        SCREEN.CENTER_X,
+        SCREEN.CENTER_Y,
+        SCREEN.WIDTH,
+        SCREEN.HEIGHT,
+        0x000000,
+        0.3,
+      )
+      .setInteractive();
+
     const panel = this.add.graphics();
-    let borderColor = 0xffd966;
-
-    if (this.cardData.type === "SPELL") {
-      borderColor = 0x55aaff;
-    } else if (this.cardData.type === "MONSTER") {
-      borderColor = 0xddaa55; //FFD966
-    } else if (this.cardData.type == "TRAP") {
-      borderColor = 0xbc55ff;
-    }
-
-    this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.3).setInteractive();
-
     panel.fillStyle(0x1a1a20, 0.95);
     panel.lineStyle(4, borderColor, 1);
 
     //box
-    panel.fillRoundedRect(startX, startY, width, height, 20);
-    panel.strokeRoundedRect(startX, startY, width, height, 20);
+    panel.fillRoundedRect(startX, startY, DETAIL.WIDTH, DETAIL.HEIGHT, 20);
+    panel.strokeRoundedRect(startX, startY, DETAIL.WIDTH, DETAIL.HEIGHT, 20);
 
     const displayCard = new Card(
       this,
-      startX + 200,
-      centerY,
+      startX + DETAIL.CARD_X_OFFSET,
+      SCREEN.CENTER_Y,
       this.cardData,
       this.owner,
     );
@@ -55,13 +62,13 @@ export class CardDetailScene extends Phaser.Scene {
     displayCard.input!.enabled = false;
     displayCard.setScale(1);
 
-    const textStartX = startX + 380;
-    const textWidth = 380; // text width
+    const textStartX = startX + DETAIL.TEXT_X_OFFSET;
+    const textWidth = DETAIL.WIDTH - DETAIL.TEXT_X_OFFSET - 40; // text width
 
     // Título
     this.add.text(
       textStartX,
-      startY + 60,
+      startY + DETAIL.TEXT_START_Y,
       this.cardData.nameKey.toUpperCase(),
       {
         fontSize: "24px",
@@ -93,7 +100,7 @@ export class CardDetailScene extends Phaser.Scene {
     });
 
     new ToonButton(this, {
-      x: startX + width - 30,
+      x: startX + DETAIL.WIDTH - 30,
       y: startY + 30,
       text: "X",
       width: 50,

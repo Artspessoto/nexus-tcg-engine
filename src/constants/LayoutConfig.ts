@@ -44,10 +44,11 @@ export const LAYOUT_CONFIG = {
     SPACING: 115,
   },
   DECK: {
-    PLAYER: { X: 1122, Y: 542 },
-    OPPONENT: { X: 1122, Y: 170 },
+    PLAYER: { x: 1122, y: 542 },
+    OPPONENT: { x: 1122, y: 170 },
   },
   FIELD: {
+    ZONE_SIZE: { W: 110, H: 150 },
     PLAYER: {
       MONSTER: [
         { x: 505, y: 450 },
@@ -73,6 +74,20 @@ export const LAYOUT_CONFIG = {
         { x: 787, y: 120 },
       ],
       GRAVEYARD: { x: 108, y: 270 },
+    },
+  },
+  UI: {
+    MANA: {
+      PLAYER: { x: 1232, y: 650 },
+      OPPONENT: { x: 1232, y: 73 },
+    },
+    LP_BAR: {
+      WIDTH: 180,
+      HEIGHT: 60,
+      RADIUS: 12,
+      X: 30,
+      Y_PLAYER: 630,
+      Y_OPPONENT: 40,
     },
   },
   MODAL: {

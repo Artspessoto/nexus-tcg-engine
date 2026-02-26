@@ -26,6 +26,7 @@ import type { IHandManager } from "../interfaces/IHandManager";
 import type { IInputManager } from "../interfaces/IInputManager";
 import type { IPhaseManager } from "../interfaces/IPhaseManager";
 import type { IUIManager } from "../interfaces/IUIManager";
+import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 
 export class BattleScene extends Phaser.Scene implements IBattleContext {
   public engine = this;
@@ -93,15 +94,20 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   }
 
   create() {
+    const { SCREEN, BATTLE } = LAYOUT_CONFIG;
     const lang = LanguageManager.getInstance().currentLanguage;
     const currentTranslations = TRANSLATIONS[lang];
     this.translationText = TRANSLATIONS[lang].battle_scene;
 
-    const bg = this.add.image(640, 360, "battle-scene-background");
+    const bg = this.add.image(
+      SCREEN.CENTER_X,
+      SCREEN.CENTER_Y,
+      "battle-scene-background",
+    );
     bg.setDisplaySize(1280, 720).setDepth(-100);
 
     //global stage: temp container ensures activated cards always render on top
-    this.overlayLayer = this.add.container(0, 0).setDepth(20000);
+    this.overlayLayer = this.add.container(0, 0).setDepth(BATTLE.OVERLAY_DEPTH);
 
     this.playerUI.setTranslations(currentTranslations);
     this.opponentUI.setTranslations(currentTranslations);
@@ -118,15 +124,15 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
     // this.phaseTextBg = this.add.rectangle(640, 360, 500, 40, 0x000000, 0.8);
     this.phaseButton = new ToonButton(this, {
-      x: 1120,
-      y: 420,
+      x: BATTLE.PHASE_BUTTON.x,
+      y: BATTLE.PHASE_BUTTON.y,
       text: "",
       fontSize: "18px",
       textColor: "#fff",
       color: 0x242424,
       hoverColor: 0x242424,
-      width: 200,
-      height: 60,
+      width: BATTLE.PHASE_BUTTON.width,
+      height: BATTLE.PHASE_BUTTON.height,
     });
     this.phaseButton.setVisible(false).setDepth(5000);
 
@@ -347,6 +353,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   }
 
   public cardActivation(card: Card, side: GameSide) {
+    const { SCREEN, BATTLE } = LAYOUT_CONFIG;
     const isEffectMonster = card.getType() === "EFFECT_MONSTER";
 
     //save original position
@@ -367,7 +374,14 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
     //add black background into overlay container
     const background = this.add
-      .rectangle(640, 360, 1280, 720, 0x000000, 0.7)
+      .rectangle(
+        SCREEN.CENTER_X,
+        SCREEN.CENTER_Y,
+        SCREEN.WIDTH,
+        SCREEN.HEIGHT,
+        0x000000,
+        0.7,
+      )
       .setAlpha(0)
       .setDepth(0);
 
@@ -389,8 +403,8 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
     this.tweens.add({
       targets: card,
-      x: 640, // x center (1280 / 2)
-      y: 360, // y center (720 / 2)
+      x: BATTLE.ACTIVATION_CENTER.x, // x center (1280 / 2)
+      y: BATTLE.ACTIVATION_CENTER.y, // y center (720 / 2)
       angle: 0,
       scale: 1,
       duration: 400,

@@ -1,3 +1,4 @@
+import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { IDeckManager } from "../interfaces/IDeckManager";
 import type { GameSide } from "../types/GameTypes";
@@ -11,8 +12,7 @@ export class DeckManager implements IDeckManager {
     this.context = context;
     this.side = side;
 
-    this.deckPosition =
-      this.side == "PLAYER" ? { x: 1122, y: 542 } : { x: 1122, y: 170 };
+    this.deckPosition = LAYOUT_CONFIG.DECK[this.side];
   }
 
   public get position() {

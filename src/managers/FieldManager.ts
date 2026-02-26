@@ -1,3 +1,4 @@
+import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type {
   IFieldManager,
@@ -25,58 +26,30 @@ export class FieldManager implements IFieldManager {
     OPPONENT: [] as Card[],
   };
 
-  private readonly fieldCoords = {
-    PLAYER: {
-      MONSTER: [
-        { x: 505, y: 450 },
-        { x: 645, y: 450 },
-        { x: 787, y: 450 },
-      ],
-      SPELL: [
-        { x: 505, y: 600 },
-        { x: 645, y: 600 },
-        { x: 787, y: 600 },
-      ],
-      GRAVEYARD: { x: 108, y: 450 },
-    },
-    OPPONENT: {
-      MONSTER: [
-        { x: 505, y: 270 },
-        { x: 645, y: 270 },
-        { x: 787, y: 270 },
-      ],
-      SPELL: [
-        { x: 505, y: 120 },
-        { x: 645, y: 120 },
-        { x: 787, y: 120 },
-      ],
-      GRAVEYARD: { x: 108, y: 270 },
-    },
-  };
-
   constructor(context: IBattleContext) {
     this.context = context;
   }
 
   public setupFieldZones() {
+    const { FIELD } = LAYOUT_CONFIG;
     const sides: GameSide[] = ["PLAYER", "OPPONENT"];
 
     sides.forEach((side) => {
       //Monster Zones
-      this.fieldCoords[side].MONSTER.forEach((pos, i) => {
+      FIELD[side].MONSTER.forEach((pos, i) => {
         this.context.add
-          .zone(pos.x, pos.y, 110, 150)
-          .setRectangleDropZone(110, 150)
+          .zone(pos.x, pos.y, FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
+          .setRectangleDropZone(FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
           .setData("type", "MONSTER")
           .setData("side", side)
           .setData("index", i);
       });
 
       //Spell/Trap Zones
-      this.fieldCoords[side].SPELL.forEach((pos, i) => {
+      FIELD[side].SPELL.forEach((pos, i) => {
         this.context.add
-          .zone(pos.x, pos.y, 110, 150)
-          .setRectangleDropZone(110, 150)
+          .zone(pos.x, pos.y, FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
+          .setRectangleDropZone(FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
           .setData("type", "SPELL")
           .setData("side", side)
           .setData("index", i);
@@ -85,12 +58,10 @@ export class FieldManager implements IFieldManager {
   }
 
   public getFirstAvailableSlot(side: GameSide, type: "MONSTER" | "SPELL") {
+    const { FIELD } = LAYOUT_CONFIG;
     const slots =
       type == "MONSTER" ? this.monsterSlots[side] : this.spellSlots[side];
-    const coords =
-      type === "MONSTER"
-        ? this.fieldCoords[side].MONSTER
-        : this.fieldCoords[side].SPELL;
+    const coords = type === "MONSTER" ? FIELD[side].MONSTER : FIELD[side].SPELL;
 
     for (let i = 0; i < slots.length; i++) {
       //return first slot to use
@@ -256,8 +227,9 @@ export class FieldManager implements IFieldManager {
   }
 
   public moveToGraveyard(card: Card, side: GameSide) {
+    const { FIELD } = LAYOUT_CONFIG;
     this.context.tweens.killTweensOf(card.visualElements);
-    const coords = this.fieldCoords[side].GRAVEYARD;
+    const coords = FIELD[side].GRAVEYARD;
 
     this.graveyardSlot[side].unshift(card);
     card.setLocation("GRAVEYARD");
@@ -307,7 +279,7 @@ export class FieldManager implements IFieldManager {
           this.context
             .getUI(card.owner)
             .showFieldCardMenu(currentX, currentY, card);
-          this.context.getHand(card.owner).hideHand();
+          this.context.getHand("PLAYER").hideHand();
           break;
         case "GRAVEYARD": {
           const cardOwner = card.owner;
