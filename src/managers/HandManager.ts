@@ -3,6 +3,7 @@ import { Card } from "../objects/Card";
 import { CARD_DATABASE } from "../constants/CardDatabase";
 import type { GameSide } from "../types/GameTypes";
 import type { IHandManager } from "../interfaces/IHandManager";
+import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 
 export class HandManager implements IHandManager {
   private context: IBattleContext;
@@ -12,19 +13,16 @@ export class HandManager implements IHandManager {
   private currentHandY: number; //hand position
   private readonly hiddenY: number; //hidden hand cards
   private readonly normalY: number;
-  private readonly maxHandSize: number = 6;
+  private readonly maxHandSize: number;
 
   constructor(context: IBattleContext, side: GameSide) {
     this.context = context;
     this.side = side;
 
-    if (this.side === "PLAYER") {
-      this.normalY = 710;
-      this.hiddenY = 850;
-    } else {
-      this.normalY = 10;
-      this.hiddenY = -150;
-    }
+    const config = LAYOUT_CONFIG.HAND[side];
+    this.normalY = config.NORMAL_Y;
+    this.hiddenY = config.HIDDEN_Y;
+    this.maxHandSize = LAYOUT_CONFIG.HAND.MAX_CARDS;
 
     this.currentHandY = this.normalY;
   }
@@ -80,16 +78,15 @@ export class HandManager implements IHandManager {
   }
 
   public animateCardEntry(card: Card) {
-    card.setAngle(-22);
+    card.setAngle(-22); // buy card angle
     card.setAlpha(0);
     this.context.tweens.add({ targets: card, alpha: 1, duration: 100 });
   }
 
   public reorganizeHand() {
-    // position config
-    const cardWidth = 180 * 0.58; // card large (base x scale)
-    const spacing = cardWidth + 10; // cards gap between
-    const centerX = 640;
+    const { SCREEN, HAND } = LAYOUT_CONFIG;
+    const spacing = HAND.SPACING; // cards gap between
+    const centerX = SCREEN.CENTER_X; // center of the screen
 
     const totalHandWidth = (this.hand.length - 1) * spacing;
     const startX = centerX - totalHandWidth / 2;
