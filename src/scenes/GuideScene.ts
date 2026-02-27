@@ -3,6 +3,7 @@ import { ToonButton } from "../objects/ToonButton";
 import { LanguageManager } from "../managers/LanguageManager";
 import { TRANSLATIONS } from "../constants/Translations";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 
 export class GuideScene extends Phaser.Scene {
   constructor() {
@@ -11,12 +12,16 @@ export class GuideScene extends Phaser.Scene {
 
   create() {
     const { SCREEN, MODAL } = LAYOUT_CONFIG;
+    const { COLORS, FONTS, COMPONENTS } = THEME_CONFIG;
+
     const lang = LanguageManager.getInstance().currentLang;
     const text = TRANSLATIONS[lang].guide;
+
     const boxWidth = MODAL.DEFAULT_WIDTH;
     const boxHeight = MODAL.DEFAULT_HEIGHT;
     const x = (SCREEN.WIDTH - boxWidth) / 2;
     const y = (SCREEN.HEIGHT - boxHeight) / 2;
+
     const content = `${text.lore}\n\n${text.rules}\n\n${text.footer}`;
 
     this.add.rectangle(
@@ -24,7 +29,7 @@ export class GuideScene extends Phaser.Scene {
       SCREEN.CENTER_Y,
       SCREEN.WIDTH,
       SCREEN.HEIGHT,
-      0x000000,
+      COLORS.OVERLAY_BLACK,
       0.7,
     );
 
@@ -33,27 +38,25 @@ export class GuideScene extends Phaser.Scene {
     // panel.lineStyle(4, 0xffcc00, 1);
     // panel.fillRoundedRect(340, 110, 600, 500, 20);
     // panel.strokeRoundedRect(340, 110, 600, 500, 20);
-    panel.fillStyle(0x0a0a0a, 1);
-    panel.lineStyle(4, 0x996600, 1);
+    panel.fillStyle(COLORS.PANEL_BG_DARK, 1);
+    panel.lineStyle(4, COLORS.GOLD_DARK, 1);
 
     //box
     panel.fillRoundedRect(x, y, boxWidth, boxHeight, 20);
     panel.strokeRoundedRect(x, y, boxWidth, boxHeight, 20);
 
     this.add
-      .text(SCREEN.CENTER_X, MODAL.GUIDE.TITLE_Y, text.title, {
-        fontSize: "32px",
-        color: "#ffcc00",
-        fontStyle: "bold",
-        letterSpacing: 2,
-      })
+      .text(
+        SCREEN.CENTER_X,
+        MODAL.GUIDE.TITLE_Y,
+        text.title,
+        FONTS.STYLES.MODAL_TITLE,
+      )
       .setOrigin(0.5);
 
     this.add
       .text(SCREEN.CENTER_X, MODAL.GUIDE.CONTENT_Y, content, {
-        fontSize: "1.4rem",
-        color: "#fff",
-        align: "center",
+        ...FONTS.STYLES.MODAL_CONTENT,
         wordWrap: { width: boxWidth - 100 },
       })
       .setOrigin(0.5);
@@ -64,9 +67,7 @@ export class GuideScene extends Phaser.Scene {
       text: text.close,
       width: 150,
       height: 70,
-      color: 0x1a1a1a,
-      hoverColor: 0x2a2a2a,
-      textColor: "#fff",
+      ...COMPONENTS.BUTTONS.SECONDARY,
     });
 
     closeBtn.on("pointerdown", () => {

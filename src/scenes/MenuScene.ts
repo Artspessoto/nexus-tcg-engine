@@ -3,6 +3,7 @@ import { ToonButton } from "../objects/ToonButton";
 import { LanguageManager } from "../managers/LanguageManager";
 import { TRANSLATIONS } from "../constants/Translations";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 
 export type Difficulty = "EASY" | "MEDIUM" | "HARD";
 
@@ -21,6 +22,8 @@ export class MenuScene extends Phaser.Scene {
 
   create() {
     const { SCREEN, MENU } = LAYOUT_CONFIG;
+    const { COLORS, FONTS, COMPONENTS } = THEME_CONFIG;
+
     const lang = LanguageManager.getInstance().currentLanguage;
     const strings = TRANSLATIONS[lang].menu;
 
@@ -31,27 +34,26 @@ export class MenuScene extends Phaser.Scene {
       SCREEN.CENTER_Y,
       SCREEN.WIDTH,
       SCREEN.HEIGHT,
-      0x000000,
+      COLORS.OVERLAY_BLACK,
       0.5,
     );
 
     this.add
-      .text(SCREEN.CENTER_X, MENU.TITLE_Y, "TOON CASTLE", {
-        fontSize: "80px",
-        color: "#ffcc00",
-        fontStyle: "bold",
-        stroke: "#000",
-        strokeThickness: 8,
-        shadow: { offsetX: 5, offsetY: 5, color: "#000", blur: 2, fill: true },
-      })
+      .text(
+        SCREEN.CENTER_X,
+        MENU.TITLE_Y,
+        "TOON CASTLE",
+        FONTS.STYLES.MAIN_TITLE,
+      )
       .setOrigin(0.5);
 
     this.add
-      .text(SCREEN.CENTER_X, MENU.SUBTITLE_Y, strings.select_diff, {
-        fontSize: "22px",
-        color: "#ffffff",
-        fontStyle: "bold",
-      })
+      .text(
+        SCREEN.CENTER_X,
+        MENU.SUBTITLE_Y,
+        strings.select_diff,
+        FONTS.STYLES.MENU_SUBTITLE,
+      )
       .setOrigin(0.5);
 
     const diffs: { id: Difficulty; label: string; color: string }[] = [
@@ -100,9 +102,7 @@ export class MenuScene extends Phaser.Scene {
       y: MENU.ACTIONS.GUIDE_Y,
       text: strings.guide,
       fontSize: "1.2rem",
-      textColor: "#fff",
-      color: 0x333333,
-      hoverColor: 0x222222,
+      ...COMPONENTS.BUTTONS.SECONDARY,
     });
 
     guideBtn.on("pointerdown", () => {
@@ -110,15 +110,17 @@ export class MenuScene extends Phaser.Scene {
       this.scene.launch("GuideScene");
     });
 
+    const langPickerY = MENU.LANG_PICKER.Y;
+
     const btnPT = this.add
-      .text(MENU.LANG_PICKER.PT_X, 50, "PT", {
+      .text(MENU.LANG_PICKER.PT_X, langPickerY, "PT", {
         fontSize: "20px",
         color: "#fff",
       })
       .setInteractive({ useHandCursor: true });
 
     const btnEN = this.add
-      .text(MENU.LANG_PICKER.EN_X, 50, "EN", {
+      .text(MENU.LANG_PICKER.EN_X, langPickerY, "EN", {
         fontSize: "20px",
         color: "#fff",
       })
@@ -137,6 +139,7 @@ export class MenuScene extends Phaser.Scene {
 
   private updateDifficulty(difficulty: Difficulty, activeColor: string) {
     const { DIFF_BUTTONS } = LAYOUT_CONFIG.MENU;
+    const { COLORS } = THEME_CONFIG;
     this.selectedDifficulty = difficulty;
 
     this.diffButtons.forEach((btn, id) => {
@@ -151,11 +154,11 @@ export class MenuScene extends Phaser.Scene {
           Phaser.Display.Color.HexStringToColor(activeColor).color,
           1,
         );
-        graphics.fillStyle(0x111111, 0.9);
+        graphics.fillStyle(COLORS.PANEL_BG_DARK, 0.9);
         btn.setStyle({ color: activeColor }).setScale(1.0);
       } else {
-        graphics.lineStyle(2, 0x000000, 0.5);
-        graphics.fillStyle(0x111111, 0.7);
+        graphics.lineStyle(2, COLORS.OVERLAY_BLACK, 0.5);
+        graphics.fillStyle(COLORS.PANEL_BG_DARK, 0.7);
         btn.setStyle({ color: "#666" }).setScale(1.0);
       }
 

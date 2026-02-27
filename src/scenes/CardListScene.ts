@@ -1,10 +1,10 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { Card } from "../objects/Card";
 import { ToonButton } from "../objects/ToonButton";
 import type { CardData } from "../types/CardTypes";
 
 export class CardListScene extends Phaser.Scene {
-  public border: number = 0xffd966;
   private cardList: Card[] = [];
   private cardDetailView!: Card;
   private detailNameText!: Phaser.GameObjects.Text;
@@ -22,7 +22,11 @@ export class CardListScene extends Phaser.Scene {
 
   create() {
     const { SCREEN, MODAL } = LAYOUT_CONFIG;
+    const { COLORS, FONTS, DEPTHS } = THEME_CONFIG;
     const { LIST } = MODAL;
+
+    const border = COLORS.GOLD_GLOW;
+    const borderConvert = Phaser.Display.Color.HexStringToColor(border).color;
 
     const startX = (SCREEN.WIDTH - LIST.WIDTH) / 2; //240 margin left and right
     const startY = (SCREEN.HEIGHT - LIST.HEIGHT) / 2; //60 margin top and bottom
@@ -35,14 +39,16 @@ export class CardListScene extends Phaser.Scene {
         SCREEN.CENTER_Y,
         SCREEN.WIDTH,
         SCREEN.HEIGHT,
-        0x000000,
+        COLORS.OVERLAY_BLACK,
         0.3,
       )
       .setInteractive();
-    panel.fillStyle(0x1a1a20, 0.95);
+
+    //panel (background and border)
+    panel.fillStyle(COLORS.PANEL_BG, 0.95);
+    panel.lineStyle(4, borderConvert, 1);
 
     //box
-    panel.lineStyle(4, this.border, 1);
     panel.fillRoundedRect(startX, startY, LIST.WIDTH, LIST.HEIGHT, 20);
     panel.strokeRoundedRect(startX, startY, LIST.WIDTH, LIST.HEIGHT, 20);
 
@@ -60,7 +66,7 @@ export class CardListScene extends Phaser.Scene {
     const cellHeight = LIST.CELL_HEIGHT; // 5 lines x 135 height (card scale -> card height 450h x 0.30 = 135px)
 
     this.selectionHighlight = this.add.graphics();
-    this.selectionHighlight.setDepth(10);
+    this.selectionHighlight.setDepth(DEPTHS.UI_BASE + 1);
 
     //util var to mark the first card of list. cardList[0] set the graphics border into battle scene
     let firstCardItem: Card | undefined;
@@ -115,11 +121,7 @@ export class CardListScene extends Phaser.Scene {
 
     this.detailNameText = this.add
       .text(detailCenterX, textPaddingY, nameKey.toUpperCase(), {
-        fontSize: "20px",
-        fontFamily: "Arial Black",
-        color: "#FFFFFF",
-        stroke: "#000000",
-        strokeThickness: 4,
+        ...FONTS.STYLES.CARD_NAME,
         wordWrap: { width: LIST.DETAIL_WIDTH - 40 },
       })
       .setOrigin(0.5);
@@ -134,10 +136,9 @@ export class CardListScene extends Phaser.Scene {
 
     this.detailDescText = this.add
       .text(detailCenterX, textPaddingY + 60, descriptionKey, {
+        ...FONTS.STYLES.MODAL_CONTENT,
         fontSize: "14px",
-        color: "#CCCCCC",
         wordWrap: { width: LIST.DETAIL_WIDTH - 40 },
-        align: "center",
       })
       .setOrigin(0.5, 0);
 
@@ -147,7 +148,7 @@ export class CardListScene extends Phaser.Scene {
       text: "X",
       width: 50,
       height: 50,
-      textColor: `#${this.border.toString(16)}`,
+      textColor: border,
       alpha: 0,
       fontSize: "20px",
     }).on("pointerdown", () => this.closeModal());
@@ -168,9 +169,13 @@ export class CardListScene extends Phaser.Scene {
   }
 
   private updateHighlight(x: number, y: number) {
+    const { COLORS } = THEME_CONFIG;
+    const border = COLORS.GOLD_GLOW;
+    const borderConvert = Phaser.Display.Color.HexStringToColor(border).color;
+
     this.selectionHighlight.clear();
 
-    this.selectionHighlight.lineStyle(4, this.border, 1);
+    this.selectionHighlight.lineStyle(4, borderConvert, 1);
 
     const w = 320 * 0.3; //w = 96px
     const h = 450 * 0.3; //h * card scale = 135px
@@ -183,7 +188,7 @@ export class CardListScene extends Phaser.Scene {
       h,
       10,
     );
-    this.selectionHighlight.fillStyle(this.border, 0.2);
+    this.selectionHighlight.fillStyle(borderConvert, 0.2);
     this.selectionHighlight.fillRoundedRect(
       x - w / 2,
       y - h / 2 + offsetY,
@@ -194,15 +199,12 @@ export class CardListScene extends Phaser.Scene {
   }
 
   private getTypeColor(type: string): string {
-    switch (type) {
-      case "SPELL":
-        return "#55aaff";
-      case "MONSTER":
-        return "#ddaa55";
-      case "TRAP":
-        return "#bc55ff";
-      default:
-        return "#ffd966";
-    }
+    const { COLORS } = THEME_CONFIG;
+    const colorMap: Record<string, string> = {
+      SPELL: COLORS.TYPE_SPELL,
+      MONSTER: COLORS.TYPE_MONSTER,
+      TRAP: COLORS.TYPE_TRAP,
+    };
+    return colorMap[type] || COLORS.GOLD_GLOW;
   }
 }

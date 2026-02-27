@@ -58,7 +58,7 @@ export const THEME_CONFIG = {
         align: "center",
       },
       CARD_NAME: {
-        fontSize: "20px",
+        fontSize: "24px",
         fontFamily: "Arial Black",
         color: "#FFFFFF",
         stroke: "#000000",

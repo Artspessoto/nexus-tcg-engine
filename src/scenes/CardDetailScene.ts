@@ -1,4 +1,5 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { Card } from "../objects/Card";
 import { ToonButton } from "../objects/ToonButton";
 import type { CardData, CardLocation } from "../types/CardTypes";
@@ -19,17 +20,20 @@ export class CardDetailScene extends Phaser.Scene {
 
   create() {
     const { SCREEN, MODAL } = LAYOUT_CONFIG;
+    const { COLORS, FONTS } = THEME_CONFIG;
     const { DETAIL } = MODAL;
 
     const startX = SCREEN.CENTER_X - DETAIL.WIDTH / 2;
     const startY = SCREEN.CENTER_Y - DETAIL.HEIGHT / 2;
 
     const typeColors: Record<string, number> = {
-      SPELL: 0x55aaff,
-      MONSTER: 0xddaa55,
-      TRAP: 0xbc55ff,
+      SPELL: Phaser.Display.Color.HexStringToColor(COLORS.TYPE_SPELL).color,
+      MONSTER: Phaser.Display.Color.HexStringToColor(COLORS.TYPE_MONSTER).color,
+      TRAP: Phaser.Display.Color.HexStringToColor(COLORS.TYPE_TRAP).color,
     };
-    const borderColor = typeColors[this.cardData.type] || 0xffd966;
+    const borderColor =
+      typeColors[this.cardData.type] ||
+      Phaser.Display.Color.HexStringToColor(COLORS.GOLD_GLOW).color;
 
     this.add
       .rectangle(
@@ -37,13 +41,13 @@ export class CardDetailScene extends Phaser.Scene {
         SCREEN.CENTER_Y,
         SCREEN.WIDTH,
         SCREEN.HEIGHT,
-        0x000000,
+        COLORS.OVERLAY_BLACK,
         0.3,
       )
       .setInteractive();
 
     const panel = this.add.graphics();
-    panel.fillStyle(0x1a1a20, 0.95);
+    panel.fillStyle(COLORS.PANEL_BG, 0.95);
     panel.lineStyle(4, borderColor, 1);
 
     //box
@@ -70,13 +74,7 @@ export class CardDetailScene extends Phaser.Scene {
       textStartX,
       startY + DETAIL.TEXT_START_Y,
       this.cardData.nameKey.toUpperCase(),
-      {
-        fontSize: "24px",
-        fontFamily: "Arial Black",
-        color: "#FFFFFF",
-        stroke: "#000000",
-        strokeThickness: 4,
-      },
+      FONTS.STYLES.CARD_NAME,
     );
 
     this.add.text(textStartX, startY + 110, `[ ${this.cardData.type} ]`, {
