@@ -7,8 +7,8 @@ export const THEME_CONFIG = {
     GOLD_UI_STROKE: "#4D2600", //mana counter stroke
 
     //states
-    NOTICE_PHASE: 0xcc0000,
-    NOTICE_WARNING: "#ff4d4d",
+    NOTICE_PHASE: 0xffcc00,
+    NOTICE_WARNING: 0xcc0000,
     NOTICE_TURN: 0x0077ff,
     NOTICE_NEUTRAL: 0xbdc3c7,
 
@@ -70,6 +70,7 @@ export const THEME_CONFIG = {
         color: "#FFD966",
         stroke: "#4D2600",
         strokeThickness: 5,
+        align: "center",
       },
       BANNER_TEXT: {
         fontSize: "25px",
@@ -110,7 +111,7 @@ export const THEME_CONFIG = {
     CARD: {
       SCALES: {
         PLAYER_HAND: 0.45,
-        OPPONENT_HAND: 0.35,
+        DEFAULT_HAND: 0.35,
         FIELD_ATK: 0.32,
         FIELD_DEF: 0.3,
         PREVIEW: 0.55,
