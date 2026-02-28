@@ -1,3 +1,4 @@
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { IPhaseManager } from "../interfaces/IPhaseManager";
 import type { ToonButton } from "../objects/ToonButton";
@@ -17,7 +18,7 @@ export class PhaseManager implements IPhaseManager {
       this.phaseTimer.remove();
       this.phaseTimer = undefined;
     }
-
+    const { PHASE } = THEME_CONFIG.COMPONENTS.BUTTONS;
     const { phaseButton } = this.context;
     const currentUI = this.context.getUI(this.context.gameState.activePlayer);
     const isPlayerTurn = this.context.gameState.activePlayer == "PLAYER";
@@ -31,7 +32,7 @@ export class PhaseManager implements IPhaseManager {
       case "DRAW":
         if (isPlayerTurn) {
           currentUI.showNotice(translations.draw_phase, "PHASE");
-          phaseButton.setAlpha(1).updatePhase(this.turn, "DRAW", 0x242424);
+          phaseButton.setAlpha(1).updatePhase(this.turn, "DRAW", PHASE.color);
           phaseButton.disableInteractive();
         } else {
           currentUI.showNotice(translations.opponent_draw, "PHASE");
@@ -48,7 +49,7 @@ export class PhaseManager implements IPhaseManager {
               : translations.battle_buttons.to_battle;
 
           phaseButton.setInteractive().setAlpha(1);
-          phaseButton.updatePhase(this.turn, buttonText, 0x242424);
+          phaseButton.updatePhase(this.turn, buttonText, PHASE.color);
         } else {
           this.setOpponentState(phaseButton);
         }
@@ -63,7 +64,7 @@ export class PhaseManager implements IPhaseManager {
             .updatePhase(
               this.turn,
               translations.battle_buttons.end_turn,
-              0x242424,
+              PHASE.color,
             );
         } else {
           this.setOpponentState(phaseButton);

@@ -1,3 +1,4 @@
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { ICombatManager } from "../interfaces/ICombatManager";
 import type { Card } from "../objects/Card";
@@ -85,12 +86,13 @@ export class CombatManager implements ICombatManager {
   }
 
   private executeAttack(attacker: Card, target: Card) {
+    const { DURATIONS, EASING } = THEME_CONFIG.ANIMATIONS;
     this.context.tweens.add({
       targets: attacker,
       x: target.x,
       y: target.y,
-      duration: 300,
-      ease: "Back.easeIn",
+      duration: DURATIONS.NORMAL,
+      ease: EASING.BOUNCE,
       yoyo: true, //attacker return into original pos
       onYoyo: () => {
         this.triggerImpactEffects(target);
@@ -112,6 +114,7 @@ export class CombatManager implements ICombatManager {
   }
 
   private executeDirectAttack(attacker: Card, targetSide: GameSide) {
+    const { DURATIONS, EASING, SHAKES } = THEME_CONFIG.ANIMATIONS;
     const damage = attacker.getCardData().atk ?? 0;
 
     const targetY = targetSide === "OPPONENT" ? 50 : 650;
@@ -121,11 +124,14 @@ export class CombatManager implements ICombatManager {
       targets: attacker,
       y: targetY,
       x: targetX,
-      duration: 300,
-      ease: "Back.easeIn",
+      duration: DURATIONS.NORMAL,
+      ease: EASING.BOUNCE,
       yoyo: true, //attacker return into original pos
       onYoyo: () => {
-        this.context.cameras.main.shake(100, 0.003);
+        this.context.cameras.main.shake(
+          SHAKES.MEDIUM.duration,
+          SHAKES.MEDIUM.intensity,
+        );
         this.context.getUI(targetSide).updateLP(targetSide, -damage);
       },
       onComplete: () => {
@@ -188,9 +194,11 @@ export class CombatManager implements ICombatManager {
   }
 
   public triggerImpactEffects(target: Card) {
-    this.context.cameras.main.shake(100, 0.003);
+    const { COLORS, ANIMATIONS } = THEME_CONFIG;
+    const { MEDIUM } = ANIMATIONS.SHAKES;
+    this.context.cameras.main.shake(MEDIUM.duration, MEDIUM.intensity);
 
-    this.applyTint(target, 0xff0000);
+    this.applyTint(target, COLORS.TINT_IMPACT);
     this.context.time.delayedCall(100, () => this.applyTint(target, null));
   }
 
@@ -199,6 +207,7 @@ export class CombatManager implements ICombatManager {
     side: GameSide,
     silentEffect: boolean = false,
   ) {
+    const { DURATIONS, EASING } = THEME_CONFIG.ANIMATIONS;
     const currentSlots = card.getType().includes("MONSTER")
       ? this.context.field["monsterSlots"][side]
       : this.context.field["spellSlots"][side];
@@ -213,7 +222,7 @@ export class CombatManager implements ICombatManager {
       this.context.tweens.add({
         targets: card,
         alpha: 0,
-        duration: 300,
+        duration: DURATIONS.NORMAL,
         onComplete: () => {
           card.setFaceUp();
           this.context.field.moveToGraveyard(card, side);
@@ -227,10 +236,10 @@ export class CombatManager implements ICombatManager {
       targets: card,
       alpha: 0,
       scale: 1.4,
-      duration: 500,
-      ease: "Expo.easeOut",
+      duration: DURATIONS.SLOW,
+      ease: EASING.EXPO_OUT,
       onStart: () => {
-        this.applyTint(card, 0xff0000);
+        this.applyTint(card, THEME_CONFIG.COLORS.TINT_IMPACT);
       },
       onComplete: () => {
         card.setFaceUp();

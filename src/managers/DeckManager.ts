@@ -1,4 +1,5 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { IDeckManager } from "../interfaces/IDeckManager";
 import type { GameSide } from "../types/GameTypes";
@@ -20,6 +21,7 @@ export class DeckManager implements IDeckManager {
   }
 
   public createDeckVisual() {
+    const { TINT_DISABLED } = THEME_CONFIG.COLORS;
     for (let i = 8; i >= 0; i--) {
       const xOffset = i * 2;
       const yOffset = 0;
@@ -45,7 +47,7 @@ export class DeckManager implements IDeckManager {
       }
 
       if (i > 0) {
-        deckCard.setTint(0x999999);
+        deckCard.setTint(TINT_DISABLED);
       }
     }
   }

@@ -109,6 +109,7 @@ export class EffectManager implements IEffectManager {
     const statResolver =
       (type: "atk" | "def", isBuff: boolean) =>
       (target: Card, _source: Card, effect: CardEffect) => {
+        //BUG: this effect apply into all same cards (need to apply just to target selected)
         const current =
           type === "atk"
             ? target.getCardData().atk || 0

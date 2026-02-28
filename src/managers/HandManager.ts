@@ -4,6 +4,7 @@ import { CARD_DATABASE } from "../constants/CardDatabase";
 import type { GameSide } from "../types/GameTypes";
 import type { IHandManager } from "../interfaces/IHandManager";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 
 export class HandManager implements IHandManager {
   private context: IBattleContext;
@@ -44,6 +45,7 @@ export class HandManager implements IHandManager {
   }
 
   public drawCard(deckPosition: { x: number; y: number }) {
+    const { DEPTHS } = THEME_CONFIG;
     if (this.hand.length >= this.maxHandSize) return;
 
     const cardData = this.getRandomCardData();
@@ -65,7 +67,7 @@ export class HandManager implements IHandManager {
 
     newCard.setLocation("HAND");
 
-    newCard.setDepth(200);
+    newCard.setDepth(DEPTHS.HAND_CARDS);
     this.hand.push(newCard);
     this.animateCardEntry(newCard);
     this.reorganizeHand();
@@ -78,12 +80,18 @@ export class HandManager implements IHandManager {
   }
 
   public animateCardEntry(card: Card) {
+    const { DURATIONS } = THEME_CONFIG.ANIMATIONS;
     card.setAngle(-22); // buy card angle
     card.setAlpha(0);
-    this.context.tweens.add({ targets: card, alpha: 1, duration: 100 });
+    this.context.tweens.add({
+      targets: card,
+      alpha: 1,
+      duration: DURATIONS.FAST,
+    });
   }
 
   public reorganizeHand() {
+    const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
     const { SCREEN, HAND } = LAYOUT_CONFIG;
     const spacing = HAND.SPACING; // cards gap between
     const centerX = SCREEN.CENTER_X; // center of the screen
@@ -93,6 +101,9 @@ export class HandManager implements IHandManager {
 
     this.hand.forEach((card, index) => {
       const targetX = startX + index * spacing;
+      const cardScale = COMPONENTS.CARD.SCALES;
+      const finalScale =
+        this.side == "PLAYER" ? cardScale.PLAYER_HAND : cardScale.DEFAULT_HAND;
       card.setDepth(100 + index);
 
       this.context.tweens.add({
@@ -100,10 +111,10 @@ export class HandManager implements IHandManager {
         x: targetX,
         y: this.currentHandY,
         angle: 0,
-        scale: this.side == "PLAYER" ? 0.45 : 0.35,
-        duration: 500, // 0.5s
+        scale: finalScale,
+        duration: ANIMATIONS.DURATIONS.SLOW, // 0.5s
         // ease: "Power2",
-        ease: "Back.easeOut",
+        ease: ANIMATIONS.EASING.BOUNCE,
       });
     });
   }

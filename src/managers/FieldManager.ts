@@ -1,4 +1,5 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type {
   IFieldManager,
@@ -160,6 +161,8 @@ export class FieldManager implements IFieldManager {
     targetY: number,
     mode: PlacementMode,
   ) {
+    const { SCALES } = THEME_CONFIG.COMPONENTS.CARD;
+    const { DURATIONS, SHAKES, EASING } = THEME_CONFIG.ANIMATIONS;
     const currentTurn = this.context.gameState.currentTurn;
     const { manaCost } = card.getCardData();
     card.disableInteractive();
@@ -175,7 +178,7 @@ export class FieldManager implements IFieldManager {
     const isMonster = card.getType().includes("MONSTER");
 
     const finalAngle = isDefense ? 270 : 0;
-    const finalScale = isDefense ? 0.3 : 0.32;
+    const finalScale = isDefense ? SCALES.FIELD_DEF : SCALES.FIELD_ATK;
 
     if (isSet || (isMonster && isDefense)) {
       card.setFaceDown();
@@ -194,11 +197,14 @@ export class FieldManager implements IFieldManager {
       y: targetY,
       angle: finalAngle,
       scale: finalScale,
-      duration: 250,
-      ease: "Back.easeOut",
+      duration: DURATIONS.FIELD_PLAY,
+      ease: EASING.BOUNCE,
       onComplete: () => {
         // card impact animation effect
-        this.context.cameras.main.shake(100, 0.002);
+        this.context.cameras.main.shake(
+          SHAKES.LIGHT.duration,
+          SHAKES.LIGHT.intensity,
+        );
         card.setDepth(10);
 
         this.setupFieldInteractions(card);
@@ -207,6 +213,7 @@ export class FieldManager implements IFieldManager {
   }
 
   public previewPlacement(card: Card, targetX: number, targetY: number) {
+    const { ANIMATIONS, COMPONENTS, DEPTHS } = THEME_CONFIG;
     card.disableInteractive();
     this.context.tweens.killTweensOf(card);
 
@@ -217,17 +224,18 @@ export class FieldManager implements IFieldManager {
       targets: card,
       x: targetX,
       y: targetY,
-      scale: 0.55,
+      scale: COMPONENTS.CARD.SCALES.PREVIEW,
       angle: 0,
-      duration: 200,
-      ease: "Power2",
+      duration: ANIMATIONS.DURATIONS.PREVIEW,
+      ease: ANIMATIONS.EASING.SMOOTH,
     });
 
-    card.setDepth(5000);
+    card.setDepth(DEPTHS.PREVIEW_CARD);
   }
 
   public moveToGraveyard(card: Card, side: GameSide) {
     const { FIELD } = LAYOUT_CONFIG;
+    const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
     this.context.tweens.killTweensOf(card.visualElements);
     const coords = FIELD[side].GRAVEYARD;
 
@@ -238,9 +246,9 @@ export class FieldManager implements IFieldManager {
       targets: card,
       x: coords.x,
       y: coords.y,
-      scale: 0.32,
+      scale: COMPONENTS.CARD.SCALES.FIELD_ATK,
       angle: 0,
-      duration: 500,
+      duration: ANIMATIONS.DURATIONS.SLOW,
       ease: "Power2",
       onStart: () => {
         card.visualElements.setDepth(1000);

@@ -1,6 +1,7 @@
 import type { IInputManager } from "../interfaces/IInputManager";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { Card } from "../objects/Card";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 
 export class InputManager implements IInputManager {
   private context: IBattleContext;
@@ -69,34 +70,37 @@ export class InputManager implements IInputManager {
 
   //card on focus (hand)
   private handleCardHover(card: Card) {
+    const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
     if (this.context.gameState.isDragging) return;
 
     this.context.tweens.add({
       targets: card.visualElements,
-      y: -280,
-      scale: 1.5,
-      duration: 200,
-      ease: "Back.easeOut",
+      y: COMPONENTS.CARD.OFFSETS.HOVER_Y,
+      scale: COMPONENTS.CARD.SCALES.ZOOM,
+      duration: ANIMATIONS.DURATIONS.PREVIEW,
+      ease: ANIMATIONS.EASING.BOUNCE,
     });
     card.setDepth(200);
   }
 
   //card stop focus (hand)
   private handleCardOut(card: Card) {
+    const { ANIMATIONS } = THEME_CONFIG;
     if (this.context.gameState.isDragging) return;
 
     this.context.tweens.add({
       targets: card.visualElements,
       y: 0,
       scale: 1,
-      duration: 200,
-      ease: "Power2",
+      duration: ANIMATIONS.DURATIONS.PREVIEW,
+      ease: ANIMATIONS.EASING.SMOOTH,
     });
 
     this.context.getHand(card.owner).reorganizeHand();
   }
 
   public setupDragEvents(card: Card) {
+    const { ANIMATIONS, COMPONENTS, DEPTHS } = THEME_CONFIG;
     card.on("dragstart", (pointer: Phaser.Input.Pointer) => {
       if (this.context.currentPhase !== "MAIN") {
         this.context.engine.input.setDragState(pointer, 0);
@@ -109,11 +113,11 @@ export class InputManager implements IInputManager {
 
       this.context.tweens.add({
         targets: card,
-        scale: 0.35,
-        duration: 150,
-        ease: "Power2",
+        scale: COMPONENTS.CARD.SCALES.DEFAULT_HAND,
+        duration: ANIMATIONS.DURATIONS.UI_POP,
+        ease: ANIMATIONS.EASING.SMOOTH,
       });
-      card.setDepth(2000);
+      card.setDepth(DEPTHS.DRAGGING_CARD);
     });
 
     card.on(
@@ -132,9 +136,9 @@ export class InputManager implements IInputManager {
       if (!dropped) this.context.getHand(activeSide).reorganizeHand();
       this.context.tweens.add({
         targets: card,
-        scale: 0.35,
-        duration: 200,
-        ease: "Back.easeOut",
+        scale: COMPONENTS.CARD.SCALES.DEFAULT_HAND,
+        duration: ANIMATIONS.DURATIONS.PREVIEW,
+        ease: ANIMATIONS.EASING.BOUNCE,
       });
     });
 

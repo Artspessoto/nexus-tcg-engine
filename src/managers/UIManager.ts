@@ -1,4 +1,5 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { IUIManager } from "../interfaces/IUIManager";
 import type { Card } from "../objects/Card";
@@ -37,6 +38,7 @@ export class UIManager implements IUIManager {
 
   public setupUI() {
     const { SCREEN } = LAYOUT_CONFIG;
+    const { COLORS, FONTS, DEPTHS } = THEME_CONFIG;
     const initialMana = this.context.gameState.getMana(this.side);
 
     this.manaAura = this.context.add
@@ -44,49 +46,40 @@ export class UIManager implements IUIManager {
       .setScale(0.5)
       .setAlpha(0)
       .setTint(0xffffff)
-      .setDepth(99);
+      .setDepth(DEPTHS.UI_BASE - 1);
 
     this.manaIcon = this.context.add
       .image(this.manaPosition.x, this.manaPosition.y, "mana_icon")
       .setScale(0.4)
-      .setDepth(100);
+      .setDepth(DEPTHS.UI_BASE);
 
     this.manaText = this.context.add
-      .text(this.manaIcon.x, this.manaIcon.y, `${initialMana}`, {
-        fontSize: "32px",
-        fontFamily: "Arial Black",
-        color: "#FFD966",
-        stroke: "#4D2600",
-        strokeThickness: 5,
-        align: "center",
-      })
+      .text(
+        this.manaIcon.x,
+        this.manaIcon.y,
+        `${initialMana}`,
+        FONTS.STYLES.MANA_DISPLAY,
+      )
       .setOrigin(0.5)
-      .setDepth(101);
+      .setDepth(DEPTHS.UI_BASE + 1);
 
     this.bannerBg = this.context.add
       .rectangle(
         SCREEN.CENTER_X,
         SCREEN.CENTER_Y,
         SCREEN.WIDTH,
-        80,
-        0x000000,
+        THEME_CONFIG.COMPONENTS.UI.BANNER_HEIGHT,
+        COLORS.OVERLAY_BLACK,
         0.85,
       )
       .setVisible(false)
-      .setDepth(10000);
+      .setDepth(DEPTHS.BANNERS);
 
     this.bannerText = this.context.add
-      .text(SCREEN.CENTER_X, SCREEN.CENTER_Y, "", {
-        fontSize: "25px",
-        color: "#FFFFFF",
-        fontStyle: "bold italic",
-        fontFamily: "Arial Black",
-        stroke: "#000000",
-        strokeThickness: 6,
-      })
+      .text(SCREEN.CENTER_X, SCREEN.CENTER_Y, "", FONTS.STYLES.BANNER_TEXT)
       .setOrigin(0.5)
       .setVisible(false)
-      .setDepth(10001);
+      .setDepth(DEPTHS.BANNERS + 1);
   }
 
   public setupLifePoints() {
@@ -99,6 +92,7 @@ export class UIManager implements IUIManager {
   }
 
   public updateLP(side: GameSide, amount: number) {
+    const { ANIMATIONS } = THEME_CONFIG;
     const startLP = this.context.gameState.getHP(side);
 
     this.context.gameState.modifyHP(side, amount);
@@ -111,8 +105,8 @@ export class UIManager implements IUIManager {
     this.context.tweens.add({
       targets: lpCounter,
       value: targetLP,
-      duration: 1200,
-      ease: "Power2",
+      duration: ANIMATIONS.DURATIONS.LP_ROLL,
+      ease: ANIMATIONS.EASING.SMOOTH,
       onUpdate: () => {
         this.hpText.setText(Math.floor(lpCounter.value).toString());
       },
@@ -120,6 +114,7 @@ export class UIManager implements IUIManager {
   }
 
   public updateMana(amount: number) {
+    const { ANIMATIONS } = THEME_CONFIG;
     this.context.gameState.modifyMana(this.side, amount);
 
     const newMana = this.context.gameState.getMana(this.side);
@@ -129,8 +124,8 @@ export class UIManager implements IUIManager {
       targets: this.manaAura,
       alpha: { from: 0.8, to: 0 },
       scale: { from: 0.5, to: 0.8 }, //shock wave effect
-      duration: 300,
-      ease: "Quad.easeOut",
+      duration: ANIMATIONS.DURATIONS.NORMAL,
+      ease: ANIMATIONS.EASING.QUART_OUT,
       onComplete: () => {
         this.manaAura.setScale(0.5).setAlpha(0);
       },
@@ -139,34 +134,25 @@ export class UIManager implements IUIManager {
 
   public showNotice(message: string, type: Notice) {
     if (!this.bannerBg || !this.bannerText) return;
+    const { COLORS } = THEME_CONFIG;
 
-    let color: number;
+    const colorMap: Record<Notice, number> = {
+      PHASE: COLORS.NOTICE_PHASE,
+      WARNING: COLORS.NOTICE_WARNING,
+      TURN: COLORS.NOTICE_TURN,
+      NEUTRAL: COLORS.NOTICE_NEUTRAL,
+    };
 
-    switch (type) {
-      case "PHASE":
-        color = 0xffcc00;
-        break;
-      case "WARNING":
-        color = 0xcc0000;
-        break;
-      case "TURN":
-        color = 0x0077ff;
-        break;
-      case "NEUTRAL":
-        color = 0xbdc3c7;
-        break;
-      default:
-        color = 0xffcc00;
-        break;
-    }
+    const targetColor = colorMap[type] || COLORS.NOTICE_PHASE;
 
-    this.bannerBg.setStrokeStyle(4, color);
+    this.bannerBg.setStrokeStyle(4, targetColor);
 
     this.animateBanner(message, type);
   }
 
   private animateBanner(message: string, type: Notice) {
     const { SCREEN } = LAYOUT_CONFIG;
+    const { ANIMATIONS } = THEME_CONFIG;
     this.context.tweens.killTweensOf([this.bannerText, this.bannerBg]);
 
     this.bannerText
@@ -181,16 +167,16 @@ export class UIManager implements IUIManager {
       targets: this.bannerBg,
       scaleY: 1,
       alpha: 1,
-      duration: 100,
-      ease: "Quad.easeOut",
+      duration: ANIMATIONS.DURATIONS.FAST,
+      ease: ANIMATIONS.EASING.QUART_OUT,
     });
 
     // pop animation
     this.context.tweens.add({
       targets: this.bannerText,
       scale: 1,
-      duration: 150,
-      ease: "Back.easeOut",
+      duration: ANIMATIONS.DURATIONS.UI_POP,
+      ease: ANIMATIONS.EASING.BOUNCE,
       onComplete: () => {
         //shake effect
         if (type === "WARNING") {
@@ -210,8 +196,8 @@ export class UIManager implements IUIManager {
         targets: [this.bannerText, this.bannerBg],
         alpha: 0,
         y: "-=30",
-        duration: 200,
-        ease: "Power2.easeIn",
+        duration: ANIMATIONS.DURATIONS.PREVIEW,
+        ease: ANIMATIONS.EASING.POWER_OUT,
         onComplete: () => {
           this.bannerText.setVisible(false).setY(SCREEN.CENTER_Y);
           this.bannerBg.setVisible(false).setY(SCREEN.CENTER_Y);
@@ -225,41 +211,38 @@ export class UIManager implements IUIManager {
 
   private createLPBar(x: number, y: number, initialHP: number) {
     const { HEIGHT, RADIUS, WIDTH } = LAYOUT_CONFIG.UI.LP_BAR;
-
-    const stoneDark = 0x262626; // background
-    const metalGold = 0xcfb35d; // border
-    const magicGlow = "#FFD966"; // color text
+    const { COLORS } = THEME_CONFIG;
 
     const container = this.context.add.container(x, y);
     const bg = this.context.add.graphics();
 
-    bg.fillStyle(0x000000, 0.5);
+    bg.fillStyle(COLORS.OVERLAY_BLACK, 0.5);
     bg.fillRoundedRect(4, 4, WIDTH, HEIGHT, RADIUS);
 
-    bg.fillStyle(stoneDark, 1);
+    bg.fillStyle(COLORS.STONE_DARK, 1);
     bg.fillRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
 
-    bg.lineStyle(4, metalGold, 1);
+    bg.lineStyle(4, COLORS.GOLD_METAL, 1);
     bg.strokeRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
 
-    bg.lineStyle(2, 0x000000, 0.3);
+    bg.lineStyle(2, COLORS.OVERLAY_BLACK, 0.3);
     bg.strokeRoundedRect(3, 3, WIDTH - 6, HEIGHT - 6, RADIUS - 2);
 
     container.add(bg);
 
     const labelLP = this.context.add
       .text(20, 18, "LP", {
-        fontFamily: "Arial Black",
+        fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
         fontSize: "18px",
-        color: magicGlow,
+        color: COLORS.GOLD_GLOW,
       })
       .setOrigin(0, 0.5);
     container.add(labelLP);
 
     const textStyle = {
-      fontFamily: "Arial Black",
+      fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
       fontSize: "36px",
-      color: magicGlow,
+      color: COLORS.GOLD_GLOW,
     };
 
     this.hpText = this.context.add
@@ -281,7 +264,7 @@ export class UIManager implements IUIManager {
     cb: (mode: PlacementMode) => void,
   ) {
     this.clearSelectionMenu();
-
+    const { COMPONENTS, DEPTHS } = THEME_CONFIG;
     const cardType = card.getType();
     const isMonster = cardType.includes("MONSTER");
     const buttonTexts = this.translations.battle_scene.battle_buttons;
@@ -299,47 +282,28 @@ export class UIManager implements IUIManager {
       rightConfig = { text: buttonTexts.set, width: 110 };
     }
 
-    if (leftConfig) {
-      const leftBtn = new ToonButton(this.context.engine, {
-        x: x - (rightConfig ? 75 : 0),
+    const createBtn = (
+      config: { text: string; width: number; icon?: string },
+      isLeft: boolean,
+    ) => {
+      const btn = new ToonButton(this.context.engine, {
+        x: x + (isLeft ? (rightConfig ? -75 : 0) : 75),
         y: y - 100,
         height: 42,
-        fontSize: "18px",
-        color: 0x302b1f,
-        textColor: "#FFD966",
-        hoverColor: 0x302b1f,
-        borderColor: 0xeee5ae,
-        ...leftConfig,
-      }).setDepth(10002);
+        fontSize: isLeft ? "18px" : "16px",
+        ...COMPONENTS.BUTTONS.PRIMARY,
+        ...config,
+      }).setDepth(DEPTHS.SELECTION_MENU);
 
-      this.selectionButtons.push(leftBtn);
-
-      leftBtn.on("pointerdown", () => {
+      this.selectionButtons.push(btn);
+      btn.on("pointerdown", () => {
         this.clearSelectionMenu();
-        cb(isMonster ? "ATK" : "FACE_UP"); //FACE_UP trigger cardActivation method
+        cb(isMonster ? (isLeft ? "ATK" : "DEF") : isLeft ? "FACE_UP" : "SET");
       });
-    }
+    };
 
-    if (rightConfig) {
-      const rightBtn = new ToonButton(this.context.engine, {
-        x: x + 75,
-        y: y - 100,
-        height: 42,
-        fontSize: "16px",
-        color: 0x302b1f,
-        textColor: "#FFD966",
-        hoverColor: 0x302b1f,
-        borderColor: 0xeee5ae,
-        ...rightConfig,
-      }).setDepth(10002);
-
-      this.selectionButtons.push(rightBtn);
-
-      rightBtn.on("pointerdown", () => {
-        this.clearSelectionMenu();
-        cb(isMonster ? "DEF" : "SET");
-      });
-    }
+    if (leftConfig) createBtn(leftConfig, true);
+    if (rightConfig) createBtn(rightConfig, false);
   }
 
   public clearSelectionMenu() {
@@ -486,16 +450,13 @@ export class UIManager implements IUIManager {
   ): ToonButton {
     const btn = new ToonButton(this.context.engine, {
       text: text.toUpperCase(),
-      x: x,
-      y: y,
+      x,
+      y,
+      ...THEME_CONFIG.COMPONENTS.BUTTONS.PRIMARY,
       height: 40,
       width: 120,
       fontSize: "14px",
-      color: 0x302b1f,
-      textColor: "#FFD966",
-      hoverColor: 0x4d4533,
-      borderColor: 0xeee5ae,
-    }).setDepth(10002);
+    }).setDepth(THEME_CONFIG.DEPTHS.SELECTION_MENU);
 
     btn.on("pointerdown", () => {
       this.clearSelectionMenu();
@@ -514,34 +475,38 @@ export class UIManager implements IUIManager {
   }
 
   public handleChangePosition(card: Card) {
+    const { LIGHT } = THEME_CONFIG.ANIMATIONS.SHAKES;
     card.animateChangePosition(() => {
       // card impact animation effect
-      this.context.cameras.main.shake(100, 0.002);
+      this.context.cameras.main.shake(LIGHT.duration, LIGHT.intensity);
       this.context.getHand(card.owner).showHand();
     });
   }
 
   private animateLPImpact(amount: number) {
+    const { COLORS, ANIMATIONS } = THEME_CONFIG;
     const isDamage = amount < 0; //take dmg is negative value
-    const originalColor = "#FFD966"; // magicGlow
-    const impactColor = isDamage ? "#ff4d4d" : "#4dff4d";
+    const impactColor = isDamage ? COLORS.LP_DAMAGE : COLORS.LP_HEAL;
 
     this.hpText.setColor(impactColor);
 
     this.context.tweens.add({
       targets: this.hpText,
       scale: 1.4,
-      duration: 150,
+      duration: ANIMATIONS.DURATIONS.UI_POP,
       yoyo: true,
-      ease: "Back.easeOut",
+      ease: ANIMATIONS.EASING.BOUNCE,
       onComplete: () => {
-        this.hpText.setColor(originalColor);
+        this.hpText.setColor(COLORS.GOLD_GLOW);
         this.hpText.setScale(1);
       },
     });
 
     if (isDamage) {
-      this.context.cameras.main.shake(200, 0.005);
+      this.context.cameras.main.shake(
+        ANIMATIONS.SHAKES.STRONG.duration,
+        ANIMATIONS.SHAKES.STRONG.intensity,
+      );
     }
   }
 }
