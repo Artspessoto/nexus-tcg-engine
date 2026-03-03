@@ -129,6 +129,15 @@ export class Card extends Phaser.GameObjects.Container {
     return this._isFaceDown;
   }
 
+  public setHandVisuals() {
+    const width = CARD_CONFIG.WIDTH;
+    const height = CARD_CONFIG.HEIGHT;
+
+    this.frame.setDisplaySize(width, height);
+
+    this.setSize(width, height);
+  }
+
   public setFaceDown() {
     this._isFaceDown = true;
     this.frame.setTexture("card_back");
@@ -209,8 +218,8 @@ export class Card extends Phaser.GameObjects.Container {
       this.atkText.setText(this.baseData.atk?.toString() || "0");
       this.defText.setText(this.baseData.def?.toString() || "0");
 
-      this.atkText.setColor("#FFD966");
-      this.defText.setColor("#FFD966");
+      this.atkText.setColor(CARD_CONFIG.STYLES.STATS.color);
+      this.defText.setColor(CARD_CONFIG.STYLES.STATS.color);
     }
   }
 

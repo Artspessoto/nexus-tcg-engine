@@ -250,7 +250,7 @@ export class FieldManager implements IFieldManager {
       scale: COMPONENTS.CARD.SCALES.FIELD_ATK,
       angle: 0,
       duration: ANIMATIONS.DURATIONS.SLOW,
-      ease: "Power2",
+      ease: ANIMATIONS.EASING.SMOOTH,
       onStart: () => {
         card.visualElements.setDepth(1000);
       },
