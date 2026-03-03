@@ -1,6 +1,6 @@
 export const CARD_CONFIG = {
-  WIDTH: 180,
-  HEIGHT: 250,
+  WIDTH: 300, //180
+  HEIGHT: 400, //250
   POSITIONS: {
     MANA: { x: 122, y: -174 },
     NAME: { x: 0, y: 70 },
