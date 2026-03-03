@@ -1,3 +1,5 @@
+import type { CardType } from "./CardTypes";
+
 export type EffectTargetSide = "OWNER" | "OPPONENT" | "BOTH";
 
 interface NumericEffect {
@@ -24,6 +26,7 @@ interface ActionEffect {
     | "BOUNCE";
   targetSide: EffectTargetSide;
   value?: number;
+  targetType?: CardType;
 }
 
 interface UtilityEffect {
