@@ -136,11 +136,21 @@ export class EffectManager implements IEffectManager {
           this.context.getUI(source.owner).handleChangePosition(target);
         }
       },
+      BOUNCE: (target) => {
+        const hand = this.context.getHand(target.owner);
+
+        this.context.field.releaseSlot(target, target.owner);
+        target.resetStats();
+
+        target.setLocation("HAND");
+
+        hand.addCardBack(target);
+      },
     };
   })();
 
   private targetValidations: Partial<
-    Record<EffectTypes, (target: Card) => boolean>
+    Record<EffectTypes, (target: Card, effect: CardEffect) => boolean>
   > = {
     BOOST_ATK: (target) => target.getType().includes("MONSTER"),
     NERF_ATK: (target) => target.getType().includes("MONSTER"),
@@ -151,7 +161,13 @@ export class EffectManager implements IEffectManager {
     DESTROY_MONSTER: (target) => target.getType().includes("MONSTER"),
     DESTROY_SPELL: (target) => target.getType() == "SPELL",
     DESTROY_TRAP: (target) => target.getType() == "TRAP",
-    BOUNCE: () => true,
+    BOUNCE: (target, effect) => {
+      if (!("targetType" in effect) || !effect.targetType) return true;
+
+      //verify target card type == effect target (source)
+      //ex: target (monster) == bounce effect for monster card
+      return target.getType().includes(effect.targetType);
+    },
   };
 
   public handleCardSelection(target: Card) {
@@ -163,7 +179,7 @@ export class EffectManager implements IEffectManager {
     const validator = this.targetValidations[this.pendingEffect.type];
 
     //check if validator exists for pendingEffect type and apply validation
-    if (validator && !validator(target)) {
+    if (validator && !validator(target, this.pendingEffect)) {
       this.context
         .getUI(this.pendingSource.owner)
         .showNotice(this.notices.invalid_target, "WARNING");
