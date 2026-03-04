@@ -28,6 +28,8 @@ import type { IPhaseManager } from "../interfaces/IPhaseManager";
 import type { IUIManager } from "../interfaces/IUIManager";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import type { ISequenceManager } from "../interfaces/ISequenceManager";
+import { SequenceManager } from "../managers/SequenceManager";
 
 export class BattleScene extends Phaser.Scene implements IBattleContext {
   public engine = this;
@@ -44,6 +46,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public opponentUI: IUIManager;
   public combat: ICombatManager;
   public effects: IEffectManager;
+  public sequences: ISequenceManager;
 
   public phaseButton!: ToonButton;
   public selectedCard: Card | null = null;
@@ -58,6 +61,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.controls = new InputManager(this);
     this.combat = new CombatManager(this);
     this.effects = new EffectManager(this);
+    this.sequences = new SequenceManager();
 
     this.playerUI = new UIManager(this, "PLAYER");
     this.opponentUI = new UIManager(this, "OPPONENT");
