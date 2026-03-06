@@ -35,12 +35,7 @@ export class EffectManager implements IEffectManager {
         this.prepareTargeting(effect, source),
       CHANGE_POS: (effect, _side, source) =>
         this.prepareTargeting(effect, source),
-      DESTROY_MONSTER: (effect, _side, source) =>
-        this.prepareTargeting(effect, source),
-      DESTROY_SPELL: (effect, _side, source) =>
-        this.prepareTargeting(effect, source),
-      DESTROY_TRAP: (effect, _side, source) =>
-        this.prepareTargeting(effect, source),
+      DESTROY: (effect, _side, source) => this.prepareTargeting(effect, source),
       BOUNCE: (effect, _side, source) => this.prepareTargeting(effect, source),
       NEGATE: (effect, _side, source) => this.prepareTargeting(effect, source),
       REVIVE: (effect, _side, source) => this.prepareTargeting(effect, source),
@@ -53,6 +48,7 @@ export class EffectManager implements IEffectManager {
   }
 
   public applyCardEffect(card: Card) {
+    this.stopTargeting();
     const effect = card.getCardData().effects;
     if (!effect) return;
 
@@ -97,6 +93,11 @@ export class EffectManager implements IEffectManager {
     return ["PLAYER", "OPPONENT"];
   }
 
+  public cancelTargeting(): void {
+    this.stopTargeting();
+    this.context.getUI("PLAYER").showNotice("CANCELADO", "NEUTRAL");
+  }
+
   private targetResolution: Partial<
     Record<
       EffectTypes,
@@ -126,9 +127,7 @@ export class EffectManager implements IEffectManager {
       NERF_ATK: statResolver("atk", false),
       BOOST_DEF: statResolver("def", true),
       NERF_DEF: statResolver("def", false),
-      DESTROY_MONSTER: destroyResolver,
-      DESTROY_SPELL: destroyResolver,
-      DESTROY_TRAP: destroyResolver,
+      DESTROY: destroyResolver,
       CHANGE_POS: (target, source) => {
         if (target.isFaceDown) {
           this.context.getUI(source.owner).handleFlipSummon(target);
@@ -157,18 +156,18 @@ export class EffectManager implements IEffectManager {
     BOOST_DEF: (target) => target.getType().includes("MONSTER"),
     NERF_DEF: (target) => target.getType().includes("MONSTER"),
     CHANGE_POS: (target) => target.getType().includes("MONSTER"),
-    REVIVE: (target) => target.getType().includes("MONSTER"),
-    DESTROY_MONSTER: (target) => target.getType().includes("MONSTER"),
-    DESTROY_SPELL: (target) => target.getType() == "SPELL",
-    DESTROY_TRAP: (target) => target.getType() == "TRAP",
-    BOUNCE: (target, effect) => {
-      if (!("targetType" in effect) || !effect.targetType) return true;
-
-      //verify target card type == effect target (source)
-      //ex: target (monster) == bounce effect for monster card
-      return target.getType().includes(effect.targetType);
-    },
+    REVIVE: (target, effect) => this.validateType(target, effect),
+    DESTROY: (target, effect) => this.validateType(target, effect),
+    BOUNCE: (target, effect) => this.validateType(target, effect),
   };
+
+  private validateType(target: Card, effect: CardEffect): boolean {
+    if (!("targetType" in effect) || !effect.targetType) return true;
+
+    //verify target card type == effect target (source)
+    //ex: target (monster) == bounce effect for monster card
+    return target.getType().includes(effect.targetType);
+  }
 
   public handleCardSelection(target: Card) {
     if (!this.pendingEffect || !this.pendingSource) return;
