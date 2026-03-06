@@ -14,13 +14,38 @@ export class InputManager implements IInputManager {
     this.context.engine.input.on(
       "pointerdown",
       (
-        _pointer: Phaser.Input.Pointer,
+        pointer: Phaser.Input.Pointer,
         currentlyOver: Phaser.GameObjects.GameObject[],
       ) => {
+        //DEBUG LOG
+        console.log(
+          `Debug: X: ${Math.round(pointer.x)}, Y: ${Math.round(pointer.y)}`,
+        );
+
+        //click action into void
         if (currentlyOver.length === 0) {
           const activeSide = this.context.gameState.activePlayer;
+
           this.context.getUI(activeSide).clearSelectionMenu();
           this.context.getHand(activeSide).showHand();
+
+          //cancel effect target
+          if (this.context.effects.isSelectingTarget) {
+            this.context.effects.cancelTargeting();
+          }
+
+          // cancel combat target
+          if (this.context.currentPhase === "BATTLE") {
+            this.context.combat.cancelTarget();
+          }
+
+          this.context.cancelPlacement();
+        }
+
+        if (this.context.selectedCard) {
+          this.context.time.delayedCall(50, () =>
+            this.context.cancelPlacement(),
+          );
         }
       },
     );
@@ -40,21 +65,6 @@ export class InputManager implements IInputManager {
       this.context.gameState.nextTurn();
       this.context.setPhase("DRAW");
     });
-
-    this.context.engine.input.on("pointerdown", () => {
-      if (this.context.selectedCard) {
-        this.context.time.delayedCall(50, () => this.context.cancelPlacement());
-      }
-    });
-
-    this.context.engine.input.on(
-      "pointerdown",
-      (pointer: { x: number; y: number }) => {
-        console.log(
-          `Debug: X: ${Math.round(pointer.x)}, Y: ${Math.round(pointer.y)}`,
-        );
-      },
-    );
   }
 
   public setupCardInteractions(card: Card) {
