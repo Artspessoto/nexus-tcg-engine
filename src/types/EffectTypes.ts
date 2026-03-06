@@ -17,13 +17,7 @@ interface NumericEffect {
 
 interface ActionEffect {
   //"BOUNCE" return card to card owner hand
-  type:
-    | "DESTROY_MONSTER"
-    | "DESTROY_SPELL"
-    | "DESTROY_TRAP"
-    | "CHANGE_POS"
-    | "REVIVE"
-    | "BOUNCE";
+  type: "DESTROY" | "CHANGE_POS" | "REVIVE" | "BOUNCE";
   targetSide: EffectTargetSide;
   value?: number;
   targetType?: CardType;
