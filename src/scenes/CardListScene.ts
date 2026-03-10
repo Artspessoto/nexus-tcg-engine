@@ -1,12 +1,25 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { TRANSLATIONS } from "../constants/Translations";
+import { LanguageManager } from "../managers/LanguageManager";
 import { Card } from "../objects/Card";
 import { ToonButton } from "../objects/ToonButton";
 import type { CardData } from "../types/CardTypes";
+import type { TranslationStructure } from "../types/GameTypes";
+
+export interface CardListConfig {
+  cards: Card[];
+  onSelect?: (card: Card) => void;
+  isSelectionMode?: boolean;
+}
 
 export class CardListScene extends Phaser.Scene {
   private cardList: Card[] = [];
+  private isSelectionMode: boolean = false;
+  private onSelect?: (card: Card) => void;
+  private translationText!: TranslationStructure;
   private cardDetailView!: Card;
+  private selectedCard!: Card;
   private detailNameText!: Phaser.GameObjects.Text;
   private detailTypeText!: Phaser.GameObjects.Text;
   private detailDescText!: Phaser.GameObjects.Text;
@@ -16,11 +29,22 @@ export class CardListScene extends Phaser.Scene {
     super({ key: "CardListScene" });
   }
 
-  init(cards: Card[]) {
-    this.cardList = cards;
+  init(config: CardListConfig | Card[]) {
+    if (Array.isArray(config)) {
+      this.cardList = config;
+      this.isSelectionMode = false;
+    } else {
+      this.cardList = config.cards;
+      this.onSelect = config.onSelect;
+      this.isSelectionMode = config.isSelectionMode || false;
+    }
   }
 
   create() {
+    const lang = LanguageManager.getInstance().currentLanguage;
+    const currentTranslations = TRANSLATIONS[lang];
+    this.translationText = currentTranslations;
+
     const { SCREEN, MODAL } = LAYOUT_CONFIG;
     const { COLORS, FONTS, DEPTHS } = THEME_CONFIG;
     const { LIST } = MODAL;
@@ -95,6 +119,7 @@ export class CardListScene extends Phaser.Scene {
       if (i === 0) firstCardItem = cardItem;
 
       cardItem.on("pointerdown", () => {
+        this.selectedCard = cardItem;
         this.updateDetailView(cardItem.getCardData());
         this.updateHighlight(cardItem.x, cardItem.y);
       });
@@ -105,6 +130,7 @@ export class CardListScene extends Phaser.Scene {
     }
 
     const defaultCardView = this.cardList[0];
+    this.selectedCard = defaultCardView;
     const detailCenterX = startX + LIST.GRID_WIDTH + LIST.DETAIL_WIDTH / 2;
     const textPaddingY = startY + LIST.TEXT_Y_START;
 
@@ -141,6 +167,23 @@ export class CardListScene extends Phaser.Scene {
         wordWrap: { width: LIST.DETAIL_WIDTH - 40 },
       })
       .setOrigin(0.5, 0);
+
+    if (this.isSelectionMode) {
+      const confirmBtn = new ToonButton(this, {
+        x: detailCenterX,
+        y: startY + LIST.HEIGHT - 60,
+        text: this.translationText.battle_scene.revive,
+        width: 180,
+        height: 50,
+      });
+
+      confirmBtn.on("pointerdown", () => {
+        if (this.selectedCard && this.onSelect) {
+          this.onSelect(this.selectedCard);
+          this.scene.stop();
+        }
+      });
+    }
 
     new ToonButton(this, {
       x: startX + LIST.WIDTH - 30,
