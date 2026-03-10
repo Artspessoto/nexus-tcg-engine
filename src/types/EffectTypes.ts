@@ -15,7 +15,7 @@ interface NumericEffect {
   targetSide: EffectTargetSide;
 }
 
-interface ActionEffect {
+export interface ActionEffect {
   //"BOUNCE" return card to card owner hand
   type: "DESTROY" | "CHANGE_POS" | "REVIVE" | "BOUNCE";
   targetSide: EffectTargetSide;
@@ -27,8 +27,9 @@ interface UtilityEffect {
   type: "PROTECT" | "NEGATE" | "DRAW_CARD";
   value?: number;
   targetSide?: EffectTargetSide;
+  targetType?: CardType;
 }
 
-export type CardEffect = NumericEffect | ActionEffect | UtilityEffect;
+export type CardEffect = ActionEffect | NumericEffect | UtilityEffect;
 
 export type EffectTypes = CardEffect["type"];
