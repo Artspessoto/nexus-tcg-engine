@@ -1,5 +1,7 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { EventBus } from "../events/EventBus";
+import { GameEvent, type PhaseChangedPayload } from "../events/GameEvents";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type {
   IFieldManager,
@@ -29,6 +31,12 @@ export class FieldManager implements IFieldManager {
 
   constructor(context: IBattleContext) {
     this.context = context;
+
+    EventBus.on(GameEvent.PHASE_CHANGED, (data: PhaseChangedPayload) => {
+      if (data.newPhase == "CHANGE_TURN") {
+        this.resetAttackFlags();
+      }
+    });
   }
 
   public setupFieldZones() {
@@ -97,6 +105,8 @@ export class FieldManager implements IFieldManager {
     //card found and remove from slots
     if (fieldIndex !== -1) {
       fieldSlots[fieldIndex] = null;
+
+      EventBus.emit(GameEvent.CARD_LEFT_FIELD, { card, side });
       return;
     }
 
@@ -105,6 +115,8 @@ export class FieldManager implements IFieldManager {
     const gyIndex = graveyard.indexOf(card);
     if (gyIndex !== -1) {
       graveyard.splice(gyIndex, 1);
+
+      EventBus.emit(GameEvent.CARD_REMOVED_FROM_GRAVEYARD, { card, side });
     }
   }
 
@@ -174,7 +186,7 @@ export class FieldManager implements IFieldManager {
     const { SCALES } = THEME_CONFIG.COMPONENTS.CARD;
     const { DURATIONS, SHAKES, EASING } = THEME_CONFIG.ANIMATIONS;
     const currentTurn = this.context.gameState.currentTurn;
-    
+
     card.disableInteractive();
     this.context.tweens.killTweensOf(card.visualElements);
 
@@ -197,6 +209,12 @@ export class FieldManager implements IFieldManager {
       //opponent need this to face up card into field slot (default -> card face down into opponent hand)
       card.setFaceUp();
     }
+
+    EventBus.emit(GameEvent.CARD_PLAYED, {
+      card,
+      side: card.owner,
+      mode,
+    });
 
     // Slot animation movement
     this.context.tweens.add({
@@ -250,6 +268,11 @@ export class FieldManager implements IFieldManager {
     this.graveyardSlot[side].unshift(card);
     card.resetStats();
     card.setLocation("GRAVEYARD");
+
+    EventBus.emit(GameEvent.CARD_SENT_TO_GRAVEYARD, {
+      card,
+      side,
+    });
 
     this.context.tweens.add({
       targets: card,
@@ -336,5 +359,7 @@ export class FieldManager implements IFieldManager {
         }
       });
     });
+
+    EventBus.emit(GameEvent.FIELD_STATS_RESET, { sides });
   }
 }
