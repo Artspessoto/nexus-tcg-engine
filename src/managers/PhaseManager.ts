@@ -79,12 +79,9 @@ export class PhaseManager implements IPhaseManager {
       case "CHANGE_TURN":
         this.context.tweens.killTweensOf(phaseButton);
         phaseButton.disableInteractive();
-
         phaseButton.setDisabledState(this.context.translationText.opponent);
 
         currentUI.showNotice(translations.turn_ended, "NEUTRAL");
-
-        this.context.field.resetAttackFlags();
 
         this.context.time.delayedCall(1500, () => {
           this.context.finalizeTurnTransition();

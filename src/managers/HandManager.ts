@@ -6,7 +6,7 @@ import type { IHandManager } from "../interfaces/IHandManager";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { EventBus } from "../events/EventBus";
-import { GameEvent } from "../events/GameEvents";
+import { GameEvent, type CardPlayedPayload } from "../events/GameEvents";
 
 export class HandManager implements IHandManager {
   private context: IBattleContext;
@@ -31,6 +31,12 @@ export class HandManager implements IHandManager {
 
     EventBus.on(GameEvent.PHASE_CHANGED, () => {
       this.showHand();
+    });
+
+    EventBus.on(GameEvent.CARD_PLAYED, (data: CardPlayedPayload) => {
+      if (data.card.owner == this.side) {
+        this.showHand();
+      }
     });
   }
 

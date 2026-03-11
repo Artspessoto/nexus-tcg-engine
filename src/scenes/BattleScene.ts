@@ -317,8 +317,6 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     hand.removeCard(card);
     this.field.occupySlot(side, type, slot.index, card);
     this.field.playCardToZone(card, slot.x, slot.y, mode);
-
-    if (side == "PLAYER") hand.showHand();
   }
 
   //simulate changing turn
