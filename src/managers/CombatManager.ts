@@ -1,6 +1,6 @@
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { EventBus } from "../events/EventBus";
-import { GameEvent } from "../events/GameEvents";
+import { GameEvent, type CardSentToGYPayload } from "../events/GameEvents";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { ICombatManager } from "../interfaces/ICombatManager";
 import type { Card } from "../objects/Card";
@@ -17,6 +17,16 @@ export class CombatManager implements ICombatManager {
     EventBus.on(GameEvent.PHASE_CHANGED, () => {
       this.cancelTarget();
     });
+
+    EventBus.on(
+      GameEvent.CARD_SENT_TO_GRAVEYARD,
+      (data: CardSentToGYPayload) => {
+        //if currentAttacker sent to graveyard by trap or other effect during the battle phase
+        if (this.currentAttacker == data.card) {
+          this.cancelTarget(); //prevents bug (ghost attack)
+        }
+      },
+    );
   }
 
   private get notices() {
