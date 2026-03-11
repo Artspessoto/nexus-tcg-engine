@@ -5,6 +5,8 @@ import type { GameSide } from "../types/GameTypes";
 import type { IHandManager } from "../interfaces/IHandManager";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { EventBus } from "../events/EventBus";
+import { GameEvent } from "../events/GameEvents";
 
 export class HandManager implements IHandManager {
   private context: IBattleContext;
@@ -26,6 +28,10 @@ export class HandManager implements IHandManager {
     this.maxHandSize = LAYOUT_CONFIG.HAND.MAX_CARDS;
 
     this.currentHandY = this.normalY;
+
+    EventBus.on(GameEvent.PHASE_CHANGED, () => {
+      this.showHand();
+    });
   }
 
   public get cards(): Card[] {

@@ -30,6 +30,8 @@ import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import type { ISequenceManager } from "../interfaces/ISequenceManager";
 import { SequenceManager } from "../managers/SequenceManager";
+import { EventBus } from "../events/EventBus";
+import { GameEvent } from "../events/GameEvents";
 
 export class BattleScene extends Phaser.Scene implements IBattleContext {
   public engine = this;
@@ -209,17 +211,16 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   }
 
   public setPhase(newPhase: GamePhase) {
-    this.clearAllMenus();
-    this.combat.cancelTarget();
-    this.playerHand.showHand();
-
     this.gameState.setPhase(newPhase);
 
     if (newPhase === "CHANGE_TURN") {
       this.gameState.advanceTurnCount();
     }
 
-    this.phaseManager.updateUI(newPhase, this.translationText);
+    EventBus.emit(GameEvent.PHASE_CHANGED, {
+      newPhase,
+      activePlayer: this.gameState.activePlayer,
+    });
 
     if (newPhase === "DRAW") {
       if (this.gameState.activePlayer === "OPPONENT") {
@@ -467,7 +468,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.combat.prepareTargeting(attacker);
   }
 
-  public clearAllMenus(){
+  public clearAllMenus() {
     this.playerUI.clearSelectionMenu();
     this.opponentUI.clearSelectionMenu();
   }

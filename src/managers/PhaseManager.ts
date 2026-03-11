@@ -1,4 +1,6 @@
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { EventBus } from "../events/EventBus";
+import { GameEvent, type PhaseChangedPayload } from "../events/GameEvents";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { IPhaseManager } from "../interfaces/IPhaseManager";
 import type { ToonButton } from "../objects/ToonButton";
@@ -11,6 +13,10 @@ export class PhaseManager implements IPhaseManager {
 
   constructor(context: IBattleContext) {
     this.context = context;
+
+    EventBus.on(GameEvent.PHASE_CHANGED, (data: PhaseChangedPayload) => {
+      this.updateUI(data.newPhase, this.context.translationText);
+    });
   }
 
   public updateUI(phase: GamePhase, translations: BattleTranslations) {

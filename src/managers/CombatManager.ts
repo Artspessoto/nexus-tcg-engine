@@ -1,4 +1,6 @@
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { EventBus } from "../events/EventBus";
+import { GameEvent } from "../events/GameEvents";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { ICombatManager } from "../interfaces/ICombatManager";
 import type { Card } from "../objects/Card";
@@ -11,6 +13,10 @@ export class CombatManager implements ICombatManager {
 
   constructor(context: IBattleContext) {
     this.context = context;
+
+    EventBus.on(GameEvent.PHASE_CHANGED, () => {
+      this.cancelTarget();
+    });
   }
 
   private get notices() {

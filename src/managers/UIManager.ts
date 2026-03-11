@@ -1,5 +1,7 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { EventBus } from "../events/EventBus";
+import { GameEvent } from "../events/GameEvents";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { IUIManager } from "../interfaces/IUIManager";
 import type { Card } from "../objects/Card";
@@ -30,6 +32,10 @@ export class UIManager implements IUIManager {
     this.side = side;
 
     this.manaPosition = LAYOUT_CONFIG.UI.MANA[this.side];
+
+    EventBus.on(GameEvent.PHASE_CHANGED, () => {
+      this.clearSelectionMenu();
+    });
   }
 
   public setTranslations(translations: TranslationStructure) {
