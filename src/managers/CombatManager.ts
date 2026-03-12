@@ -39,6 +39,8 @@ export class CombatManager implements ICombatManager {
       opponentSide
     ].some((slot) => slot !== null);
 
+    if (attacker.hasAttacked) return;
+
     if (!existsMonstersIntoField) {
       this.context
         .getUI(opponentSide)
@@ -95,6 +97,9 @@ export class CombatManager implements ICombatManager {
 
   public cancelTarget() {
     if (this.currentAttacker) {
+      EventBus.emit(GameEvent.ATTACK_CANCELED, {
+        attacker: this.currentAttacker,
+      });
       if (!this.currentAttacker.hasAttacked) {
         this.currentAttacker.setAlpha(1);
       }
