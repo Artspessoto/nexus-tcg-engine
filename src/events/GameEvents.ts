@@ -11,6 +11,11 @@ export enum GameEvent {
   ATTACK_DECLARED = "ATTACK_DECLARED",
   BATTLE_RESOLVED = "BATTLE_RESOLVED",
   DIRECT_ATTACK = "DIRECT_ATTACK",
+  ATTACK_CANCELED = "ATTACK_CANCELED",
+  MANA_CHANGED = "MANA_CHANGED",
+  INSUFFICIENT_MANA = "INSUFFICIENT_MANA",
+  ZONE_OCCUPIED = "ZONE_OCCUPIED",
+  TURN_STARTED = "TURN_STARTED",
 }
 
 export type PhaseChangedPayload = {
@@ -38,6 +43,15 @@ export type DirectAttackPayload = {
   targetSide: GameSide;
   damage: number;
 };
+export type AttackCanceledPayload = {
+  attacker: Card;
+};
+export type ManaChangedPayload = {
+  side: GameSide;
+  amount: number; //gain or less mana
+};
+export type ErrorPayload = { side: GameSide };
+export type TurnStartedPayload = { side: GameSide; turnCount: number };
 
 export interface GameEventMap {
   [GameEvent.PHASE_CHANGED]: PhaseChangedPayload;
@@ -49,4 +63,9 @@ export interface GameEventMap {
   [GameEvent.ATTACK_DECLARED]: AttackDeclaredPayload;
   [GameEvent.BATTLE_RESOLVED]: BattleResolvedPayload;
   [GameEvent.DIRECT_ATTACK]: DirectAttackPayload;
+  [GameEvent.ATTACK_CANCELED]: AttackCanceledPayload;
+  [GameEvent.MANA_CHANGED]: ManaChangedPayload;
+  [GameEvent.INSUFFICIENT_MANA]: ErrorPayload;
+  [GameEvent.ZONE_OCCUPIED]: ErrorPayload;
+  [GameEvent.TURN_STARTED]: TurnStartedPayload;
 }
