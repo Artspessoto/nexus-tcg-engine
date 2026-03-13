@@ -56,9 +56,8 @@ export class CombatManager implements ICombatManager {
 
     this.currentAttacker = attacker;
     this.isSelectingTarget = true;
-    this.context
-      .getUI(attacker.owner)
-      .showNotice(this.notices.select_attack_target, "NEUTRAL");
+
+    EventBus.emit(GameEvent.TARGETING_STARTED, { source: attacker, type: "ATTACK"});
     attacker.setAlpha(0.7);
   }
 

@@ -81,6 +81,15 @@ export class UIManager implements IUIManager {
         );
       }
     });
+
+    EventBus.on(GameEvent.TARGETING_STARTED, (data) => {
+      if (data.source.owner == this.side) {
+        this.showNotice(
+          this.translations.battle_scene.combat_notices.select_attack_target,
+          "NEUTRAL",
+        );
+      }
+    });
   }
 
   public setTranslations(translations: TranslationStructure) {
@@ -491,7 +500,7 @@ export class UIManager implements IUIManager {
       //trap or effect monster need wait 1 turn to active
       if (canActive && card.getType() !== "MONSTER") {
         buttons.push(
-          this.createMenuButton(buttonTexts.active, x - 70, y - 35, () => {
+          this.createMenuButton(buttonTexts.active, x + 70, y - 35, () => {
             this.context.cardActivation(card, this.side);
           }),
         );

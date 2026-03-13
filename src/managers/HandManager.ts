@@ -38,6 +38,24 @@ export class HandManager implements IHandManager {
         this.showHand();
       }
     });
+
+    EventBus.on(GameEvent.TARGETING_STARTED, () => {
+      if (this.side == "PLAYER") {
+        this.hideHand();
+      }
+    });
+
+    EventBus.on(GameEvent.ATTACK_CANCELED, () => {
+      if (this.side === "PLAYER") this.showHand();
+    });
+
+    EventBus.on(GameEvent.BATTLE_RESOLVED, () => {
+      if (this.side === "PLAYER") this.showHand();
+    });
+
+    EventBus.on(GameEvent.DIRECT_ATTACK, () => {
+      if (this.side === "PLAYER") this.showHand();
+    });
   }
 
   public get cards(): Card[] {
