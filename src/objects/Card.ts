@@ -7,7 +7,8 @@ import { GameEvent } from "../events/GameEvents";
 
 export class Card extends Phaser.GameObjects.Container {
   public location: CardLocation = "DECK"; //card initial location
-  public owner: GameSide;
+  public readonly originalOwner: GameSide; //real owner of card
+  public owner: GameSide; //card controller
   public hasAttacked: boolean = false;
   private frame: Phaser.GameObjects.Image;
   // private cardImage: Phaser.GameObjects.Image;
@@ -31,9 +32,11 @@ export class Card extends Phaser.GameObjects.Container {
     y: number,
     data: CardData,
     owner: GameSide,
+    originalOwner: GameSide,
   ) {
     super(scene, x, y);
     this.owner = owner;
+    this.originalOwner = originalOwner;
 
     this.currentData = { ...data };
     this.baseData = { ...data };
