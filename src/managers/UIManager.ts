@@ -107,6 +107,18 @@ export class UIManager implements IUIManager {
         );
       }
     });
+
+    EventBus.on(GameEvent.CARD_POSITION_CHANGED, (data) => {
+      if (data.isFlip) {
+        this.handleFlipSummon(data.card);
+      } else {
+        this.handleChangePosition(data.card);
+      }
+
+      if (this.side === "PLAYER") {
+        this.context.getHand("PLAYER").showHand();
+      }
+    });
   }
 
   public setTranslations(translations: TranslationStructure) {
@@ -465,14 +477,24 @@ export class UIManager implements IUIManager {
     if (card.isFaceDown) {
       buttons.push(
         this.createMenuButton("VIRAR", x + 70, y - 35, () =>
-          this.handleFlipSummon(card),
+          // this.handleFlipSummon(card),
+          EventBus.emit(GameEvent.CARD_POSITION_CHANGED, {
+            card: card,
+            newMode: "FACE_UP",
+            isFlip: true,
+          }),
         ),
       );
     } else {
       const label = buttonTexts.change_pos;
+      const newMode = card.angle === 0 ? "DEF" : "ATK";
       buttons.push(
         this.createMenuButton(label, x + 70, y - 35, () =>
-          this.handleChangePosition(card),
+          EventBus.emit(GameEvent.CARD_POSITION_CHANGED, {
+            card: card,
+            newMode,
+            isFlip: false,
+          }),
         ),
       );
     }

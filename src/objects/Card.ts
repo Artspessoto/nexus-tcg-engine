@@ -2,6 +2,8 @@ import Phaser, { Scene } from "phaser";
 import type { GameSide } from "../types/GameTypes";
 import { CARD_CONFIG } from "../constants/CardConfig";
 import type { CardLocation, CardData, CardType } from "../types/CardTypes";
+import { EventBus } from "../events/EventBus";
+import { GameEvent } from "../events/GameEvents";
 
 export class Card extends Phaser.GameObjects.Container {
   public location: CardLocation = "DECK"; //card initial location
@@ -252,6 +254,13 @@ export class Card extends Phaser.GameObjects.Container {
     } else {
       text.setColor("#FFD966"); //original
     }
+
+    EventBus.emit(GameEvent.CARD_STATS_CHANGED, {
+      card: this,
+      statType,
+      newValue,
+      isBuff,
+    });
 
     this.scene.tweens.add({
       targets: this.visualElements,
