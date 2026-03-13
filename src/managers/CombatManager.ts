@@ -133,8 +133,14 @@ export class CombatManager implements ICombatManager {
         }
       },
       onComplete: () => {
-        attacker.hasAttacked = true;
-        attacker.setAlpha(0.7);
+        const side = attacker.owner;
+        const monsterSlots = this.context.field.monsterSlots[side];
+        const monsterStillOnField = monsterSlots.includes(attacker);
+
+        if (monsterStillOnField) {
+          attacker.hasAttacked = true;
+          attacker.setAlpha(0.7);
+        }
       },
     });
   }
@@ -165,8 +171,14 @@ export class CombatManager implements ICombatManager {
         });
       },
       onComplete: () => {
-        attacker.hasAttacked = true;
-        attacker.setAlpha(0.7);
+        const side = attacker.owner;
+        const monsterSlots = this.context.field.monsterSlots[side];
+        const monsterStillOnField = monsterSlots.includes(attacker);
+
+        if (monsterStillOnField) {
+          attacker.hasAttacked = true;
+          attacker.setAlpha(0.7);
+        }
       },
     });
   }
