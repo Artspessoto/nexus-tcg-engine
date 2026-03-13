@@ -7,6 +7,8 @@ import type {
   EffectTypes,
 } from "../types/EffectTypes";
 import type { GameSide, PlacementMode } from "../types/GameTypes";
+import { EventBus } from "../events/EventBus";
+import { GameEvent } from "../events/GameEvents";
 
 export class EffectManager implements IEffectManager {
   private context: IBattleContext;
@@ -21,14 +23,22 @@ export class EffectManager implements IEffectManager {
   constructor(context: IBattleContext) {
     this.context = context;
 
+    EventBus.on(GameEvent.PHASE_CHANGED, () => this.stopTargeting());
+
     this.handlerEffects = {
-      BURN: (effect, side) =>
-        this.context.getUI(side).updateLP(side, -(effect.value || 0)),
-      HEAL: (effect, side) =>
-        this.context.getUI(side).updateLP(side, effect.value || 0),
+      BURN: (effect, side) => {
+        const amount = -(effect.value || 0);
+        EventBus.emit(GameEvent.LP_CHANGED, { side, amount });
+      },
+      HEAL: (effect, side) => {
+        const amount = effect.value || 0;
+        EventBus.emit(GameEvent.LP_CHANGED, { side, amount });
+      },
       DRAW_CARD: (effect, side) => this.handleDraw(effect, side),
-      GAIN_MANA: (effect, side) =>
-        this.context.getUI(side).updateMana(effect.value || 0),
+      GAIN_MANA: (effect, side) => {
+        const amount = effect.value || 0;
+        EventBus.emit(GameEvent.MANA_CHANGED, { side, amount });
+      },
       BOOST_ATK: (effect, _side, source) =>
         this.prepareTargeting(effect, source),
       NERF_ATK: (effect, _side, source) =>
@@ -55,6 +65,8 @@ export class EffectManager implements IEffectManager {
     this.stopTargeting();
     const effect = card.getCardData().effects;
     if (!effect) return;
+
+    EventBus.emit(GameEvent.EFFECT_ACTIVATED, { card, effect });
 
     const targets = this.getEffectTargets(
       card.owner,
@@ -110,10 +122,7 @@ export class EffectManager implements IEffectManager {
 
     //option to choose between both cemeteries
     if (targetSide == "BOTH") {
-      this.prepareTargeting(effect, source, false);
-      this.context
-        .getUI(source.owner)
-        .showNotice(this.notices.select_graveyard, "NEUTRAL");
+      this.prepareTargeting(effect, source, this.notices.select_graveyard);
     } else {
       //if target side is owner open source owner graveyard, else open contrary graveyard
       const sideOpen =
@@ -150,7 +159,9 @@ export class EffectManager implements IEffectManager {
     }
 
     if (source.owner == "PLAYER") {
-      this.prepareTargeting(effect, source, false);
+      this.isSelectingTarget = true;
+      this.pendingEffect = effect;
+      this.pendingSource = source;
 
       this.context.engine.scene.launch("CardListScene", {
         cards: validCards,
@@ -180,10 +191,10 @@ export class EffectManager implements IEffectManager {
   }
 
   public cancelTargeting(): void {
+    const source = this.pendingSource!;
     this.stopTargeting();
-    this.context
-      .getUI("PLAYER")
-      .showNotice(this.notices.action_canceled, "NEUTRAL");
+
+    EventBus.emit(GameEvent.TARGETING_CANCELED, { source, type: "EFFECT" });
   }
 
   private getOpponentSide(side: GameSide): GameSide {
@@ -343,6 +354,11 @@ export class EffectManager implements IEffectManager {
     const resolve = this.targetResolution[this.pendingEffect.type];
     if (resolve) {
       resolve(target, this.pendingSource, this.pendingEffect);
+
+      EventBus.emit(GameEvent.EFFECT_RESOLVED, {
+        source: this.pendingSource,
+        target,
+      });
     }
 
     this.stopTargeting();
@@ -351,17 +367,19 @@ export class EffectManager implements IEffectManager {
   public prepareTargeting(
     effect: CardEffect,
     source: Card,
-    showMsg: boolean = true,
+    customMessage?: string,
   ) {
     this.isSelectingTarget = true;
     this.pendingEffect = effect;
     this.pendingSource = source;
 
-    if (showMsg) {
-      this.context
-        .getUI(source.owner)
-        .showNotice(this.notices.select_target, "NEUTRAL");
-    }
+    const message = customMessage || this.notices.select_target;
+
+    EventBus.emit(GameEvent.TARGETING_STARTED, {
+      source,
+      type: "EFFECT",
+      message,
+    });
   }
 
   private stopTargeting() {
