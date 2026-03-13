@@ -11,6 +11,7 @@ export enum GameEvent {
   CARD_LEFT_FIELD = "CARD_LEFT_FIELD",
   FIELD_STATS_RESET = "FIELD_STATS_RESET",
   CARD_REMOVED_FROM_GRAVEYARD = "CARD_REMOVED_FROM_GRAVEYARD",
+  TARGETING_STARTED = "TARGETING_STARTED",
   ATTACK_DECLARED = "ATTACK_DECLARED",
   BATTLE_RESOLVED = "BATTLE_RESOLVED",
   DIRECT_ATTACK = "DIRECT_ATTACK",
@@ -33,6 +34,10 @@ export type CardSentToGYPayload = { card: Card; side: GameSide };
 export type CardLeftFieldPayload = { card: Card; side: GameSide };
 export type CardRemovedFromGYPayload = { card: Card; side: GameSide };
 export type FieldStatsResetPayload = { sides: GameSide[] };
+export type TargetingStartedPayload = {
+  source: Card;
+  type: "ATTACK" | "EFFECT";
+};
 export type AttackDeclaredPayload = { attacker: Card; target: Card };
 export type BattleResolvedPayload = {
   attacker: Card;
@@ -73,4 +78,5 @@ export interface GameEventMap {
   [GameEvent.TURN_STARTED]: TurnStartedPayload;
   [GameEvent.CARD_DRAW]: CardDrawPayload;
   [GameEvent.HAND_FULL]: ErrorPayload;
+  [GameEvent.TARGETING_STARTED]: TargetingStartedPayload;
 }
