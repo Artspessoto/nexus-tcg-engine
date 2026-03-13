@@ -85,11 +85,9 @@ export class EffectManager implements IEffectManager {
   ) {
     const handler = this.handlerEffects[effect.type];
 
-    if (handler) {
-      handler(effect, side, sourceCard);
-    } else {
-      console.log(`${effect.type} não criado até o momento`);
-    }
+    if (!handler) return;
+
+    handler(effect, side, sourceCard);
   }
 
   private handleDraw(effect: CardEffect, side: GameSide) {
@@ -201,118 +199,93 @@ export class EffectManager implements IEffectManager {
     return side == "PLAYER" ? "OPPONENT" : "PLAYER";
   }
 
+  private resolveChangePosition(target: Card) {
+    const isFaceDown = target.isFaceDown;
+    const newMode = target.angle === 270 ? "ATK" : "DEF";
+    EventBus.emit(GameEvent.CARD_POSITION_CHANGED, {
+      card: target,
+      isFlip: isFaceDown,
+      newMode,
+    });
+  }
+
+  private resolveBounce(target: Card) {
+    const hand = this.context.getHand(target.owner);
+    this.context.field.releaseSlot(target, target.owner);
+    target.resetStats();
+    target.setLocation("HAND");
+    hand.addCardBack(target);
+  }
+
+  private resolveRevive(target: Card, source: Card) {
+    const side = source.owner;
+    const isMonster = target.getCardData().type.includes("MONSTER");
+
+    //remove from graveyard
+    this.context.field.releaseSlot(target, target.owner);
+
+    //update target owner to enable btn attack option
+    target.setOwner(source.owner);
+
+    if (!isMonster) {
+      target.setLocation("HAND");
+      this.context.getHand(side).addCardBack(target);
+      return;
+    }
+
+    const slot = this.context.field.getFirstAvailableSlot(side, "MONSTER");
+    if (!slot) {
+      EventBus.emit(GameEvent.ZONE_OCCUPIED, { side });
+      this.context.field.moveToGraveyard(target, side);
+      return;
+    }
+
+    if (side == "PLAYER") {
+      this.context.field.previewPlacement(target, slot.x, slot.y);
+      this.context
+        .getUI("PLAYER")
+        .showSelectionMenu(slot.x, slot.y, target, (mode: PlacementMode) => {
+          this.context.field.occupySlot(side, "MONSTER", slot.index, target);
+
+          this.context.field.playCardToZone(target, slot.x, slot.y, mode);
+        });
+    } else {
+      this.context.field.occupySlot(side, "MONSTER", slot.index, target);
+      this.context.field.playCardToZone(target, slot.x, slot.y, "ATK");
+    }
+  }
+
   private targetResolution: Partial<
     Record<
       EffectTypes,
       (target: Card, source: Card, effect: CardEffect) => void
     >
-  > = (() => {
-    const destroyResolver = (target: Card) =>
-      this.context.combat.destroyCard(target, target.owner);
-
-    const statResolver =
-      (type: "atk" | "def", isBuff: boolean) =>
-      (target: Card, _source: Card, effect: CardEffect) => {
-        const current =
-          type === "atk"
-            ? target.getCardData().atk || 0
-            : target.getCardData().def || 0;
-        const value = effect.value || 0;
-        const finalValue = isBuff
-          ? current + value
-          : Math.max(0, current - value); //prevents value lower than 0
-        target.updateStat(finalValue, type);
-      };
-
-    return {
-      BOOST_ATK: statResolver("atk", true),
-      NERF_ATK: statResolver("atk", false),
-      BOOST_DEF: statResolver("def", true),
-      NERF_DEF: statResolver("def", false),
-      DESTROY: destroyResolver,
-      CHANGE_POS: (target, source) => {
-        if (target.isFaceDown) {
-          this.context.getUI(source.owner).handleFlipSummon(target);
-        } else {
-          this.context.getUI(source.owner).handleChangePosition(target);
-        }
-      },
-      BOUNCE: (target) => {
-        const hand = this.context.getHand(target.owner);
-
-        this.context.field.releaseSlot(target, target.owner);
-        target.resetStats();
-
-        target.setLocation("HAND");
-
-        hand.addCardBack(target);
-      },
-      REVIVE: (target, source) => {
-        const side = source.owner;
-        const isMonster = target.getCardData().type.includes("MONSTER");
-
-        //remove from graveyard
-        this.context.field.releaseSlot(target, target.owner);
-
-        //update target owner to enable btn attack option
-        target.setOwner(source.owner);
-
-        if (isMonster) {
-          const slot = this.context.field.getFirstAvailableSlot(
-            side,
-            "MONSTER",
-          );
-
-          if (slot) {
-            if (side == "PLAYER") {
-              this.context.field.previewPlacement(target, slot.x, slot.y);
-              this.context
-                .getUI("PLAYER")
-                .showSelectionMenu(
-                  slot.x,
-                  slot.y,
-                  target,
-                  (mode: PlacementMode) => {
-                    this.context.field.occupySlot(
-                      side,
-                      "MONSTER",
-                      slot.index,
-                      target,
-                    );
-
-                    this.context.field.playCardToZone(
-                      target,
-                      slot.x,
-                      slot.y,
-                      mode,
-                    );
-                  },
-                );
-            } else {
-              this.context.field.occupySlot(
-                side,
-                "MONSTER",
-                slot.index,
-                target,
-              );
-              this.context.field.playCardToZone(target, slot.x, slot.y, "ATK");
-            }
-          } else {
-            this.context
-              .getUI(side)
-              .showNotice(this.notices.field_full, "WARNING");
-            this.context.field.moveToGraveyard(target, target.owner);
-          }
-        } else {
-          const hand = this.context.getHand(side);
-
-          target.setLocation("HAND");
-
-          hand.addCardBack(target);
-        }
-      },
-    };
-  })();
+  > = {
+    BOOST_ATK: (target, _, effect) =>
+      target.updateStat(
+        (target.getCardData().atk || 0) + (effect.value || 0),
+        "atk",
+      ),
+    NERF_ATK: (target, _, effect) =>
+      target.updateStat(
+        Math.max(0, (target.getCardData().atk || 0) - (effect.value || 0)),
+        "atk",
+      ),
+    BOOST_DEF: (target, _, effect) =>
+      target.updateStat(
+        (target.getCardData().def || 0) + (effect.value || 0),
+        "def",
+      ),
+    NERF_DEF: (target, _, effect) =>
+      target.updateStat(
+        Math.max(0, (target.getCardData().def || 0) - (effect.value || 0)),
+        "def",
+      ),
+    DESTROY: (target) => this.context.combat.destroyCard(target, target.owner),
+    CHANGE_POS: (target) => this.resolveChangePosition(target),
+    BOUNCE: (target) => this.resolveBounce(target),
+    REVIVE: (target, source) => this.resolveRevive(target, source),
+  };
 
   private targetValidations: Partial<
     Record<EffectTypes, (target: Card, effect: CardEffect) => boolean>
