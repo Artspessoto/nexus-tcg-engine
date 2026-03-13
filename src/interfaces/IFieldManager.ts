@@ -40,7 +40,7 @@ export interface IFieldManager {
 
   validatePlay(card: Card, zone: Phaser.GameObjects.Zone): IFieldPlayResult;
 
-  moveToGraveyard(card: Card, side: GameSide): void;
+  moveToGraveyard(card: Card): void;
   playCardToZone(
     card: Card,
     targetX: number,

@@ -255,19 +255,24 @@ export class FieldManager implements IFieldManager {
     card.setDepth(DEPTHS.PREVIEW_CARD);
   }
 
-  public moveToGraveyard(card: Card, side: GameSide) {
+  public moveToGraveyard(card: Card) {
     const { FIELD } = LAYOUT_CONFIG;
     const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
     this.context.tweens.killTweensOf(card.visualElements);
-    const coords = FIELD[side].GRAVEYARD;
 
-    this.graveyardSlot[side].unshift(card);
+    const realSide = card.originalOwner;
+    const coords = FIELD[realSide].GRAVEYARD;
+
+    //sent to original owner location
+    card.setOwner(realSide);
+
+    this.graveyardSlot[realSide].unshift(card);
     card.resetStats();
     card.setLocation("GRAVEYARD");
 
     EventBus.emit(GameEvent.CARD_SENT_TO_GRAVEYARD, {
       card,
-      side,
+      side: realSide,
     });
 
     this.context.tweens.add({
@@ -282,7 +287,7 @@ export class FieldManager implements IFieldManager {
         card.visualElements.setDepth(1000);
       },
       onComplete: () => {
-        const arraySize = this.graveyardSlot[side].length;
+        const arraySize = this.graveyardSlot[realSide].length;
         card.setDepth(10 + arraySize);
 
         this.setupFieldInteractions(card);

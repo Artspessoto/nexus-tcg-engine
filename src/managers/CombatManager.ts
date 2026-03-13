@@ -283,7 +283,7 @@ export class CombatManager implements ICombatManager {
         duration: DURATIONS.NORMAL,
         onComplete: () => {
           card.setFaceUp();
-          this.context.field.moveToGraveyard(card, side);
+          this.context.field.moveToGraveyard(card);
           card.setAlpha(1);
         },
       });
@@ -301,7 +301,7 @@ export class CombatManager implements ICombatManager {
       },
       onComplete: () => {
         card.setFaceUp();
-        this.context.field.moveToGraveyard(card, side);
+        this.context.field.moveToGraveyard(card);
 
         card.setAlpha(1);
         card.setScale(1);

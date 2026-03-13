@@ -318,7 +318,6 @@ describe("CombatManager", () => {
 
       expect(mockContext.field.moveToGraveyard).toHaveBeenCalledWith(
         card,
-        "PLAYER",
       );
 
       expect(card.setAlpha).toHaveBeenCalledWith(1);
