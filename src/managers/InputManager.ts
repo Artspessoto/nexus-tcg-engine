@@ -28,6 +28,7 @@ export class InputManager implements IInputManager {
         if (currentlyOver.length === 0) {
           const activeSide = this.context.gameState.activePlayer;
 
+          if (this.isSelectionLocked()) return;
           this.context.cancelPlacement();
 
           this.context.clearAllMenus();
@@ -43,12 +44,6 @@ export class InputManager implements IInputManager {
             this.context.combat.cancelTarget();
           }
         }
-
-        // if (this.context.selectedCard) {
-        //   this.context.time.delayedCall(50, () =>
-        //     this.context.cancelPlacement(),
-        //   );
-        // }
       },
     );
 
@@ -57,6 +52,7 @@ export class InputManager implements IInputManager {
     });
 
     this.context.engine.input.keyboard?.on("keydown-ESC", () => {
+      if (this.isSelectionLocked()) return;
       if (this.context.currentPhase == "BATTLE") {
         this.context.combat.cancelTarget();
       }
@@ -83,7 +79,8 @@ export class InputManager implements IInputManager {
   //card on focus (hand)
   private handleCardHover(card: Card) {
     const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
-    if (this.context.gameState.isDragging) return;
+
+    if (this.shouldBlockHover()) return;
 
     this.context.tweens.add({
       targets: card.visualElements,
@@ -114,7 +111,7 @@ export class InputManager implements IInputManager {
   public setupDragEvents(card: Card) {
     const { ANIMATIONS, COMPONENTS, DEPTHS } = THEME_CONFIG;
     card.on("dragstart", (pointer: Phaser.Input.Pointer) => {
-      if (this.context.currentPhase !== "MAIN") {
+      if (this.context.currentPhase !== "MAIN" || this.isSelectionLocked()) {
         this.context.engine.input.setDragState(pointer, 0);
         return;
       }
@@ -135,7 +132,8 @@ export class InputManager implements IInputManager {
     card.on(
       "drag",
       (_pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
-        //TODO option to drop card into zone (defense, attack, back card)
+        if (this.isSelectionLocked()) return;
+
         card.visualElements.setY(0);
         card.visualElements.setScale(1);
         card.setPosition(dragX, dragY);
@@ -157,8 +155,21 @@ export class InputManager implements IInputManager {
     card.on(
       "drop",
       (_pointer: Phaser.Input.Pointer, targetZone: Phaser.GameObjects.Zone) => {
+        if (this.isSelectionLocked()) return;
         this.context.handleCardDrop(targetZone, card);
       },
     );
+  }
+
+  //this lock prevents everythin (void click, drag cards, hover effect) << to use in revive mode
+  private isSelectionLocked(): boolean {
+    return (
+      this.context.effects.isSelectingTarget && !!this.context.selectedCard
+    );
+  }
+
+  //lock prevents hover action
+  private shouldBlockHover(): boolean {
+    return this.context.gameState.isDragging || this.isSelectionLocked();
   }
 }
