@@ -44,6 +44,7 @@ export const createMockCard = (overrides: Partial<Card> = {}): Card => {
     visualElements:
       createMockGameObject() as unknown as Phaser.GameObjects.Container,
     setLocation: vi.fn(),
+    setPosition: vi.fn(),
     setFieldVisuals: vi.fn(),
     setFaceDown: vi.fn(),
     setFaceUp: vi.fn(),
@@ -55,7 +56,9 @@ export const createMockCard = (overrides: Partial<Card> = {}): Card => {
     disableInteractive: vi.fn(),
     setInteractive: vi.fn(),
     removeAllListeners: vi.fn(),
-    on: vi.fn(),
+    on: vi.fn(function (this: Card) {
+      return this;
+    }),
     resetStats: vi.fn(),
     setHandVisuals: vi.fn(),
     parentContainer: undefined,
