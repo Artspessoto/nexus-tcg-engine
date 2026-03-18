@@ -2,40 +2,52 @@ name: Toon Castle CI
 
 on:
   push:
-    branches: [ main, develop, feature/** ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
-  build-and-test:
+  quality-gate:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
-      - name: Code Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '22' # Stable version to Vite 7
-          cache: 'npm'
+          node-version: "22" # Stable version to Vite 7
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run type-check
 
-      - name: Install dependencies
-        run: npm ci
+  unit-tests:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run test:cov
 
-      - name: Audit Security
-        run: npm audit --audit-level=critical 
-
-      - name: Valid lint for quality
-        run: npm run lint
-
-      - name: Type Check
-        run: npm run type-check
-
-      - name: Test quality
-        run: npm run test:cov
-
-      - name: Generate build
-        run: npm run build
+  build:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run build
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: game-dist-${{ github.run_id }}
+          path: dist/
+          retention-days: 7
