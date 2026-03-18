@@ -8,6 +8,7 @@ export default defineConfig({
     include: ["**/*.{test,spec}.ts"],
     exclude: ["node_modules", "dist"],
     coverage: {
+      provider: 'v8',
       thresholds: {
         lines: 80,
         functions: 80,
