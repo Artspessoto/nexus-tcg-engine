@@ -10,7 +10,6 @@ import type { Card } from "../objects/Card";
 import type { IDeckManager } from "./IDeckManager";
 import type { ToonButton } from "../objects/ToonButton";
 import type { IEffectManager } from "./IEffectManager";
-import type { ISequenceManager } from "./ISequenceManager";
 
 export interface IBattleContext {
   engine: Phaser.Scene;
@@ -19,7 +18,6 @@ export interface IBattleContext {
   gameState: IGameState;
   combat: ICombatManager;
   effects: IEffectManager;
-  sequences: ISequenceManager;
 
   getUI(side: GameSide): IUIManager;
   getHand(side: GameSide): IHandManager;

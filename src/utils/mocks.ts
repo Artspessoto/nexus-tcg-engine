@@ -241,7 +241,6 @@ export const createMockBattleContext = (): IBattleContext => {
       moveToGraveyard: vi.fn(),
       resetAttackFlags: vi.fn(),
     },
-    sequences: { add: vi.fn(), wait: vi.fn() },
     time: {
       delayedCall: vi.fn((_, cb) => {
         if (typeof cb === "function") cb();
