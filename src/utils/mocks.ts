@@ -3,8 +3,29 @@ import type { ToonButton } from "../objects/ToonButton";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { Card } from "../objects/Card";
 
+interface PlaneFunction extends Phaser.GameObjects.GameObjectFactory {
+  (
+    x?: number,
+    y?: number,
+    texture?: string | Phaser.Textures.Texture,
+    frame?: string | number,
+    width?: number,
+    height?: number,
+    tile?: boolean,
+  ): Phaser.GameObjects.Plane;
+  mock: {
+    calls: [number, number, string?][];
+    results: { value: Phaser.GameObjects.Plane }[];
+  };
+}
+
 export const createMockGameObject = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+  const listeners: Record<string, Function> = {};
+  
   return {
+    setViewHeight: vi.fn().mockReturnThis(),
+    setInteractive: vi.fn().mockReturnThis(),
     setRectangleDropZone: vi.fn().mockReturnThis(),
     setData: vi.fn().mockReturnThis(),
     setVisible: vi.fn().mockReturnThis(),
@@ -19,7 +40,14 @@ export const createMockGameObject = () => {
     lineStyle: vi.fn().mockReturnThis(),
     strokeRoundedRect: vi.fn().mockReturnThis(),
     destroy: vi.fn(),
-    on: vi.fn(),
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+    on: vi.fn((event: string, cb: Function) => {
+      listeners[event] = cb;
+    }),
+
+    emit: vi.fn((event: string, ...args: unknown[]) => {
+      listeners[event]?.(...args);
+    }),
     removeAllListeners: vi.fn(),
     getData: vi.fn(),
     iterate: vi.fn((cb) =>
@@ -76,6 +104,13 @@ export const createMockBattleContext = (): IBattleContext => {
       container: vi.fn().mockReturnValue({ add: vi.fn(), setY: vi.fn() }),
       text: vi.fn().mockReturnValue({ setOrigin: vi.fn(), setShadow: vi.fn() }),
       image: vi.fn().mockReturnValue(createMockGameObject()),
+      plane: vi.fn().mockImplementation((_x, y, texture) => {
+        const plane =
+          createMockGameObject() as unknown as Phaser.GameObjects.Plane;
+        plane.y = y;
+        plane.texture = texture;
+        return plane;
+      }) as unknown as PlaneFunction,
     } as unknown as Phaser.GameObjects.GameObjectFactory,
     gameState: {
       getMana: vi.fn().mockReturnValue(10),
