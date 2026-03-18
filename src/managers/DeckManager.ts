@@ -5,9 +5,9 @@ import type { IDeckManager } from "../interfaces/IDeckManager";
 import type { GameSide } from "../types/GameTypes";
 
 export class DeckManager implements IDeckManager {
-  private context: IBattleContext;
-  private side: GameSide;
-  private deckPosition: { x: number; y: number };
+  public readonly context: IBattleContext;
+  public readonly side: GameSide;
+  private readonly deckPosition: { x: number; y: number };
 
   constructor(context: IBattleContext, side: GameSide) {
     this.context = context;
