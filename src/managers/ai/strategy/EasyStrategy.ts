@@ -1,5 +1,5 @@
-import type { IAIStrategy } from "../../interfaces/IAIStrategy";
-import type { IBattleContext } from "../../interfaces/IBattleContext";
+import type { IAIStrategy } from "../../../interfaces/IAIStrategy";
+import type { IBattleContext } from "../../../interfaces/IBattleContext";
 
 export class EasyStrategy implements IAIStrategy {
   public readonly context: IBattleContext;
