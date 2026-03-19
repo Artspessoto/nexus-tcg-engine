@@ -19,7 +19,8 @@ export interface IUIManager {
     x: number,
     y: number,
     card: Card,
-    cb: (mode: PlacementMode) => void,
+    onSelect: (mode: PlacementMode) => void,
+    onCancel?: () => void,
   ): void;
   clearSelectionMenu(): void;
   showGraveyardMenu(cards: Card[], x: number, y: number): void;
