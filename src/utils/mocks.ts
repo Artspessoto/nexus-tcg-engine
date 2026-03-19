@@ -22,7 +22,7 @@ interface PlaneFunction extends Phaser.GameObjects.GameObjectFactory {
 export const createMockGameObject = () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   const listeners: Record<string, Function> = {};
-  
+
   return {
     setViewHeight: vi.fn().mockReturnThis(),
     setInteractive: vi.fn().mockReturnThis(),
@@ -195,6 +195,7 @@ export const createMockBattleContext = (): IBattleContext => {
       updateLP: vi.fn(),
       showNotice: vi.fn(),
     }),
+    executePlay: vi.fn(),
     getHand: vi.fn().mockReturnValue({
       hideHand: vi.fn(),
       showHand: vi.fn(),
@@ -219,7 +220,14 @@ export const createMockBattleContext = (): IBattleContext => {
     engine: {
       scene: { launch: vi.fn() } as unknown as Phaser.Scenes.ScenePlugin,
     } as unknown as Phaser.Scene,
-    controls: { setupGlobalInputs: vi.fn(), setupCardInteractions: vi.fn() },
+    controls: {
+      setupGlobalInputs: vi.fn(),
+      setupCardInteractions: vi.fn(),
+      isSelectionLocked: vi.fn(),
+    },
+    npcAction: {
+      executeTurn: vi.fn(),
+    },
     field: {
       monsterSlots: {
         PLAYER: [null, null, null],
