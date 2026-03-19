@@ -1,4 +1,4 @@
-import type { GamePhase, GameSide } from "../types/GameTypes";
+import type { GamePhase, GameSide, PlacementMode } from "../types/GameTypes";
 import type { IFieldManager } from "./IFieldManager";
 import type { IGameState } from "./IGameState";
 import type { IUIManager } from "./IUIManager";
@@ -10,6 +10,7 @@ import type { Card } from "../objects/Card";
 import type { IDeckManager } from "./IDeckManager";
 import type { ToonButton } from "../objects/ToonButton";
 import type { IEffectManager } from "./IEffectManager";
+import type { IAIManager } from "./IAIManager";
 
 export interface IBattleContext {
   engine: Phaser.Scene;
@@ -18,6 +19,7 @@ export interface IBattleContext {
   gameState: IGameState;
   combat: ICombatManager;
   effects: IEffectManager;
+  npcAction: IAIManager;
 
   getUI(side: GameSide): IUIManager;
   getHand(side: GameSide): IHandManager;
@@ -28,6 +30,13 @@ export interface IBattleContext {
   setPhase(phase: GamePhase): void;
   finalizeTurnTransition(): void;
   handleCardDrop(zone: Phaser.GameObjects.Zone, card: Card): void;
+  executePlay(
+    card: Card,
+    side: GameSide,
+    type: "MONSTER" | "SPELL",
+    slot: { x: number; y: number; index: number },
+    mode: PlacementMode,
+  ): void;
   cardActivation(card: Card, side: GameSide): void;
   onAttackDeclared(attacker: Card): void;
   clearAllMenus(): void;
