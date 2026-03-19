@@ -4,8 +4,7 @@ import { LanguageManager } from "../managers/LanguageManager";
 import { TRANSLATIONS } from "../constants/Translations";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
-
-export type Difficulty = "EASY" | "MEDIUM" | "HARD";
+import type { Difficulty } from "../types/GameTypes";
 
 export class MenuScene extends Phaser.Scene {
   private selectedDifficulty: Difficulty = "MEDIUM";

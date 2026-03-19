@@ -1,5 +1,6 @@
 import { TRANSLATIONS } from "../constants/Translations";
 
+export type Difficulty = "EASY" | "MEDIUM" | "HARD";
 export type GamePhase = "DRAW" | "MAIN" | "BATTLE" | "CHANGE_TURN";
 export type PlacementMode = "ATK" | "DEF" | "FACE_UP" | "SET";
 
