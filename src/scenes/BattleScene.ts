@@ -6,6 +6,7 @@ import { Card } from "../objects/Card";
 import { ToonButton } from "../objects/ToonButton";
 import type {
   BattleTranslations,
+  Difficulty,
   GamePhase,
   GameSide,
   PlacementMode,
@@ -30,6 +31,8 @@ import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
+import type { IAIManager } from "../interfaces/IAIManager";
+import { AIManager } from "../managers/ai/AIManager";
 
 export class BattleScene extends Phaser.Scene implements IBattleContext {
   public engine = this;
@@ -46,10 +49,13 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public opponentUI: IUIManager;
   public combat: ICombatManager;
   public effects: IEffectManager;
+  public npcAction!: IAIManager;
 
   public phaseButton!: ToonButton;
   public selectedCard: Card | null = null;
   private overlayLayer!: Phaser.GameObjects.Container;
+  // private playerDisplayName!: string = "";
+  private gameDifficulty: Difficulty = "EASY";
 
   constructor() {
     super("BattleScene");
@@ -84,13 +90,14 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
       if (side === "OPPONENT") {
         this.opponentHand.drawCard(this.opponentDeck.position);
-        this.handleOpponentTurn();
+        this.npcAction.executeTurn();
       }
     });
   }
 
-  public get currentPhase(): GamePhase {
-    return this.gameState.currentPhase;
+  init(data: { playerName: string; difficulty: Difficulty }) {
+    // this.playerDisplayName = data.playerName;
+    this.gameDifficulty = data.difficulty;
   }
 
   preload() {
@@ -121,6 +128,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     const lang = LanguageManager.getInstance().currentLanguage;
     const currentTranslations = TRANSLATIONS[lang];
     this.translationText = TRANSLATIONS[lang].battle_scene;
+    this.npcAction = new AIManager(this, this.gameDifficulty);
 
     const bg = this.add.image(
       SCREEN.CENTER_X,
@@ -170,6 +178,10 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.controls.setupGlobalInputs();
 
     this.startInitialDraw();
+  }
+
+  public get currentPhase(): GamePhase {
+    return this.gameState.currentPhase;
   }
 
   private getManagerBySide<T>(
@@ -328,7 +340,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.selectedCard = null;
   }
 
-  private executePlay(
+  public executePlay(
     card: Card,
     side: GameSide,
     type: "MONSTER" | "SPELL",
@@ -346,50 +358,6 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     hand.removeCard(card);
     this.field.occupySlot(side, type, slot.index, card);
     this.field.playCardToZone(card, slot.x, slot.y, mode);
-  }
-
-  //simulate changing turn
-  private handleOpponentTurn() {
-    this.time.delayedCall(2000, () => {
-      this.setPhase("MAIN");
-
-      this.time.delayedCall(1000, () => {
-        const npcHand = this.opponentHand;
-        const monsterCard = npcHand.hand.find((card) =>
-          card.getType().includes("MONSTER"),
-        );
-        const firstCard = monsterCard ? monsterCard : npcHand.hand[0];
-
-        if (firstCard) {
-          const cardType = firstCard.getType();
-          const slotType = cardType.includes("MONSTER") ? "MONSTER" : "SPELL";
-          const result = this.field.getValidSlotToPlay(
-            firstCard,
-            "OPPONENT",
-            slotType,
-          );
-
-          if (result.valid && result.slot) {
-            const cardMode = slotType == "MONSTER" ? "ATK" : "SET";
-            this.executePlay(
-              firstCard,
-              "OPPONENT",
-              slotType,
-              result.slot,
-              cardMode,
-            );
-          }
-        }
-      });
-
-      this.time.delayedCall(2000, () => {
-        this.setPhase("BATTLE");
-
-        this.time.delayedCall(2000, () => {
-          this.setPhase("CHANGE_TURN");
-        });
-      });
-    });
   }
 
   public cardActivation(card: Card, side: GameSide) {
