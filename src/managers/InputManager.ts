@@ -162,7 +162,7 @@ export class InputManager implements IInputManager {
   }
 
   //this lock prevents everythin (void click, drag cards, hover effect) << to use in revive mode
-  private isSelectionLocked(): boolean {
+  public isSelectionLocked(): boolean {
     return (
       this.context.effects.isSelectingTarget && !!this.context.selectedCard
     );

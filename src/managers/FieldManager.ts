@@ -300,6 +300,10 @@ export class FieldManager implements IFieldManager {
     card.removeAllListeners();
 
     card.on("pointerdown", () => {
+      if (this.context.effects.isSelectingTarget && this.context.selectedCard) {
+        return;
+      }
+      
       const currentX = card.x;
       const currentY = card.y;
 

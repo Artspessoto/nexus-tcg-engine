@@ -159,9 +159,11 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       width: BATTLE.PHASE_BUTTON.width,
       height: BATTLE.PHASE_BUTTON.height,
     });
-    this.phaseButton.setVisible(false).setDepth(DEPTHS.PHASE_BUTTON);
+    this.phaseButton.setVisible(false).setDepth(DEPTHS.PHASE_BUTTON - 1);
 
     this.phaseButton.on("pointerdown", () => {
+      if (this.controls.isSelectionLocked()) return;
+
       this.handleNextPhase();
     });
 
@@ -297,6 +299,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
           this.cardActivation(card, activeSide);
         }
       },
+      () => this.cancelPlacement(),
     );
   }
 
