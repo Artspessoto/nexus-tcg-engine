@@ -25,6 +25,7 @@ export class UIManager implements IUIManager {
   private manaAura!: Phaser.GameObjects.Image;
   private manaPosition: { x: number; y: number };
   private hpText!: Phaser.GameObjects.Text;
+  private inputBlocker?: Phaser.GameObjects.Rectangle;
 
   private selectionButtons: ToonButton[] = [];
 
@@ -374,13 +375,24 @@ export class UIManager implements IUIManager {
     x: number,
     y: number,
     card: Card,
-    cb: (mode: PlacementMode) => void,
+    onSelect: (mode: PlacementMode) => void,
+    onCancel?: () => void,
   ) {
     this.context.clearAllMenus();
     const { COMPONENTS, DEPTHS } = THEME_CONFIG;
     const cardType = card.getType();
     const isMonster = cardType.includes("MONSTER");
     const buttonTexts = this.translations.battle_scene.battle_buttons;
+
+    this.inputBlocker = this.context.add
+      .rectangle(640, 360, 1280, 720, 0x000000, 0.4)
+      .setInteractive()
+      .setDepth(THEME_CONFIG.DEPTHS.PREVIEW_CARD - 1);
+
+    this.inputBlocker.on("pointerdown", () => {
+      if (onCancel) onCancel();
+      else this.shakeButtons();
+    });
 
     let leftConfig = null;
     let rightConfig = null;
@@ -411,7 +423,9 @@ export class UIManager implements IUIManager {
       this.selectionButtons.push(btn);
       btn.on("pointerdown", () => {
         this.context.clearAllMenus();
-        cb(isMonster ? (isLeft ? "ATK" : "DEF") : isLeft ? "FACE_UP" : "SET");
+        onSelect(
+          isMonster ? (isLeft ? "ATK" : "DEF") : isLeft ? "FACE_UP" : "SET",
+        );
       });
     };
 
@@ -419,7 +433,21 @@ export class UIManager implements IUIManager {
     if (rightConfig) createBtn(rightConfig, false);
   }
 
+  private shakeButtons() {
+    this.selectionButtons.forEach((btn) => {
+      this.context.tweens.add({
+        targets: btn,
+        x: btn.x + 5,
+        duration: 50,
+        yoyo: true,
+        repeat: 3,
+        ease: "Power1",
+      });
+    });
+  }
+
   public clearSelectionMenu() {
+    this.inputBlocker?.destroy();
     this.selectionButtons.forEach((btn) => btn.destroy());
     this.selectionButtons = [];
   }
@@ -560,7 +588,7 @@ export class UIManager implements IUIManager {
             cardData: card.getCardData(),
             owner: card.owner,
             originalOwner: card.originalOwner,
-            location: card.location
+            location: card.location,
           });
         }),
       );
