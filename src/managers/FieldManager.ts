@@ -303,7 +303,7 @@ export class FieldManager implements IFieldManager {
       if (this.context.effects.isSelectingTarget && this.context.selectedCard) {
         return;
       }
-      
+
       const currentX = card.x;
       const currentY = card.y;
 
@@ -358,8 +358,12 @@ export class FieldManager implements IFieldManager {
     sides.forEach((side) => {
       this.monsterSlots[side].forEach((card) => {
         if (card) {
+          this.context.tweens.killTweensOf(card);
+          this.context.tweens.killTweensOf(card.visualElements);
+
           card.hasAttacked = false;
           card.setAlpha(1);
+          card.visualElements.setAlpha(1);
           card.hasChangedPosition = false;
         }
       });
