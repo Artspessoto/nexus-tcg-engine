@@ -26,6 +26,7 @@ export class UIManager implements IUIManager {
   private manaPosition: { x: number; y: number };
   private hpText!: Phaser.GameObjects.Text;
   private inputBlocker?: Phaser.GameObjects.Rectangle;
+  private bannerTimer?: Phaser.Time.TimerEvent;
 
   private selectionButtons: ToonButton[] = [];
 
@@ -269,6 +270,11 @@ export class UIManager implements IUIManager {
     const { ANIMATIONS } = THEME_CONFIG;
     this.context.tweens.killTweensOf([this.bannerText, this.bannerBg]);
 
+    if (this.bannerTimer) {
+      this.bannerTimer.remove();
+      this.bannerTimer = undefined;
+    }
+
     this.bannerText
       .setText(message.toUpperCase())
       .setAlpha(1)
@@ -305,7 +311,7 @@ export class UIManager implements IUIManager {
       },
     });
 
-    this.context.time.delayedCall(600, () => {
+    this.bannerTimer = this.context.time.delayedCall(600, () => {
       this.context.tweens.add({
         targets: [this.bannerText, this.bannerBg],
         alpha: 0,
@@ -318,6 +324,7 @@ export class UIManager implements IUIManager {
 
           this.bannerText.setX(SCREEN.CENTER_X);
           this.bannerBg.setX(SCREEN.CENTER_X);
+          this.bannerTimer = undefined;
         },
       });
     });

@@ -52,6 +52,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public npcAction!: IAIManager;
 
   public phaseButton!: ToonButton;
+  private isChangingPhase: boolean = false;
   public selectedCard: Card | null = null;
   private overlayLayer!: Phaser.GameObjects.Container;
   // private playerDisplayName!: string = "";
@@ -263,6 +264,13 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   }
 
   private handleNextPhase() {
+    if (this.isChangingPhase) return;
+
+    this.isChangingPhase = true;
+    this.time.delayedCall(500, () => {
+      this.isChangingPhase = false;
+    });
+
     const currentTurn = this.gameState.currentTurn;
     if (this.currentPhase === "MAIN") {
       if (currentTurn == 1) {
