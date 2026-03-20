@@ -33,7 +33,7 @@ export class AIManager implements IAIManager {
     this.context.setPhase("BATTLE");
     await this.strategy.playBattlePhase();
 
-    await this.delay(1000);
+    await this.delay(1500);
     this.context.setPhase("CHANGE_TURN");
   }
 
