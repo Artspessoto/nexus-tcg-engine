@@ -178,10 +178,13 @@ export class EasyStrategy implements IAIStrategy {
       currentMana,
       "ATK",
     );
+    const numericMonstersAdvantage = FieldAnalyzer.hasNumericMonstersAdvantage(
+      this.context,
+    );
 
     //efficient cost (atk + def / mana cost)
     if (
-      mostEfficient &&
+      mostEfficient && !numericMonstersAdvantage &&
       card.getCardData().id == mostEfficient.getCardData().id
     ) {
       actionScore += 50;
@@ -189,7 +192,7 @@ export class EasyStrategy implements IAIStrategy {
 
     //atk value
     if (
-      strongestOption &&
+      strongestOption && !numericMonstersAdvantage &&
       card.getCardData().id == strongestOption.getCardData().id
     ) {
       actionScore += 40;
@@ -197,8 +200,9 @@ export class EasyStrategy implements IAIStrategy {
 
     //field analyze advantage
     const advantage = FieldAnalyzer.getFieldSideAdvantage(this.context);
+
     //NPC being at a disadvantage => monster with high defense priority
-    if (advantage < 0) {
+    if (advantage < 0 || !numericMonstersAdvantage) {
       actionScore += (card.getCardData().def || 0) * 0.5;
     }
 
@@ -211,11 +215,17 @@ export class EasyStrategy implements IAIStrategy {
     let baseScore = 50;
     const attackerAtk = attacker.getCardData().atk || 0;
     const targetData = target.getCardData();
+    const targetIsFaceDown = target.isFaceDown;
 
-    const isDefenseMode = target.angle === -90;
-    const targetValue = isDefenseMode
-      ? targetData.def || 0
-      : targetData.atk || 0;
+    let targetValue = 0;
+    const isDefenseMode = target.angle === -90 || targetIsFaceDown;
+
+    if (targetIsFaceDown) {
+      targetValue = 5; //lower defense value for AI (easy) priorize attack
+      baseScore += 40;
+    } else {
+      targetValue = isDefenseMode ? targetData.def || 0 : targetData.atk || 0;
+    }
 
     //NPC monster with advantage against the player's monster (atk > atk || atk > def)
     if (attackerAtk > targetValue) {
@@ -242,12 +252,12 @@ export class EasyStrategy implements IAIStrategy {
       baseScore -= 50;
     }
 
-    const weakest = FieldAnalyzer.getWeaknessPlayerTarget(
-      this.context.field.monsterSlots.PLAYER,
-    );
-    if (weakest && target.getCardData().id === weakest.getCardData().id) {
-      baseScore += 10;
-    }
+    // const weakest = FieldAnalyzer.getWeaknessPlayerTarget(
+    //   this.context.field.monsterSlots.PLAYER,
+    // );
+    // if (weakest && target.getCardData().id === weakest.getCardData().id) {
+    //   baseScore += 10;
+    // }
 
     return baseScore;
   }
