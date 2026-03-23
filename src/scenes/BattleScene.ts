@@ -132,6 +132,10 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.translationText = TRANSLATIONS[lang].battle_scene;
     this.npcAction = new AIManager(this, this.gameDifficulty);
 
+    this.events.once("shutdown", () => {
+      EventBus.removeAllListeners();
+    });
+
     const bg = this.add.image(
       SCREEN.CENTER_X,
       SCREEN.CENTER_Y,
@@ -265,7 +269,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   }
 
   private handleNextPhase() {
-    if (this.isChangingPhase) return;
+    if (this.isChangingPhase || this.combat.isAnimating) return;
 
     this.isChangingPhase = true;
     this.time.delayedCall(500, () => {
@@ -468,8 +472,14 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     });
   }
 
-  public onAttackDeclared(attacker: Card) {
-    this.combat.prepareTargeting(attacker);
+  public onAttackDeclared(attacker: Card, target?: Card) {
+    this.combat.currentAttacker = attacker;
+    if (target) {
+      this.combat.isSelectingTarget = true;
+      this.combat.handleCardSelection(target);
+    } else {
+      this.combat.prepareTargeting(attacker);
+    }
   }
 
   public clearAllMenus() {

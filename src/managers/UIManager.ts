@@ -36,11 +36,13 @@ export class UIManager implements IUIManager {
 
     this.manaPosition = LAYOUT_CONFIG.UI.MANA[this.side];
 
-    EventBus.on(GameEvent.PHASE_CHANGED, (data) => {
-      this.clearSelectionMenu();
+    if (this.side == "PLAYER") {
+      EventBus.on(GameEvent.PHASE_CHANGED, (data) => {
+        this.clearSelectionMenu();
 
-      this.handlePhaseNotice(data.newPhase, data.activePlayer);
-    });
+        this.handlePhaseNotice(data.newPhase, data.activePlayer);
+      });
+    }
 
     EventBus.on(GameEvent.DIRECT_ATTACK, (data) => {
       if (data.targetSide == this.side) {
@@ -279,8 +281,15 @@ export class UIManager implements IUIManager {
       .setText(message.toUpperCase())
       .setAlpha(1)
       .setVisible(true)
-      .setScale(0.5);
-    this.bannerBg.setAlpha(1).setVisible(true).setScale(1, 0);
+      .setScale(0.5)
+      .setY(SCREEN.CENTER_Y)
+      .setX(SCREEN.CENTER_X);
+    this.bannerBg
+      .setY(SCREEN.CENTER_Y)
+      .setX(SCREEN.CENTER_X)
+      .setAlpha(1)
+      .setVisible(true)
+      .setScale(1, 0);
 
     // start animation
     this.context.tweens.add({
