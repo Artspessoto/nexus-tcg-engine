@@ -19,7 +19,7 @@ export class AIManager implements IAIManager {
       HARD: HardStrategy,
     };
 
-    this.strategy = new strategies[difficulty](context);
+    this.strategy = new strategies[difficulty || "EASY"](context);
   }
 
   public async executeTurn(): Promise<void> {
