@@ -13,27 +13,43 @@ export class EasyStrategy implements IAIStrategy {
   }
 
   public async playMainPhase(): Promise<void> {
-    let actionMoves = 5;
-    let turnActive = true;
+    let safetyBreak = 0; //security lock (preventing bugs)
 
-    while (actionMoves > 0  && turnActive) {
+    while (safetyBreak < 15) {
       const moves = this.generateMoves();
 
       const betterChoice = this.chooseBestMove(moves);
 
-      if(!betterChoice || betterChoice.type == "PASS") {
-        turnActive = false;
+      if (!betterChoice || betterChoice.type == "PASS") {
         break;
       }
 
       await this.delay(1200);
       await this.executeMove(betterChoice);
 
-      actionMoves--;
+      safetyBreak++;
     }
   }
 
-  public async playBattlePhase(): Promise<void> {}
+  public async playBattlePhase(): Promise<void> {
+    let safety = 0;
+
+    while (safety < 3) {
+      const moves = this.generateMoves();
+
+      const combatMoves = moves.filter(
+        (action) => action.type == "ATTACK" || action.type == "PASS",
+      );
+      const bestAttack = this.chooseBestMove(combatMoves);
+
+      if (!bestAttack || bestAttack.type == "PASS") break;
+
+      await this.executeMove(bestAttack);
+      await this.delay(1200);
+
+      safety++;
+    }
+  }
 
   public generateMoves(): Move[] {
     const moves: Move[] = [];
@@ -138,7 +154,7 @@ export class EasyStrategy implements IAIStrategy {
         finalScore += this.evaluateMonsterPlay(move.card);
         break;
       case "PLAY_SPELL":
-        finalScore += 30;
+        finalScore += 0;
         break;
       case "ATTACK":
         finalScore += this.evaluateAttack(move.attacker, move.target);
@@ -192,32 +208,48 @@ export class EasyStrategy implements IAIStrategy {
   private evaluateAttack(attacker: Card, target?: Card): number {
     if (!target) return 100;
 
-    const playerField: (Card | null)[] = this.context.field.monsterSlots.PLAYER;
-    let baseAtkScore = 50;
+    let baseScore = 50;
+    const attackerAtk = attacker.getCardData().atk || 0;
+    const targetData = target.getCardData();
 
-    const weakestTarget = FieldAnalyzer.getWeaknessPlayerTarget(playerField);
-    const strongestTarget = FieldAnalyzer.getStrongestPlayerTarget(playerField);
+    const isDefenseMode = target.angle === -90;
+    const targetValue = isDefenseMode
+      ? targetData.def || 0
+      : targetData.atk || 0;
 
-    if (
-      weakestTarget &&
-      target.getCardData().id == weakestTarget.getCardData().id
-    ) {
-      baseAtkScore += 30;
+    //NPC monster with advantage against the player's monster (atk > atk || atk > def)
+    if (attackerAtk > targetValue) {
+      baseScore += 30;
     }
+    // equal 1x1
+    else if (attackerAtk == targetValue) {
+      const finalPrediction =
+        FieldAnalyzer.continueWithAdvantageAfterCombatTrade(
+          this.context,
+          isDefenseMode,
+        );
 
-    if (
-      strongestTarget &&
-      target.getCardData().id === strongestTarget.getCardData().id
-    ) {
-      // gain bonus if attacker wins against strongest player card
-      if (attacker.getCardData().atk! > strongestTarget.getCardData().atk!) {
-        baseAtkScore += 20;
+      if (finalPrediction.hasDisadvantage) {
+        baseScore -= 70;
+      } else if (finalPrediction.hasAdvantage) {
+        baseScore += 40;
       } else {
-        baseAtkScore -= 20;
+        baseScore -= 20;
       }
     }
+    //no advantage against the player's monster
+    else {
+      baseScore -= 50;
+    }
 
-    return baseAtkScore;
+    const weakest = FieldAnalyzer.getWeaknessPlayerTarget(
+      this.context.field.monsterSlots.PLAYER,
+    );
+    if (weakest && target.getCardData().id === weakest.getCardData().id) {
+      baseScore += 10;
+    }
+
+    return baseScore;
   }
 
   public chooseBestMove(moves: Move[]): Move {
@@ -253,6 +285,9 @@ export class EasyStrategy implements IAIStrategy {
           await this.delay(800);
           this.context.cardActivation(move.card, this.side);
         }
+        break;
+      case "ATTACK":
+        this.context.onAttackDeclared(move.attacker, move.target);
         break;
     }
   }
