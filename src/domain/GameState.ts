@@ -1,14 +1,15 @@
 import type { GamePhase, GameSide } from "../types/GameTypes";
+import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 
 export class GameState {
   private _currentPhase: GamePhase = "DRAW";
   private _isDragging: boolean = false;
   private _activePlayer: GameSide = "PLAYER";
 
-  public playerHP: number = 600;
-  public opponentHP: number = 600;
-  public playerMana: number = 5;
-  public opponentMana: number = 5;
+  public playerHP: number = LAYOUT_CONFIG.GAME_STATE.BASE_LP;
+  public opponentHP: number = LAYOUT_CONFIG.GAME_STATE.BASE_LP;
+  public playerMana: number = LAYOUT_CONFIG.GAME_STATE.BASE_MANA;
+  public opponentMana: number = LAYOUT_CONFIG.GAME_STATE.BASE_MANA;
   public currentTurn: number = 1;
 
   constructor() {}

@@ -37,6 +37,10 @@ export const LAYOUT_CONFIG = {
     ACTIVATION_CENTER: { x: 640, y: 360 },
     OVERLAY_DEPTH: 20000,
   },
+  GAME_STATE: {
+    BASE_LP: 600,
+    BASE_MANA: 5
+  },
   HAND: {
     PLAYER: { NORMAL_Y: 710, HIDDEN_Y: 850 },
     OPPONENT: { NORMAL_Y: 10, HIDDEN_Y: -150 },
