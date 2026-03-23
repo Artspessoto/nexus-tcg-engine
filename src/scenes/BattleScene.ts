@@ -10,6 +10,7 @@ import type {
   GamePhase,
   GameSide,
   PlacementMode,
+  Slot,
 } from "../types/GameTypes";
 import { LanguageManager } from "../managers/LanguageManager";
 import { FieldManager } from "../managers/FieldManager";
@@ -352,7 +353,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     card: Card,
     side: GameSide,
     type: "MONSTER" | "SPELL",
-    slot: { x: number; y: number; index: number },
+    slot: Slot,
     mode: PlacementMode,
   ) {
     const hand = side == "PLAYER" ? this.playerHand : this.opponentHand;

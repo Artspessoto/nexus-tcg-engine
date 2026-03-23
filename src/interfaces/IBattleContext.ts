@@ -1,4 +1,4 @@
-import type { GamePhase, GameSide, PlacementMode } from "../types/GameTypes";
+import type { GamePhase, GameSide, PlacementMode, Slot } from "../types/GameTypes";
 import type { IFieldManager } from "./IFieldManager";
 import type { IGameState } from "./IGameState";
 import type { IUIManager } from "./IUIManager";
@@ -34,7 +34,7 @@ export interface IBattleContext {
     card: Card,
     side: GameSide,
     type: "MONSTER" | "SPELL",
-    slot: { x: number; y: number; index: number },
+    slot: Slot,
     mode: PlacementMode,
   ): void;
   cardActivation(card: Card, side: GameSide): void;
