@@ -1,5 +1,6 @@
 import type { IBattleContext } from "../../interfaces/IBattleContext";
 import { Card } from "../../objects/Card";
+import type { GameSide } from "../../types/GameTypes";
 
 export class FieldAnalyzer {
   public static getPlayableCards(hand: Card[], currentMana: number): Card[] {
@@ -129,6 +130,24 @@ export class FieldAnalyzer {
     ).length;
 
     return npcCount > playerCount;
+  }
+
+  public static hasNumericSupportAdvantage(context: IBattleContext): boolean {
+    const npcCount = this.getValidMonsters(
+      context.field.spellSlots.OPPONENT,
+    ).length;
+    const playerCount = this.getValidMonsters(
+      context.field.spellSlots.PLAYER,
+    ).length;
+
+    return npcCount > playerCount;
+  }
+
+  public static getGraveyardMonsters(
+    context: IBattleContext,
+    side: GameSide,
+  ) {
+    return this.getValidMonsters(context.field.graveyardSlot[side]);
   }
 
   public static continueWithAdvantageAfterCombatTrade(
