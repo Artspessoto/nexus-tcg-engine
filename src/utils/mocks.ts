@@ -204,6 +204,8 @@ export const createMockBattleContext = (): IBattleContext => {
     }),
     combat: {
       isSelectingTarget: false,
+      currentAttacker: null,
+      isAnimating: false,
       handleCardSelection: vi.fn(),
       prepareTargeting: vi.fn(),
       destroyCard: vi.fn(),
