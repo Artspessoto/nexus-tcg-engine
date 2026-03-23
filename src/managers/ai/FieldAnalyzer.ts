@@ -16,7 +16,7 @@ export class FieldAnalyzer {
 
     if (supports.length === 0) return null;
 
-    return supports.sort(
+    return [...supports].sort(
       (a, b) => b.getCardData().manaCost - a.getCardData().manaCost,
     )[0];
   }
@@ -28,7 +28,7 @@ export class FieldAnalyzer {
     const playableOptions = this.getPlayableCards(hand, currentMana);
 
     return (
-      playableOptions.sort((a, b) => {
+      [...playableOptions].sort((a, b) => {
         const x =
           ((a.getCardData().atk || 0) + (a.getCardData().def || 0)) /
           (a.getCardData().manaCost + 1);
@@ -53,20 +53,18 @@ export class FieldAnalyzer {
     if (monsters.length == 0) return;
 
     if (option == "ATK") {
-      return monsters.sort(
+      return [...monsters].sort(
         (a, b) => (b.getCardData().atk || 0) - (a.getCardData().atk || 0),
       )[0];
     } else {
-      return monsters.sort(
+      return [...monsters].sort(
         (a, b) => (b.getCardData().def || 0) - (a.getCardData().def || 0),
       )[0];
     }
   }
 
-  public static getAllPotentialTargets(
-    playerMonsters: (Card | null)[],
-  ): Card[] {
-    return playerMonsters.filter((m): m is Card => m !== null);
+  public static getValidMonsters(monsters: (Card | null)[]): Card[] {
+    return monsters.filter((m): m is Card => m !== null);
   }
 
   public static getWeaknessPlayerTarget(
@@ -78,7 +76,7 @@ export class FieldAnalyzer {
 
     if (activeMonsters.length == 0) return null;
 
-    return activeMonsters.sort(
+    return [...activeMonsters].sort(
       (a, b) => (a.getCardData().atk || 0) - (b.getCardData().atk || 0),
     )[0];
   }
@@ -92,7 +90,7 @@ export class FieldAnalyzer {
 
     if (activeMonsters.length == 0) return null;
 
-    return activeMonsters.sort(
+    return [...activeMonsters].sort(
       (a, b) => (b.getCardData().atk || 0) - (a.getCardData().atk || 0),
     )[0];
   }
