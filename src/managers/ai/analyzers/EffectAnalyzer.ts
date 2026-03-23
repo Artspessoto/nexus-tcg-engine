@@ -67,7 +67,7 @@ export class EffectAnalyzer {
     if (availableMonsters.length == 0) return 0;
 
     const bestMonster = availableMonsters.sort(
-      (a, b) => (b.getCardData().atk || 0) - (b.getCardData().atk || 0),
+      (a, b) => (b.getCardData().atk || 0) - (a.getCardData().atk || 0),
     )[0];
 
     return bestMonster.getCardData().atk || 0;
