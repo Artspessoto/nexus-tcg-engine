@@ -147,6 +147,11 @@ export class CombatManager implements ICombatManager {
   private executeDirectAttack(attacker: Card, targetSide: GameSide) {
     const { DURATIONS, EASING, SHAKES } = THEME_CONFIG.ANIMATIONS;
     const damage = attacker.getCardData().atk ?? 0;
+    
+    attacker.hasAttacked = true;
+    attacker.setAlpha(0.7);
+
+    this.isAnimating = true;
 
     const targetY = targetSide === "OPPONENT" ? 50 : 650;
     const targetX = 650;
@@ -170,14 +175,7 @@ export class CombatManager implements ICombatManager {
         });
       },
       onComplete: () => {
-        const side = attacker.owner;
-        const monsterSlots = this.context.field.monsterSlots[side];
-        const monsterStillOnField = monsterSlots.includes(attacker);
-
-        if (monsterStillOnField) {
-          attacker.hasAttacked = true;
-          attacker.setAlpha(0.7);
-        }
+        this.isAnimating = false;
       },
     });
   }
