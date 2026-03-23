@@ -38,7 +38,7 @@ export interface IBattleContext {
     mode: PlacementMode,
   ): void;
   cardActivation(card: Card, side: GameSide): void;
-  onAttackDeclared(attacker: Card): void;
+  onAttackDeclared(attacker: Card, target?: Card): void;
   clearAllMenus(): void;
 
   add: Phaser.GameObjects.GameObjectFactory;
