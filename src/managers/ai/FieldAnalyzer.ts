@@ -130,4 +130,28 @@ export class FieldAnalyzer {
 
     return npcCount > playerCount;
   }
+
+  public static continueWithAdvantageAfterCombatTrade(
+    context: IBattleContext,
+    isTargetInDefense: boolean,
+  ) {
+    const npcMonsters = this.getValidMonsters(
+      context.field.monsterSlots.OPPONENT,
+    );
+    const playerMonsters = this.getValidMonsters(
+      context.field.monsterSlots.PLAYER,
+    );
+
+    // equal monsters atk x atk (destroy both => NPC and player lost 1)
+    // equal monsters atk x def (destroy attacker => NPC lost 1)
+    const npcCountAfter = npcMonsters.length - 1;
+    const playerCountAfter = isTargetInDefense
+      ? playerMonsters.length
+      : playerMonsters.length - 1;
+
+    return {
+      hasDisadvantage: npcCountAfter === 0 && playerCountAfter > 0,
+      hasAdvantage: npcCountAfter >= playerCountAfter,
+    };
+  }
 }
