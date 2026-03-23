@@ -28,6 +28,7 @@ export class PhaseManager implements IPhaseManager {
     const { phaseButton } = this.context;
     const isPlayerTurn = this.context.gameState.activePlayer == "PLAYER";
     const currentTurn = this.context.gameState.currentTurn;
+    const attackAnimation = this.context.combat.isAnimating;
 
     this.turn = `${this.context.translationText.turn_label} ${currentTurn}`;
     phaseButton.setVisible(true);
@@ -55,7 +56,7 @@ export class PhaseManager implements IPhaseManager {
         }
         break;
       case "BATTLE":
-        if (isPlayerTurn) {
+        if (isPlayerTurn && !attackAnimation) {
           phaseButton
             .setInteractive()
             .setAlpha(1)
