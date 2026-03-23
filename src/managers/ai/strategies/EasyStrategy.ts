@@ -2,7 +2,7 @@ import type { IAIStrategy } from "../../../interfaces/IAIStrategy";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
 import type { GameSide, Move } from "../../../types/GameTypes";
-import { FieldAnalyzer } from "../FieldAnalyzer";
+import { FieldAnalyzer } from "../analyzers/FieldAnalyzer";
 
 export class EasyStrategy implements IAIStrategy {
   public readonly context: IBattleContext;

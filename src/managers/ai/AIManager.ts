@@ -2,9 +2,9 @@ import type { IAIManager } from "../../interfaces/IAIManager";
 import type { IAIStrategy } from "../../interfaces/IAIStrategy";
 import type { IBattleContext } from "../../interfaces/IBattleContext";
 import type { Difficulty } from "../../types/GameTypes";
-import { EasyStrategy } from "./strategy/EasyStrategy";
-import { HardStrategy } from "./strategy/HardStrategy";
-import { MediumStrategy } from "./strategy/MediumStrategy";
+import { EasyStrategy } from "./strategies/EasyStrategy";
+import { HardStrategy } from "./strategies/HardStrategy";
+import { MediumStrategy } from "./strategies/MediumStrategy";
 
 export class AIManager implements IAIManager {
   private strategy!: IAIStrategy;
