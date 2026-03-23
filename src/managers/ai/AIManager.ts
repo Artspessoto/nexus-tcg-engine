@@ -30,10 +30,12 @@ export class AIManager implements IAIManager {
 
     await this.delay(1500);
 
-    this.context.setPhase("BATTLE");
-    await this.strategy.playBattlePhase();
+    if (this.context.gameState.currentTurn > 1) {
+      this.context.setPhase("BATTLE");
+      await this.delay(1500);
+      await this.strategy.playBattlePhase();
+    }
 
-    await this.delay(1500);
     this.context.setPhase("CHANGE_TURN");
   }
 
