@@ -10,6 +10,7 @@ export class CombatManager implements ICombatManager {
   private context: IBattleContext;
   public isSelectingTarget: boolean = false;
   public currentAttacker: Card | null = null;
+  public isAnimating: boolean = false;
 
   constructor(context: IBattleContext) {
     this.context = context;
@@ -110,6 +111,10 @@ export class CombatManager implements ICombatManager {
 
   private executeAttack(attacker: Card, target: Card) {
     const { DURATIONS, EASING } = THEME_CONFIG.ANIMATIONS;
+    attacker.hasAttacked = true;
+    attacker.setAlpha(0.7);
+
+    this.isAnimating = true;
 
     EventBus.emit(GameEvent.ATTACK_DECLARED, { attacker, target });
 
@@ -123,24 +128,18 @@ export class CombatManager implements ICombatManager {
       onYoyoAll: () => {
         this.triggerImpactEffects(target);
 
-        if (target.isFaceDown) target.setFaceUp();
-        const isTargetDefenseMode = target.angle === 270;
+        const isTargetDefenseMode = target.angle == 270 || target.angle == -90;
 
         if (isTargetDefenseMode) {
+          if (target.isFaceDown) target.setFaceUp();
           this.resolveAtkVsDef(attacker, target);
         } else {
+          if (target.isFaceDown) target.setFaceUp();
           this.resolveAtkVsAtk(attacker, target);
         }
       },
       onComplete: () => {
-        const side = attacker.owner;
-        const monsterSlots = this.context.field.monsterSlots[side];
-        const monsterStillOnField = monsterSlots.includes(attacker);
-
-        if (monsterStillOnField) {
-          attacker.hasAttacked = true;
-          attacker.setAlpha(0.7);
-        }
+        this.isAnimating = false;
       },
     });
   }
