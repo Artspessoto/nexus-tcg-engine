@@ -119,4 +119,15 @@ export class FieldAnalyzer {
 
     return npcAtk - playerAtk;
   }
+
+  public static hasNumericMonstersAdvantage(context: IBattleContext): boolean {
+    const npcCount = this.getValidMonsters(
+      context.field.monsterSlots.OPPONENT,
+    ).length;
+    const playerCount = this.getValidMonsters(
+      context.field.monsterSlots.PLAYER,
+    ).length;
+
+    return npcCount > playerCount;
+  }
 }
