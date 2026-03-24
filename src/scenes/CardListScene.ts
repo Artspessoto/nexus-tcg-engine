@@ -117,10 +117,12 @@ export class CardListScene extends Phaser.Scene {
         card.originalOwner
       ).setScale(0.3);
 
+      cardItem.setData("originalReference", card);
+
       if (i === 0) firstCardItem = cardItem;
 
       cardItem.on("pointerdown", () => {
-        this.selectedCard = cardItem;
+        this.selectedCard = cardItem.getData("originalReference");
         this.updateDetailView(cardItem.getCardData());
         this.updateHighlight(cardItem.x, cardItem.y);
       });

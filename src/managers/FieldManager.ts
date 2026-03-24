@@ -182,6 +182,7 @@ export class FieldManager implements IFieldManager {
     const { SCALES } = THEME_CONFIG.COMPONENTS.CARD;
     const { DURATIONS, SHAKES, EASING } = THEME_CONFIG.ANIMATIONS;
     const currentTurn = this.context.gameState.currentTurn;
+    this.context.add.existing(card);
 
     card.disableInteractive();
     this.context.tweens.killTweensOf(card.visualElements);
