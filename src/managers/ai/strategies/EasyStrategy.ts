@@ -252,13 +252,6 @@ export class EasyStrategy implements IAIStrategy {
       baseScore -= 50;
     }
 
-    // const weakest = FieldAnalyzer.getWeaknessPlayerTarget(
-    //   this.context.field.monsterSlots.PLAYER,
-    // );
-    // if (weakest && target.getCardData().id === weakest.getCardData().id) {
-    //   baseScore += 10;
-    // }
-
     return baseScore;
   }
 

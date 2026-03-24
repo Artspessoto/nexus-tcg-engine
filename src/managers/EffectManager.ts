@@ -17,7 +17,7 @@ export class EffectManager implements IEffectManager {
   private pendingSource: Card | null = null;
   private handlerEffects: Record<
     EffectTypes,
-    (effect: CardEffect, side: GameSide, source: Card) => void
+    (effect: CardEffect, side: GameSide, source: Card, aiTarget?: Card) => void
   >;
 
   constructor(context: IBattleContext) {
@@ -39,20 +39,43 @@ export class EffectManager implements IEffectManager {
         const amount = effect.value || 0;
         EventBus.emit(GameEvent.MANA_CHANGED, { side, amount });
       },
-      BOOST_ATK: (effect, _side, source) =>
-        this.prepareTargeting(effect, source),
-      NERF_ATK: (effect, _side, source) =>
-        this.prepareTargeting(effect, source),
-      BOOST_DEF: (effect, _side, source) =>
-        this.prepareTargeting(effect, source),
-      NERF_DEF: (effect, _side, source) =>
-        this.prepareTargeting(effect, source),
-      CHANGE_POS: (effect, _side, source) =>
-        this.prepareTargeting(effect, source),
-      DESTROY: (effect, _side, source) => this.prepareTargeting(effect, source),
-      BOUNCE: (effect, _side, source) => this.prepareTargeting(effect, source),
+      BOOST_ATK: (effect, _side, source, AITarget) =>
+        this.resolveOrTarget(AITarget, source, effect, (t) =>
+          this.targetResolution.BOOST_ATK!(t, source, effect),
+        ),
+      NERF_ATK: (effect, _side, source, AITarget) =>
+        this.resolveOrTarget(AITarget, source, effect, (t) =>
+          this.targetResolution.NERF_ATK!(t, source, effect),
+        ),
+      BOOST_DEF: (effect, _side, source, AITarget) =>
+        this.resolveOrTarget(AITarget, source, effect, (t) =>
+          this.targetResolution.BOOST_DEF!(t, source, effect),
+        ),
+      NERF_DEF: (effect, _side, source, AITarget) =>
+        this.resolveOrTarget(AITarget, source, effect, (t) =>
+          this.targetResolution.NERF_DEF!(t, source, effect),
+        ),
+      CHANGE_POS: (effect, _side, source, AITarget) =>
+        this.resolveOrTarget(AITarget, source, effect, (t) =>
+          this.targetResolution.CHANGE_POS!(t, source, effect),
+        ),
+      DESTROY: (effect, _side, source, AITarget) =>
+        this.resolveOrTarget(AITarget, source, effect, (t) =>
+          this.targetResolution.DESTROY!(t, source, effect),
+        ),
+      BOUNCE: (effect, _side, source, AITarget) =>
+        this.resolveOrTarget(AITarget, source, effect, (t) =>
+          this.targetResolution.BOUNCE!(t, source, effect),
+        ),
       NEGATE: (effect, _side, source) => this.prepareTargeting(effect, source),
-      REVIVE: (effect, _side, source) => this.handleRevive(effect, source),
+      REVIVE: (effect, _side, source, AITarget) => {
+        if (AITarget) {
+          this.resolveRevive(AITarget, source);
+        } else {
+          this.handleRevive(effect, source);
+        }
+      },
+
       PROTECT: () => console.log(""),
     };
   }
@@ -61,7 +84,20 @@ export class EffectManager implements IEffectManager {
     return this.context.translationText.effect_notices;
   }
 
-  public applyCardEffect(card: Card) {
+  private resolveOrTarget(
+    aiTarget: Card | undefined,
+    source: Card,
+    effect: CardEffect,
+    resolution: (target: Card) => void,
+  ) {
+    if (aiTarget) {
+      resolution(aiTarget);
+    } else {
+      this.prepareTargeting(effect, source);
+    }
+  }
+
+  public applyCardEffect(card: Card, aiTarget?: Card) {
     this.stopTargeting();
     const effect = card.getCardData().effects;
     if (!effect) return;
@@ -74,7 +110,7 @@ export class EffectManager implements IEffectManager {
     );
 
     targets.forEach((side) => {
-      this.executeCardEffect(effect, side, card);
+      this.executeCardEffect(effect, side, card, aiTarget);
     });
   }
 
@@ -82,12 +118,13 @@ export class EffectManager implements IEffectManager {
     effect: CardEffect,
     side: GameSide,
     sourceCard: Card,
+    aiTarget?: Card,
   ) {
     const handler = this.handlerEffects[effect.type];
 
     if (!handler) return;
 
-    handler(effect, side, sourceCard);
+    handler(effect, side, sourceCard, aiTarget);
   }
 
   private handleDraw(effect: CardEffect, side: GameSide) {

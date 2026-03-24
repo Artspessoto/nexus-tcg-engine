@@ -25,6 +25,7 @@ export type Move =
       card: Card;
       slot: Slot;
       mode: "FACE_UP" | "SET";
+      params?: { target?: Card, value?: number}
     }
   | { type: "ACTIVATE_EFFECT"; card: Card; target?: Card }
   | { type: "ATTACK"; attacker: Card; target?: Card }

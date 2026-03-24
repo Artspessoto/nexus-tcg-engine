@@ -373,7 +373,11 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.field.playCardToZone(card, slot.x, slot.y, mode);
   }
 
-  public cardActivation(card: Card, side: GameSide) {
+  public cardActivation(
+    card: Card,
+    side: GameSide,
+    instructions?: { target?: Card },
+  ) {
     const { SCREEN, BATTLE } = LAYOUT_CONFIG;
     const { COLORS, ANIMATIONS } = THEME_CONFIG;
     const isEffectMonster = card.getType() === "EFFECT_MONSTER";
@@ -444,7 +448,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
           this.add.existing(card);
           this.currentHand.showHand();
 
-          this.effects.applyCardEffect(card);
+          this.effects.applyCardEffect(card, instructions?.target);
 
           if (!isEffectMonster) {
             // remove card from slot
