@@ -74,8 +74,8 @@ export class UIManager implements IUIManager {
       }
     });
 
-    EventBus.on(GameEvent.INSUFFICIENT_MANA, (data) => {
-      if (data.side == this.side) {
+    EventBus.on(GameEvent.INSUFFICIENT_MANA, () => {
+      if (this.side == "PLAYER") {
         this.showNotice(
           this.translations.battle_scene.insufficient_mana,
           "WARNING",
@@ -83,8 +83,8 @@ export class UIManager implements IUIManager {
       }
     });
 
-    EventBus.on(GameEvent.ZONE_OCCUPIED, (data) => {
-      if (data.side == this.side) {
+    EventBus.on(GameEvent.ZONE_OCCUPIED, () => {
+      if (this.side == "PLAYER") {
         this.showNotice(
           this.translations.battle_scene.zone_occupied,
           "WARNING",
@@ -93,12 +93,12 @@ export class UIManager implements IUIManager {
     });
 
     EventBus.on(GameEvent.TARGETING_STARTED, (data) => {
-      if (data.source.owner == this.side && data.type == "ATTACK") {
+      if (this.side == "PLAYER" && data.type == "ATTACK") {
         this.showNotice(
           this.translations.battle_scene.combat_notices.select_attack_target,
           "NEUTRAL",
         );
-      } else if (data.source.owner == this.side && data.type == "EFFECT") {
+      } else if (this.side == "PLAYER" && data.type == "EFFECT") {
         this.showNotice(data.message!, "NEUTRAL");
       }
     });
