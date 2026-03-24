@@ -101,6 +101,7 @@ export const createMockBattleContext = (): IBattleContext => {
         .fn()
         .mockReturnValue({ ...createMockGameObject(), getData: undefined }),
       graphics: vi.fn().mockReturnValue(createMockGameObject()),
+      existing: vi.fn(),
       container: vi.fn().mockReturnValue({ add: vi.fn(), setY: vi.fn() }),
       text: vi.fn().mockReturnValue({ setOrigin: vi.fn(), setShadow: vi.fn() }),
       image: vi.fn().mockReturnValue(createMockGameObject()),
