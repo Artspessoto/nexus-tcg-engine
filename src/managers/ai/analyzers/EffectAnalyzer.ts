@@ -11,6 +11,10 @@ import type { EffectTargetSide } from "../../../types/EffectTypes";
 import { FieldAnalyzer } from "./FieldAnalyzer";
 
 export class EffectAnalyzer {
+  public static getRelativeImpact(value: number, totalLP: number): number {
+    return value / totalLP;
+  }
+  
   public static analyzeCardUrgency(context: IBattleContext): number {
     const actualHand = context.getHand("OPPONENT").hand.length;
     const maxHand = context.getHand("OPPONENT").maxHandSize;
@@ -62,7 +66,8 @@ export class EffectAnalyzer {
   public static analyzeRevivePotential(
     context: IBattleContext,
     targetSide: EffectTargetSide,
-  ): number {
+    targetType?: string
+  ): Card | null {
     const npcGraveyard = FieldAnalyzer.getGraveyardMonsters(
       context,
       "OPPONENT",
@@ -72,15 +77,18 @@ export class EffectAnalyzer {
         ? FieldAnalyzer.getGraveyardMonsters(context, "PLAYER")
         : [];
 
-    const availableMonsters = [...npcGraveyard, ...playerGraveyard];
+    let availableCards = [...npcGraveyard, ...playerGraveyard];
 
-    if (availableMonsters.length == 0) return 0;
+    
+    if(targetType) {
+      availableCards = availableCards.filter(c => c.getType().includes(targetType));
+    }
+    
+    if (availableCards.length == 0) return null;
 
-    const bestMonster = availableMonsters.sort(
+    return availableCards.sort(
       (a, b) => (b.getCardData().atk || 0) - (a.getCardData().atk || 0),
     )[0];
-
-    return bestMonster.getCardData().atk || 0;
   }
 
   //burn priority (increases as the player's life decreases)

@@ -300,6 +300,7 @@ export class EffectManager implements IEffectManager {
           this.context.selectedCard = null;
         });
     } else {
+      this.context.selectedCard = target
       this.context.field.occupySlot(side, "MONSTER", slot.index, target);
       this.context.field.playCardToZone(target, slot.x, slot.y, "ATK");
     }

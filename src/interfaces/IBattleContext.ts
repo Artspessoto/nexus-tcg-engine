@@ -1,4 +1,9 @@
-import type { GamePhase, GameSide, PlacementMode, Slot } from "../types/GameTypes";
+import type {
+  GamePhase,
+  GameSide,
+  PlacementMode,
+  Slot,
+} from "../types/GameTypes";
 import type { IFieldManager } from "./IFieldManager";
 import type { IGameState } from "./IGameState";
 import type { IUIManager } from "./IUIManager";
@@ -37,7 +42,11 @@ export interface IBattleContext {
     slot: Slot,
     mode: PlacementMode,
   ): void;
-  cardActivation(card: Card, side: GameSide): void;
+  cardActivation(
+    card: Card,
+    side: GameSide,
+    instructions?: { target?: Card },
+  ): void;
   onAttackDeclared(attacker: Card, target?: Card): void;
   clearAllMenus(): void;
 
