@@ -84,6 +84,7 @@ export class FieldAnalyzer {
 
   public static getStrongestPlayerTarget(
     playerMonsters: (Card | null)[],
+    option: "ATK" | "DEF" = "ATK",
   ): Card | null {
     const activeMonsters = playerMonsters.filter(
       (monster): monster is Card => monster !== null && !monster.isFaceDown,
@@ -91,9 +92,13 @@ export class FieldAnalyzer {
 
     if (activeMonsters.length == 0) return null;
 
-    return [...activeMonsters].sort(
-      (a, b) => (b.getCardData().atk || 0) - (a.getCardData().atk || 0),
-    )[0];
+    return [...activeMonsters].sort((a, b) => {
+      const valA =
+        option === "ATK" ? a.getCardData().atk || 0 : a.getCardData().def || 0;
+      const valB =
+        option === "ATK" ? b.getCardData().atk || 0 : b.getCardData().def || 0;
+      return valB - valA;
+    })[0];
   }
 
   public static getPlayerMonstersField(
@@ -143,10 +148,7 @@ export class FieldAnalyzer {
     return npcCount > playerCount;
   }
 
-  public static getGraveyardMonsters(
-    context: IBattleContext,
-    side: GameSide,
-  ) {
+  public static getGraveyardMonsters(context: IBattleContext, side: GameSide) {
     return this.getValidMonsters(context.field.graveyardSlot[side]);
   }
 
