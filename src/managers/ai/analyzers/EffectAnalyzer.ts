@@ -1,5 +1,12 @@
 import { LAYOUT_CONFIG } from "../../../constants/LayoutConfig";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
+import type { Card } from "../../../objects/Card";
+import type {
+  BurnAnalysis,
+  BuffAnalysis,
+  BounceAnalysis,
+  ChangePosAnalysis,
+} from "../../../types/AnalyzerTypes";
 import type { EffectTargetSide } from "../../../types/EffectTypes";
 import { FieldAnalyzer } from "./FieldAnalyzer";
 
@@ -26,7 +33,7 @@ export class EffectAnalyzer {
   }
 
   //destroy monster potential
-  public static analyzeMonsterDestructionPotential(
+  public static analyzeMonsterDestructionValue(
     context: IBattleContext,
   ): number {
     const strongestPlayerMonster = FieldAnalyzer.getStrongestPlayerTarget(
@@ -39,21 +46,23 @@ export class EffectAnalyzer {
   }
 
   //destroy spell/trap potential
-  public static analyzeSupportDestructionPotential(
+  public static analyzeSupportDestructionCount(
     context: IBattleContext,
   ): number {
-    const playerSupports = context.field.spellSlots.PLAYER.length;
+    const playerSupports = context.field.spellSlots.PLAYER.filter(
+      (support): support is Card => support !== null,
+    );
 
     if (!playerSupports) return 0;
 
-    return playerSupports;
+    return playerSupports.length;
   }
 
   //revive potential
   public static analyzeRevivePotential(
     context: IBattleContext,
     targetSide: EffectTargetSide,
-  ) {
+  ): number {
     const npcGraveyard = FieldAnalyzer.getGraveyardMonsters(
       context,
       "OPPONENT",
@@ -75,26 +84,32 @@ export class EffectAnalyzer {
   }
 
   //burn priority (increases as the player's life decreases)
-  public static analyzeBurnUrgency(context: IBattleContext, burnValue: number) {
+  public static analyzeBurnImpact(
+    context: IBattleContext,
+    burnValue: number,
+  ): BurnAnalysis {
     const playerLP = context.gameState.getHP("PLAYER");
+    const initialLP = LAYOUT_CONFIG.GAME_STATE.BASE_LP;
 
-    if (burnValue >= playerLP) return 9999;
-
-    const dmgPriority = LAYOUT_CONFIG.GAME_STATE.BASE_LP - playerLP;
-    return dmgPriority;
+    return {
+      isLethal: burnValue >= playerLP,
+      damagePotential: initialLP - playerLP,
+    };
   }
 
-  //boost potential
-  public static analyzeCombatBuffPotential(
+  //boost or nerf priority
+  public static analyzeCombatStatShiftPotential(
     context: IBattleContext,
-    buffValue: number,
+    value: number,
     statType: "atk" | "def",
-  ): number {
+    isBuff: boolean,
+  ): BuffAnalysis {
     const playerMonsters = context.field.monsterSlots.PLAYER;
     const playerStrongestMonster =
       FieldAnalyzer.getStrongestPlayerTarget(playerMonsters);
 
-    if (!playerStrongestMonster) return 0;
+    if (!playerStrongestMonster)
+      return { isGameChanger: false, targetValue: 0 };
 
     const playerValue =
       statType == "atk"
@@ -120,67 +135,69 @@ export class EffectAnalyzer {
           ? monster.getCardData().atk || 0
           : monster.getCardData().def || 0;
 
-      //increase buff priority
-      return (
-        currentStat <= playerValue && currentStat + buffValue > playerValue
-      );
+      if (isBuff) {
+        return currentStat <= playerValue && currentStat + value > playerValue;
+      } else {
+        return playerValue >= currentStat && playerValue - value < currentStat;
+      }
     });
 
-    if (canChangeAdvantage) {
-      //kill enemy monster (+ priority) than protect monster
-      return statType == "atk" ? 1000 : 600;
-    }
-
-    return 0;
+    return { isGameChanger: canChangeAdvantage, targetValue: playerValue };
   }
 
-  //nerf priority
-  public static analyzeCombatNerfPotential(
+  //bounce priority
+  public static analyzeBouncePotential(
     context: IBattleContext,
-    nerfValue: number,
-    statType: "atk" | "def",
-  ): number {
-    const playerMonsters = context.field.monsterSlots.PLAYER;
-    const playerStrongestMonster =
-      FieldAnalyzer.getStrongestPlayerTarget(playerMonsters);
+  ): BounceAnalysis {
+    const playerField = context.field.monsterSlots.PLAYER;
 
-    if (!playerStrongestMonster) return 0;
-
-    const playerValue =
-      statType == "atk"
-        ? playerStrongestMonster.getCardData().atk || 0
-        : playerStrongestMonster.getCardData().def || 0;
-
-    const npcFieldMonsters = FieldAnalyzer.getValidMonsters(
-      context.field.monsterSlots.OPPONENT,
+    const strongestAtk = FieldAnalyzer.getStrongestPlayerTarget(
+      playerField,
+      "ATK",
+    );
+    const strongestDef = FieldAnalyzer.getStrongestPlayerTarget(
+      playerField,
+      "DEF",
     );
 
-    const npcHandMonster = FieldAnalyzer.getStrongestMonsterOption(
-      context.getHand("OPPONENT").hand,
-      context.gameState.getMana("OPPONENT"),
-      statType === "atk" ? "ATK" : "DEF",
-    );
+    if (!strongestAtk || !strongestDef)
+      return { targetAtk: 0, targetDef: 0, manaCost: 0, isTank: false };
 
-    const validOptions = [...npcFieldMonsters];
-    if (npcHandMonster) validOptions.push(npcHandMonster);
+    const atkValue = strongestAtk.getCardData().atk || 0;
+    const defValue = strongestDef.getCardData().def || 0;
 
-    const canChangeAdvantage = validOptions.some((monster) => {
-      const currentStat =
-        statType == "atk"
-          ? monster.getCardData().atk || 0
-          : monster.getCardData().def || 0;
+    const bestTarget = defValue > atkValue ? strongestDef : strongestAtk;
+    const cardData = bestTarget.getCardData();
 
-      //increase nerf priority
-      return (
-        currentStat <= playerValue && currentStat > playerValue - nerfValue
-      );
-    });
-
-    if (canChangeAdvantage) {
-      //kill enemy monster (+ priority) than protect monster
-      return statType == "atk" ? 1000 : 600;
-    }
-
-    return 0;
+    return {
+      targetAtk: cardData.atk || 0,
+      targetDef: cardData.def || 0,
+      manaCost: cardData.manaCost,
+      isTank: (cardData.def || 0) > 30,
+    };
   }
+
+  public static analyzePositionChangePotential(
+    context: IBattleContext,
+  ): ChangePosAnalysis {
+    const playerField = context.field.monsterSlots.PLAYER;
+
+    const target = FieldAnalyzer.getStrongestPlayerTarget(playerField, "ATK");
+
+    if (!target)
+      return { targetAtk: 0, targetDef: 0, isCurrentAtkMode: true, statGap: 0 };
+
+    const cardData = target.getCardData();
+    const atk = cardData.atk || 0;
+    const def = cardData.def || 0;
+
+    return {
+      targetAtk: atk,
+      targetDef: def,
+      isCurrentAtkMode: target.angle == 0 || target.angle == 360,
+      statGap: Math.abs(atk - def),
+    };
+  }
+
+  //TODO: protect and negate priority
 }
