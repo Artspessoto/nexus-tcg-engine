@@ -1,7 +1,11 @@
+import { LAYOUT_CONFIG } from "../../../constants/LayoutConfig";
 import type { IAIStrategy } from "../../../interfaces/IAIStrategy";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
+import type { BurnAnalysis } from "../../../types/AnalyzerTypes";
+import type { CardEffect } from "../../../types/EffectTypes";
 import type { GameSide, Move } from "../../../types/GameTypes";
+import { EffectAnalyzer } from "../analyzers/EffectAnalyzer";
 import { FieldAnalyzer } from "../analyzers/FieldAnalyzer";
 
 export class EasyStrategy implements IAIStrategy {
@@ -99,10 +103,27 @@ export class EasyStrategy implements IAIStrategy {
     //spell and trap options
     for (const card of playableCards) {
       if (card.getType() == "SPELL" || card.getType() == "TRAP") {
+        const effect = card.getCardData().effects;
+        if (!effect) continue;
+
         const slot = this.context.field.getFirstAvailableSlot(
           this.side,
           "SPELL",
         );
+
+        const needsTarget = [
+          "DESTROY",
+          "BOUNCE",
+          "NERF_ATK",
+          "BOOST_ATK",
+          "REVIVE",
+          "CHANGE_POS",
+        ];
+        const target = this.getBestTargetToApplyEffect(effect!);
+
+        if (needsTarget.includes(effect.type) && !target) {
+          continue;
+        }
 
         if (slot !== null) {
           const mode = card.getType() === "SPELL" ? "FACE_UP" : "SET";
@@ -110,6 +131,7 @@ export class EasyStrategy implements IAIStrategy {
             card,
             mode,
             type: "PLAY_SPELL",
+            params: { target },
             slot,
           });
         }
@@ -145,27 +167,87 @@ export class EasyStrategy implements IAIStrategy {
   }
 
   public evaluateMove(move: Move): number {
-    let finalScore: number = 0;
+    if (move.type == "PASS") return 2;
 
-    if (move.type == "PASS") return 5;
+    let finalScore: number = 0;
+    let cardInvolved: Card | null = null;
 
     switch (move.type) {
       case "PLAY_MONSTER":
+        cardInvolved = move.card;
         finalScore += this.evaluateMonsterPlay(move.card);
         break;
       case "PLAY_SPELL":
-        finalScore += 0;
+        cardInvolved = move.card;
+        finalScore += this.evaluateSupport(move.card, move.params);
         break;
       case "ATTACK":
+        cardInvolved = move.attacker;
         finalScore += this.evaluateAttack(move.attacker, move.target);
         break;
+    }
+
+    if (cardInvolved) {
+      finalScore += cardInvolved.getCardData().manaCost * 10;
     }
 
     return finalScore;
   }
 
+  private getBestTargetToApplyEffect(effect: CardEffect): Card | undefined {
+    const playerField = this.context.field.monsterSlots.PLAYER;
+    const playerSpells = this.context.field.spellSlots.PLAYER;
+    const npcField = this.context.field.monsterSlots.OPPONENT;
+
+    const offensiveEffects = ["NERF_ATK", "BOUNCE", "CHANGE_POS"];
+    const defensiveEffects = ["BOOST_ATK", "BOOST_DEF", "PROTECT"];
+
+    if (offensiveEffects.includes(effect.type)) {
+      const targetStat = effect.type === "CHANGE_POS" ? "DEF" : "ATK";
+
+      const monsterTarget = FieldAnalyzer.getStrongestPlayerTarget(
+        playerField,
+        targetStat,
+      );
+
+      return monsterTarget
+        ? monsterTarget
+        : playerField.filter((m) => m !== null)[0];
+    }
+
+    if (defensiveEffects.includes(effect.type)) {
+      return (
+        FieldAnalyzer.getStrongestPlayerTarget(npcField, "ATK") || undefined
+      );
+    }
+
+    if (effect.type == "DESTROY") {
+      if (effect.targetType == "SPELL" || effect.targetType == "TRAP") {
+        return playerSpells.filter((s) => s !== null)[0];
+      }
+
+      return (
+        FieldAnalyzer.getStrongestPlayerTarget(playerField, "ATK") || undefined
+      );
+    }
+
+    if (effect.type == "REVIVE") {
+      const targetType = effect.targetType;
+
+      return (
+        EffectAnalyzer.analyzeRevivePotential(
+          this.context,
+          effect.targetSide || "OWNER",
+          targetType,
+        ) || undefined
+      );
+    }
+
+    return undefined;
+  }
+
   private evaluateMonsterPlay(card: Card): number {
-    let actionScore: number = 0;
+    let actionScore: number = 80;
     const hand = this.context.getHand(this.side).hand;
     const currentMana = this.context.gameState.getMana(this.side);
 
@@ -184,7 +266,8 @@ export class EasyStrategy implements IAIStrategy {
 
     //efficient cost (atk + def / mana cost)
     if (
-      mostEfficient && !numericMonstersAdvantage &&
+      mostEfficient &&
+      !numericMonstersAdvantage &&
       card.getCardData().id == mostEfficient.getCardData().id
     ) {
       actionScore += 50;
@@ -192,7 +275,8 @@ export class EasyStrategy implements IAIStrategy {
 
     //atk value
     if (
-      strongestOption && !numericMonstersAdvantage &&
+      strongestOption &&
+      !numericMonstersAdvantage &&
       card.getCardData().id == strongestOption.getCardData().id
     ) {
       actionScore += 40;
@@ -210,46 +294,137 @@ export class EasyStrategy implements IAIStrategy {
   }
 
   private evaluateAttack(attacker: Card, target?: Card): number {
-    if (!target) return 100;
+    if (!target) return 150;
 
-    let baseScore = 50;
     const attackerAtk = attacker.getCardData().atk || 0;
     const targetData = target.getCardData();
-    const targetIsFaceDown = target.isFaceDown;
+    const isDefenseMode = target.angle === -90 || target.isFaceDown;
 
-    let targetValue = 0;
-    const isDefenseMode = target.angle === -90 || targetIsFaceDown;
-
-    if (targetIsFaceDown) {
-      targetValue = 5; //lower defense value for AI (easy) priorize attack
-      baseScore += 40;
-    } else {
-      targetValue = isDefenseMode ? targetData.def || 0 : targetData.atk || 0;
+    if (target.isFaceDown) {
+      //impulsive action, ignores the enemy support and other problems
+      return 200;
     }
+
+    const targetValue = isDefenseMode
+      ? targetData.def || 0
+      : targetData.atk || 0;
 
     //NPC monster with advantage against the player's monster (atk > atk || atk > def)
     if (attackerAtk > targetValue) {
-      baseScore += 30;
+      return 100 + (attackerAtk - targetValue);
     }
     // equal 1x1
     else if (attackerAtk == targetValue) {
-      const finalPrediction =
-        FieldAnalyzer.continueWithAdvantageAfterCombatTrade(
+      return 60;
+      //predicition implements into medium strategy
+      // const finalPrediction =
+      //   FieldAnalyzer.continueWithAdvantageAfterCombatTrade(
+      //     this.context,
+      //     isDefenseMode,
+      //   );
+
+      // if (finalPrediction.hasDisadvantage) {
+      //   baseScore -= 70;
+      // } else if (finalPrediction.hasAdvantage) {
+      //   baseScore += 40;
+      // } else {
+      //   baseScore -= 20;
+      // }
+    }
+
+    return -50;
+  }
+
+  public evaluateSupport(card: Card, params?: { target?: Card }) {
+    const effect = card.getCardData().effects;
+    if (!effect) return 0;
+
+    const needTarget = [
+      "DESTROY",
+      "BOUNCE",
+      "NERF_ATK",
+      "BOOST_ATK",
+      "REVIVE",
+      "CHANGE_POS",
+    ];
+
+    if (needTarget.includes(effect.type) && !params?.target) return 0;
+
+    let baseScore = 0;
+    const effectValue = effect.value || 0;
+    const totalLP = LAYOUT_CONFIG.GAME_STATE.BASE_LP;
+
+    switch (effect.type) {
+      case "BURN": {
+        const burn: BurnAnalysis = EffectAnalyzer.analyzeBurnImpact(
           this.context,
-          isDefenseMode,
+          effect.value,
+        );
+        if (burn.isLethal) return 9999;
+        baseScore +=
+          EffectAnalyzer.getRelativeImpact(effectValue, totalLP) * 1000;
+
+        if (burn.damagePotential > totalLP * 0.5) baseScore += 30;
+        break;
+      }
+      case "HEAL": {
+        const healPriority = EffectAnalyzer.analyzeHealUrgency(this.context);
+        baseScore +=
+          EffectAnalyzer.getRelativeImpact(healPriority, totalLP) * 200;
+        break;
+      }
+      case "BOOST_ATK": {
+        const buff = EffectAnalyzer.analyzeCombatStatShiftPotential(
+          this.context,
+          effectValue,
+          "atk",
+          true,
+        );
+        if (buff.isGameChanger) baseScore += 150;
+        baseScore += buff.targetValue * 2;
+        break;
+      }
+      case "DRAW_CARD": {
+        const neededCards = EffectAnalyzer.analyzeCardUrgency(this.context);
+        baseScore += neededCards * 25;
+        break;
+      }
+      case "DESTROY": {
+        if (
+          effect.targetType == "MONSTER" ||
+          effect.targetType == "EFFECT_MONSTER"
+        ) {
+          const destructionValue =
+            EffectAnalyzer.analyzeMonsterDestructionValue(this.context);
+          baseScore += destructionValue * 1.5;
+        } else {
+          baseScore += 20;
+        }
+
+        break;
+      }
+      case "BOUNCE": {
+        // const bounce: BounceAnalysis = EffectAnalyzer.analyzeBouncePotential(this.context);
+        // medium strategy => baseScore += bounce.targetAtk * 0.05 + bounce.manaCost * 20;
+        baseScore += 10;
+        break;
+      }
+      case "REVIVE": {
+        const targetType = effect.targetType;
+        const bestCard = EffectAnalyzer.analyzeRevivePotential(
+          this.context,
+          effect.targetSide || "OWNER",
+          targetType,
         );
 
-      if (finalPrediction.hasDisadvantage) {
-        baseScore -= 70;
-      } else if (finalPrediction.hasAdvantage) {
-        baseScore += 40;
-      } else {
-        baseScore -= 20;
+        console.log(bestCard, params?.target);
+
+        if (bestCard) {
+          const reviveValuation = bestCard.getCardData().atk || 0;
+          baseScore += reviveValuation * 1.2;
+          break;
+        }
       }
-    }
-    //no advantage against the player's monster
-    else {
-      baseScore -= 50;
     }
 
     return baseScore;
@@ -286,7 +461,7 @@ export class EasyStrategy implements IAIStrategy {
         );
         if (move.mode === "FACE_UP") {
           await this.delay(800);
-          this.context.cardActivation(move.card, this.side);
+          this.context.cardActivation(move.card, this.side, move.params);
         }
         break;
       case "ATTACK":
