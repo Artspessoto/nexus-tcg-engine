@@ -25,7 +25,7 @@ export class EffectAnalyzer {
     return Math.max(0, initialMana - actualMana);
   }
 
-  //destroy potential
+  //destroy monster potential
   public static analyzeMonsterDestructionPotential(
     context: IBattleContext,
   ): number {
@@ -38,6 +38,7 @@ export class EffectAnalyzer {
     return strongestPlayerMonster.getCardData().atk || 0;
   }
 
+  //destroy spell/trap potential
   public static analyzeSupportDestructionPotential(
     context: IBattleContext,
   ): number {
@@ -81,5 +82,105 @@ export class EffectAnalyzer {
 
     const dmgPriority = LAYOUT_CONFIG.GAME_STATE.BASE_LP - playerLP;
     return dmgPriority;
+  }
+
+  //boost potential
+  public static analyzeCombatBuffPotential(
+    context: IBattleContext,
+    buffValue: number,
+    statType: "atk" | "def",
+  ): number {
+    const playerMonsters = context.field.monsterSlots.PLAYER;
+    const playerStrongestMonster =
+      FieldAnalyzer.getStrongestPlayerTarget(playerMonsters);
+
+    if (!playerStrongestMonster) return 0;
+
+    const playerValue =
+      statType == "atk"
+        ? playerStrongestMonster.getCardData().atk || 0
+        : playerStrongestMonster.getCardData().def || 0;
+
+    const npcFieldMonsters = FieldAnalyzer.getValidMonsters(
+      context.field.monsterSlots.OPPONENT,
+    );
+
+    const npcHandMonster = FieldAnalyzer.getStrongestMonsterOption(
+      context.getHand("OPPONENT").hand,
+      context.gameState.getMana("OPPONENT"),
+      statType === "atk" ? "ATK" : "DEF",
+    );
+
+    const validOptions = [...npcFieldMonsters];
+    if (npcHandMonster) validOptions.push(npcHandMonster);
+
+    const canChangeAdvantage = validOptions.some((monster) => {
+      const currentStat =
+        statType == "atk"
+          ? monster.getCardData().atk || 0
+          : monster.getCardData().def || 0;
+
+      //increase buff priority
+      return (
+        currentStat <= playerValue && currentStat + buffValue > playerValue
+      );
+    });
+
+    if (canChangeAdvantage) {
+      //kill enemy monster (+ priority) than protect monster
+      return statType == "atk" ? 1000 : 600;
+    }
+
+    return 0;
+  }
+
+  //nerf priority
+  public static analyzeCombatNerfPotential(
+    context: IBattleContext,
+    nerfValue: number,
+    statType: "atk" | "def",
+  ): number {
+    const playerMonsters = context.field.monsterSlots.PLAYER;
+    const playerStrongestMonster =
+      FieldAnalyzer.getStrongestPlayerTarget(playerMonsters);
+
+    if (!playerStrongestMonster) return 0;
+
+    const playerValue =
+      statType == "atk"
+        ? playerStrongestMonster.getCardData().atk || 0
+        : playerStrongestMonster.getCardData().def || 0;
+
+    const npcFieldMonsters = FieldAnalyzer.getValidMonsters(
+      context.field.monsterSlots.OPPONENT,
+    );
+
+    const npcHandMonster = FieldAnalyzer.getStrongestMonsterOption(
+      context.getHand("OPPONENT").hand,
+      context.gameState.getMana("OPPONENT"),
+      statType === "atk" ? "ATK" : "DEF",
+    );
+
+    const validOptions = [...npcFieldMonsters];
+    if (npcHandMonster) validOptions.push(npcHandMonster);
+
+    const canChangeAdvantage = validOptions.some((monster) => {
+      const currentStat =
+        statType == "atk"
+          ? monster.getCardData().atk || 0
+          : monster.getCardData().def || 0;
+
+      //increase nerf priority
+      return (
+        currentStat <= playerValue && currentStat > playerValue - nerfValue
+      );
+    });
+
+    if (canChangeAdvantage) {
+      //kill enemy monster (+ priority) than protect monster
+      return statType == "atk" ? 1000 : 600;
+    }
+
+    return 0;
   }
 }
