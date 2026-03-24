@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - uses: actions/setup-node@v4
         with:
@@ -29,6 +31,16 @@ jobs:
           
       - run: npm ci
       - run: npm run test:ci
+
+      - name: Generate and Push Tag
+        id: tag_version
+        uses: anothrNick/github-tag-action@1.71.0 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true 
+          DEFAULT_BUMP: patch     
+          RELEASE_BRANCHES: main
+
       - run: npm run build 
       
       - name: Setup Pages
