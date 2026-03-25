@@ -6,7 +6,11 @@ import type {
   CardEffect,
   EffectTypes,
 } from "../types/EffectTypes";
-import type { GameSide, PlacementMode } from "../types/GameTypes";
+import type {
+  EffectInstructions,
+  GameSide,
+  PlacementMode,
+} from "../types/GameTypes";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
 
@@ -17,7 +21,12 @@ export class EffectManager implements IEffectManager {
   private pendingSource: Card | null = null;
   private handlerEffects: Record<
     EffectTypes,
-    (effect: CardEffect, side: GameSide, source: Card, aiTarget?: Card) => void
+    (
+      effect: CardEffect,
+      side: GameSide,
+      source: Card,
+      AIInstructions?: EffectInstructions,
+    ) => void
   >;
 
   constructor(context: IBattleContext) {
@@ -39,38 +48,42 @@ export class EffectManager implements IEffectManager {
         const amount = effect.value || 0;
         EventBus.emit(GameEvent.MANA_CHANGED, { side, amount });
       },
-      BOOST_ATK: (effect, _side, source, AITarget) =>
-        this.resolveOrTarget(AITarget, source, effect, (t) =>
+      BOOST_ATK: (effect, _side, source, AIInstructions) =>
+        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
           this.targetResolution.BOOST_ATK!(t, source, effect),
         ),
-      NERF_ATK: (effect, _side, source, AITarget) =>
-        this.resolveOrTarget(AITarget, source, effect, (t) =>
+      NERF_ATK: (effect, _side, source, AIInstructions) =>
+        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
           this.targetResolution.NERF_ATK!(t, source, effect),
         ),
-      BOOST_DEF: (effect, _side, source, AITarget) =>
-        this.resolveOrTarget(AITarget, source, effect, (t) =>
+      BOOST_DEF: (effect, _side, source, AIInstructions) =>
+        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
           this.targetResolution.BOOST_DEF!(t, source, effect),
         ),
-      NERF_DEF: (effect, _side, source, AITarget) =>
-        this.resolveOrTarget(AITarget, source, effect, (t) =>
+      NERF_DEF: (effect, _side, source, AIInstructions) =>
+        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
           this.targetResolution.NERF_DEF!(t, source, effect),
         ),
-      CHANGE_POS: (effect, _side, source, AITarget) =>
-        this.resolveOrTarget(AITarget, source, effect, (t) =>
+      CHANGE_POS: (effect, _side, source, AIInstructions) =>
+        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
           this.targetResolution.CHANGE_POS!(t, source, effect),
         ),
-      DESTROY: (effect, _side, source, AITarget) =>
-        this.resolveOrTarget(AITarget, source, effect, (t) =>
+      DESTROY: (effect, _side, source, AIInstructions) =>
+        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
           this.targetResolution.DESTROY!(t, source, effect),
         ),
-      BOUNCE: (effect, _side, source, AITarget) =>
-        this.resolveOrTarget(AITarget, source, effect, (t) =>
+      BOUNCE: (effect, _side, source, AIInstructions) =>
+        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
           this.targetResolution.BOUNCE!(t, source, effect),
         ),
       NEGATE: (effect, _side, source) => this.prepareTargeting(effect, source),
-      REVIVE: (effect, _side, source, AITarget) => {
-        if (AITarget) {
-          this.resolveRevive(AITarget, source);
+      REVIVE: (effect, _side, source, AIInstructions) => {
+        if (AIInstructions?.target) {
+          this.resolveRevive(
+            AIInstructions.target,
+            source,
+            AIInstructions.mode || "ATK",
+          );
         } else {
           this.handleRevive(effect, source);
         }
@@ -97,7 +110,7 @@ export class EffectManager implements IEffectManager {
     }
   }
 
-  public applyCardEffect(card: Card, aiTarget?: Card) {
+  public applyCardEffect(card: Card, AIInstructions?: EffectInstructions) {
     this.stopTargeting();
     const effect = card.getCardData().effects;
     if (!effect) return;
@@ -110,7 +123,7 @@ export class EffectManager implements IEffectManager {
     );
 
     targets.forEach((side) => {
-      this.executeCardEffect(effect, side, card, aiTarget);
+      this.executeCardEffect(effect, side, card, AIInstructions);
     });
   }
 
@@ -118,13 +131,13 @@ export class EffectManager implements IEffectManager {
     effect: CardEffect,
     side: GameSide,
     sourceCard: Card,
-    aiTarget?: Card,
+    AIInstructions?: EffectInstructions,
   ) {
     const handler = this.handlerEffects[effect.type];
 
     if (!handler) return;
 
-    handler(effect, side, sourceCard, aiTarget);
+    handler(effect, side, sourceCard, AIInstructions);
   }
 
   private handleDraw(effect: CardEffect, side: GameSide) {
@@ -193,21 +206,17 @@ export class EffectManager implements IEffectManager {
       return;
     }
 
-    if (source.owner == "PLAYER") {
-      this.isSelectingTarget = true;
-      this.pendingEffect = effect;
-      this.pendingSource = source;
+    this.isSelectingTarget = true;
+    this.pendingEffect = effect;
+    this.pendingSource = source;
 
-      this.context.engine.scene.launch("CardListScene", {
-        cards: validCards,
-        isSelectionMode: true,
-        onSelect: (selectedCard: Card) => {
-          this.handleCardSelection(selectedCard);
-        },
-      });
-    } else {
-      //TODO: opponent logic to select better card by: atk, def, spell or target effect
-    }
+    this.context.engine.scene.launch("CardListScene", {
+      cards: validCards,
+      isSelectionMode: true,
+      onSelect: (selectedCard: Card) => {
+        this.handleCardSelection(selectedCard);
+      },
+    });
   }
 
   public onGraveyardClicked(side: GameSide) {
@@ -263,7 +272,11 @@ export class EffectManager implements IEffectManager {
     hand.addCardBack(target);
   }
 
-  private resolveRevive(target: Card, source: Card) {
+  private resolveRevive(
+    target: Card,
+    source: Card,
+    mode: PlacementMode = "ATK",
+  ) {
     const side = source.owner;
     const isMonster = target.getCardData().type.includes("MONSTER");
 
@@ -300,9 +313,9 @@ export class EffectManager implements IEffectManager {
           this.context.selectedCard = null;
         });
     } else {
-      this.context.selectedCard = target
+      this.context.selectedCard = target;
       this.context.field.occupySlot(side, "MONSTER", slot.index, target);
-      this.context.field.playCardToZone(target, slot.x, slot.y, "ATK");
+      this.context.field.playCardToZone(target, slot.x, slot.y, mode);
     }
   }
 

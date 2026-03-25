@@ -127,11 +127,13 @@ export class EasyStrategy implements IAIStrategy {
 
         if (slot !== null) {
           const mode = card.getType() === "SPELL" ? "FACE_UP" : "SET";
+          const revivalMonsterPlacementMode: "ATK" | "DEF" = "ATK";
+
           moves.push({
             card,
             mode,
             type: "PLAY_SPELL",
-            params: { target },
+            params: { target, mode: revivalMonsterPlacementMode },
             slot,
           });
         }
@@ -410,6 +412,12 @@ export class EasyStrategy implements IAIStrategy {
         break;
       }
       case "REVIVE": {
+        const emptySlots = this.context.field.monsterSlots.OPPONENT.filter(
+          (m) => m === null,
+        ).length;
+
+        if (emptySlots) return -500;
+
         const targetType = effect.targetType;
         const bestCard = EffectAnalyzer.analyzeRevivePotential(
           this.context,
@@ -417,13 +425,13 @@ export class EasyStrategy implements IAIStrategy {
           targetType,
         );
 
-        console.log(bestCard, params?.target);
-
         if (bestCard) {
           const reviveValuation = bestCard.getCardData().atk || 0;
           baseScore += reviveValuation * 1.2;
-          break;
+        } else {
+          baseScore = -500;
         }
+        break;
       }
     }
 

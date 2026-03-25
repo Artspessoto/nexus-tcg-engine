@@ -7,6 +7,7 @@ import { ToonButton } from "../objects/ToonButton";
 import type {
   BattleTranslations,
   Difficulty,
+  EffectInstructions,
   GamePhase,
   GameSide,
   PlacementMode,
@@ -376,7 +377,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public cardActivation(
     card: Card,
     side: GameSide,
-    instructions?: { target?: Card },
+    instructions?: EffectInstructions,
   ) {
     const { SCREEN, BATTLE } = LAYOUT_CONFIG;
     const { COLORS, ANIMATIONS } = THEME_CONFIG;
@@ -448,7 +449,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
           this.add.existing(card);
           this.currentHand.showHand();
 
-          this.effects.applyCardEffect(card, instructions?.target);
+          this.effects.applyCardEffect(card, instructions);
 
           if (!isEffectMonster) {
             // remove card from slot
