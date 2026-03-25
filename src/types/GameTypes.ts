@@ -18,6 +18,11 @@ export type Slot = {
   y: number;
 };
 
+export type EffectInstructions = {
+  target?: Card,
+  mode?: PlacementMode
+}
+
 export type Move =
   | { type: "PLAY_MONSTER"; card: Card; slot: Slot; mode: "ATK" | "DEF" }
   | {
@@ -25,7 +30,7 @@ export type Move =
       card: Card;
       slot: Slot;
       mode: "FACE_UP" | "SET";
-      params?: { target?: Card, value?: number}
+      params?: EffectInstructions
     }
   | { type: "ACTIVATE_EFFECT"; card: Card; target?: Card }
   | { type: "ATTACK"; attacker: Card; target?: Card }
