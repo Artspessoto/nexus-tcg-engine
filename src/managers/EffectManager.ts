@@ -26,7 +26,7 @@ export class EffectManager implements IEffectManager {
       side: GameSide,
       source: Card,
       AIInstructions?: EffectInstructions,
-    ) => void
+    ) => Promise<void> | void
   >;
 
   constructor(context: IBattleContext) {
@@ -35,46 +35,80 @@ export class EffectManager implements IEffectManager {
     EventBus.on(GameEvent.PHASE_CHANGED, () => this.stopTargeting());
 
     this.handlerEffects = {
-      BURN: (effect, side) => {
+      BURN: async (effect, side) => {
         const amount = -(effect.value || 0);
         EventBus.emit(GameEvent.LP_CHANGED, { side, amount });
       },
-      HEAL: (effect, side) => {
+      HEAL: async (effect, side) => {
         const amount = effect.value || 0;
         EventBus.emit(GameEvent.LP_CHANGED, { side, amount });
       },
-      DRAW_CARD: (effect, side) => this.handleDraw(effect, side),
-      GAIN_MANA: (effect, side) => {
+      DRAW_CARD: async (effect, side) => {
+        this.handleDraw(effect, side);
+      },
+      GAIN_MANA: async (effect, side) => {
         const amount = effect.value || 0;
         EventBus.emit(GameEvent.MANA_CHANGED, { side, amount });
       },
-      BOOST_ATK: (effect, _side, source, AIInstructions) =>
-        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
-          this.targetResolution.BOOST_ATK!(t, source, effect),
+      BOOST_ATK: async (effect, _side, source, AIInstructions) =>
+        await this.resolveOrTarget(
+          AIInstructions?.target,
+          source,
+          effect,
+          async (t) => {
+            this.targetResolution.BOOST_ATK!(t, source, effect);
+          },
         ),
-      NERF_ATK: (effect, _side, source, AIInstructions) =>
-        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
-          this.targetResolution.NERF_ATK!(t, source, effect),
+      NERF_ATK: async (effect, _side, source, AIInstructions) =>
+        await this.resolveOrTarget(
+          AIInstructions?.target,
+          source,
+          effect,
+          async (t) => {
+            this.targetResolution.NERF_ATK!(t, source, effect);
+          },
         ),
-      BOOST_DEF: (effect, _side, source, AIInstructions) =>
-        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
-          this.targetResolution.BOOST_DEF!(t, source, effect),
+      BOOST_DEF: async (effect, _side, source, AIInstructions) =>
+        await this.resolveOrTarget(
+          AIInstructions?.target,
+          source,
+          effect,
+          async (t) => {
+            this.targetResolution.BOOST_DEF!(t, source, effect);
+          },
         ),
-      NERF_DEF: (effect, _side, source, AIInstructions) =>
-        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
-          this.targetResolution.NERF_DEF!(t, source, effect),
+      NERF_DEF: async (effect, _side, source, AIInstructions) =>
+        await this.resolveOrTarget(
+          AIInstructions?.target,
+          source,
+          effect,
+          async (t) => {
+            this.targetResolution.NERF_DEF!(t, source, effect);
+          },
         ),
-      CHANGE_POS: (effect, _side, source, AIInstructions) =>
-        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
-          this.targetResolution.CHANGE_POS!(t, source, effect),
-        ),
-      DESTROY: (effect, _side, source, AIInstructions) =>
-        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
-          this.targetResolution.DESTROY!(t, source, effect),
-        ),
-      BOUNCE: (effect, _side, source, AIInstructions) =>
-        this.resolveOrTarget(AIInstructions?.target, source, effect, (t) =>
-          this.targetResolution.BOUNCE!(t, source, effect),
+      CHANGE_POS: async (effect, _side, source, AIInstructions) => {
+        await this.resolveOrTarget(
+          AIInstructions?.target,
+          source,
+          effect,
+          (t) => this.targetResolution.CHANGE_POS!(t, source, effect),
+        );
+        await new Promise((r) => this.context.time.delayedCall(400, r));
+      },
+      DESTROY: async (effect, _side, source, AIInstructions) => {
+        await this.resolveOrTarget(
+          AIInstructions?.target,
+          source,
+          effect,
+          async (t) => await this.targetResolution.DESTROY!(t, source, effect),
+        );
+      },
+      BOUNCE: async (effect, _side, source, AIInstructions) =>
+        await this.resolveOrTarget(
+          AIInstructions?.target,
+          source,
+          effect,
+          async (t) => await this.targetResolution.BOUNCE!(t, source, effect),
         ),
       NEGATE: (effect, _side, source) => this.prepareTargeting(effect, source),
       REVIVE: (effect, _side, source, AIInstructions) => {
@@ -97,47 +131,59 @@ export class EffectManager implements IEffectManager {
     return this.context.translationText.effect_notices;
   }
 
-  private resolveOrTarget(
+  private async resolveOrTarget(
     aiTarget: Card | undefined,
     source: Card,
     effect: CardEffect,
-    resolution: (target: Card) => void,
+    resolution: (target: Card) => Promise<void> | void,
   ) {
     if (aiTarget) {
-      resolution(aiTarget);
+      await resolution(aiTarget);
     } else {
       this.prepareTargeting(effect, source);
     }
   }
 
-  public applyCardEffect(card: Card, AIInstructions?: EffectInstructions) {
+  public async applyCardEffect(
+    card: Card,
+    AIInstructions?: EffectInstructions,
+  ): Promise<void> {
     this.stopTargeting();
     const effect = card.getCardData().effects;
     if (!effect) return;
 
     EventBus.emit(GameEvent.EFFECT_ACTIVATED, { card, effect });
 
+    if (AIInstructions?.target) {
+      await this.executeCardEffect(
+        effect,
+        AIInstructions.target.owner,
+        card,
+        AIInstructions,
+      );
+      return;
+    }
+
     const targets = this.getEffectTargets(
       card.owner,
       effect.targetSide || "OPPONENT",
     );
-
-    targets.forEach((side) => {
-      this.executeCardEffect(effect, side, card, AIInstructions);
-    });
+    for (const side of targets) {
+      await this.executeCardEffect(effect, side, card, AIInstructions);
+    }
   }
 
-  private executeCardEffect(
+  private async executeCardEffect(
     effect: CardEffect,
     side: GameSide,
     sourceCard: Card,
     AIInstructions?: EffectInstructions,
-  ) {
+  ): Promise<void> {
     const handler = this.handlerEffects[effect.type];
 
     if (!handler) return;
 
-    handler(effect, side, sourceCard, AIInstructions);
+    await handler(effect, side, sourceCard, AIInstructions);
   }
 
   private handleDraw(effect: CardEffect, side: GameSide) {
@@ -322,7 +368,7 @@ export class EffectManager implements IEffectManager {
   private targetResolution: Partial<
     Record<
       EffectTypes,
-      (target: Card, source: Card, effect: CardEffect) => void
+      (target: Card, source: Card, effect: CardEffect) => Promise<void> | void
     >
   > = {
     BOOST_ATK: (target, _, effect) =>
@@ -345,9 +391,15 @@ export class EffectManager implements IEffectManager {
         Math.max(0, (target.getCardData().def || 0) - (effect.value || 0)),
         "def",
       ),
-    DESTROY: (target) => this.context.combat.destroyCard(target, target.owner),
+    DESTROY: async (target) =>
+      this.context.combat.destroyCard(target, target.owner),
     CHANGE_POS: (target) => this.resolveChangePosition(target),
-    BOUNCE: (target) => this.resolveBounce(target),
+    BOUNCE: async (target) => {
+      this.resolveBounce(target);
+      // await new Promise((resolve) =>
+      //   this.context.time.delayedCall(500, resolve),
+      // );
+    },
     REVIVE: (target, source) => this.resolveRevive(target, source),
   };
 

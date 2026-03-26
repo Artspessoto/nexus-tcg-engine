@@ -561,8 +561,8 @@ export class UIManager implements IUIManager {
     //atk btn
     if (currentPhase === "BATTLE" && canAttack) {
       buttons.push(
-        this.createMenuButton(buttonTexts.attack, x + 70, y - 35, () => {
-          this.context.onAttackDeclared(card);
+        this.createMenuButton(buttonTexts.attack, x + 70, y - 35, async () => {
+          await this.context.onAttackDeclared(card);
         }),
       );
     }
@@ -583,8 +583,8 @@ export class UIManager implements IUIManager {
       //trap or effect monster need wait 1 turn to active
       if (canActive && card.getType() !== "MONSTER") {
         buttons.push(
-          this.createMenuButton(buttonTexts.active, x + 70, y - 35, () => {
-            this.context.cardActivation(card, this.side);
+          this.createMenuButton(buttonTexts.active, x + 70, y - 35, async () => {
+            await this.context.cardActivation(card, this.side);
           }),
         );
       }

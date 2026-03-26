@@ -469,11 +469,11 @@ export class EasyStrategy implements IAIStrategy {
         );
         if (move.mode === "FACE_UP") {
           await this.delay(800);
-          this.context.cardActivation(move.card, this.side, move.params);
+          await this.context.cardActivation(move.card, this.side, move.params);
         }
         break;
       case "ATTACK":
-        this.context.onAttackDeclared(move.attacker, move.target);
+        await this.context.onAttackDeclared(move.attacker, move.target);
         break;
     }
   }

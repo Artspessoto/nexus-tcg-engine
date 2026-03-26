@@ -378,112 +378,116 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     card: Card,
     side: GameSide,
     instructions?: EffectInstructions,
-  ) {
-    const { SCREEN, BATTLE } = LAYOUT_CONFIG;
-    const { COLORS, ANIMATIONS } = THEME_CONFIG;
-    const isEffectMonster = card.getType() === "EFFECT_MONSTER";
+  ): Promise<void> {
+    return new Promise((resolve) => {
+      const { SCREEN, BATTLE } = LAYOUT_CONFIG;
+      const { COLORS, ANIMATIONS } = THEME_CONFIG;
+      const isEffectMonster = card.getType() === "EFFECT_MONSTER";
 
-    //save original position
-    const originalPos = {
-      x: card.x,
-      y: card.y,
-      angle: card.angle,
-      scale: card.scale,
-    };
+      //save original position
+      const originalPos = {
+        x: card.x,
+        y: card.y,
+        angle: card.angle,
+        scale: card.scale,
+      };
 
-    card.activate();
+      card.activate();
 
-    //creating a temporary point to store position data
-    const tempPoint = new Phaser.Math.Vector2();
+      //creating a temporary point to store position data
+      const tempPoint = new Phaser.Math.Vector2();
 
-    //capture the card's absolute world position for coord mapping
-    card.visualElements.getWorldPoint(tempPoint);
+      //capture the card's absolute world position for coord mapping
+      card.visualElements.getWorldPoint(tempPoint);
 
-    //add black background into overlay container
-    const background = this.add
-      .rectangle(
-        SCREEN.CENTER_X,
-        SCREEN.CENTER_Y,
-        SCREEN.WIDTH,
-        SCREEN.HEIGHT,
-        COLORS.OVERLAY_BLACK,
-        0.7,
-      )
-      .setAlpha(0)
-      .setDepth(0);
+      //add black background into overlay container
+      const background = this.add
+        .rectangle(
+          SCREEN.CENTER_X,
+          SCREEN.CENTER_Y,
+          SCREEN.WIDTH,
+          SCREEN.HEIGHT,
+          COLORS.OVERLAY_BLACK,
+          0.7,
+        )
+        .setAlpha(0)
+        .setDepth(0);
 
-    this.tweens.add({
-      targets: background,
-      alpha: 0.7,
-      duration: ANIMATIONS.DURATIONS.NORMAL,
-    });
-
-    if (card.parentContainer) {
-      //remove from parent container to add into temp overlay
-      card.parentContainer.remove(card);
-    }
-
-    // add background and card into temp container
-    this.overlayLayer.add([background, card]);
-    card.setPosition(tempPoint.x, tempPoint.y);
-    card.setDepth(1); // background depth 0, card 1
-
-    this.tweens.add({
-      targets: card,
-      x: BATTLE.ACTIVATION_CENTER.x, // x center (1280 / 2)
-      y: BATTLE.ACTIVATION_CENTER.y, // y center (720 / 2)
-      angle: 0,
-      scale: 1,
-      duration: ANIMATIONS.DURATIONS.ACTIVATION,
-      ease: ANIMATIONS.EASING.BOUNCE,
-    });
-
-    this.time.delayedCall(1000, () => {
       this.tweens.add({
         targets: background,
-        alpha: 0,
+        alpha: 0.7,
         duration: ANIMATIONS.DURATIONS.NORMAL,
-        onComplete: () => {
-          background.destroy();
-          this.overlayLayer.remove(card);
-          this.add.existing(card);
-          this.currentHand.showHand();
+      });
 
-          this.effects.applyCardEffect(card, instructions);
+      if (card.parentContainer) {
+        //remove from parent container to add into temp overlay
+        card.parentContainer.remove(card);
+      }
 
-          if (!isEffectMonster) {
-            // remove card from slot
-            this.field.releaseSlot(card, side);
+      // add background and card into temp container
+      this.overlayLayer.add([background, card]);
+      card.setPosition(tempPoint.x, tempPoint.y);
+      card.setDepth(1); // background depth 0, card 1
 
-            // move card to graveyard
-            this.field.moveToGraveyard(card);
-          } else {
-            //effect monster returns into original position after active effect
-            this.tweens.add({
-              targets: card,
-              x: originalPos.x,
-              y: originalPos.y,
-              angle: originalPos.angle,
-              scale: originalPos.scale,
-              duration: ANIMATIONS.DURATIONS.ACTIVATION,
-              ease: ANIMATIONS.EASING.POWER_OUT,
-              onComplete: () => {
-                this.currentHand.showHand();
-              },
-            });
-          }
-        },
+      this.tweens.add({
+        targets: card,
+        x: BATTLE.ACTIVATION_CENTER.x, // x center (1280 / 2)
+        y: BATTLE.ACTIVATION_CENTER.y, // y center (720 / 2)
+        angle: 0,
+        scale: 1,
+        duration: ANIMATIONS.DURATIONS.ACTIVATION,
+        ease: ANIMATIONS.EASING.BOUNCE,
+      });
+
+      this.time.delayedCall(1000, () => {
+        this.tweens.add({
+          targets: background,
+          alpha: 0,
+          duration: ANIMATIONS.DURATIONS.NORMAL,
+          onComplete: async () => {
+            background.destroy();
+            this.overlayLayer.remove(card);
+            this.add.existing(card);
+            this.currentHand.showHand();
+
+            await this.effects.applyCardEffect(card, instructions);
+
+            if (!isEffectMonster) {
+              // remove card from slot
+              this.field.releaseSlot(card, side);
+
+              // move card to graveyard
+              this.field.moveToGraveyard(card);
+              resolve();
+            } else {
+              //effect monster returns into original position after active effect
+              this.tweens.add({
+                targets: card,
+                x: originalPos.x,
+                y: originalPos.y,
+                angle: originalPos.angle,
+                scale: originalPos.scale,
+                duration: ANIMATIONS.DURATIONS.ACTIVATION,
+                ease: ANIMATIONS.EASING.POWER_OUT,
+                onComplete: () => {
+                  this.currentHand.showHand();
+                  resolve();
+                },
+              });
+            }
+          },
+        });
       });
     });
   }
 
-  public onAttackDeclared(attacker: Card, target?: Card) {
+  public async onAttackDeclared(attacker: Card, target?: Card): Promise<void> {
     this.combat.currentAttacker = attacker;
     if (target) {
       this.combat.isSelectingTarget = true;
-      this.combat.handleCardSelection(target);
+      await this.combat.handleCardSelection(target);
     } else {
-      this.combat.prepareTargeting(attacker);
+      await this.combat.prepareTargeting(attacker);
     }
   }
 

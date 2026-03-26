@@ -34,7 +34,7 @@ export class CombatManager implements ICombatManager {
     return this.context.translationText.combat_notices;
   }
 
-  public prepareTargeting(attacker: Card) {
+  public async prepareTargeting(attacker: Card): Promise<void> {
     const opponentSide = attacker.owner == "PLAYER" ? "OPPONENT" : "PLAYER";
     const existsMonstersIntoField = this.context.field.monsterSlots[
       opponentSide
@@ -48,10 +48,10 @@ export class CombatManager implements ICombatManager {
         .showNotice(this.notices.direct_attack, "WARNING");
       attacker.setAlpha(0.7);
 
-      this.context.time.delayedCall(100, () => {
-        this.executeDirectAttack(attacker, opponentSide);
-        this.currentAttacker = null;
-      });
+      await this.delay(200);
+
+      await this.executeDirectAttack(attacker, opponentSide);
+      this.currentAttacker = null;
       return;
     }
 
@@ -65,7 +65,7 @@ export class CombatManager implements ICombatManager {
     attacker.setAlpha(0.7);
   }
 
-  public handleCardSelection(target: Card) {
+  public async handleCardSelection(target: Card): Promise<void> {
     if (!this.isSelectingTarget || !this.currentAttacker) return;
 
     if (this.context.gameState.currentPhase !== "BATTLE") {
@@ -91,7 +91,7 @@ export class CombatManager implements ICombatManager {
     }
 
     this.isSelectingTarget = false;
-    this.executeAttack(this.currentAttacker, target);
+    await this.executeAttack(this.currentAttacker, target);
 
     this.cancelTarget();
   }
@@ -109,74 +109,84 @@ export class CombatManager implements ICombatManager {
     this.currentAttacker = null;
   }
 
-  private executeAttack(attacker: Card, target: Card) {
-    const { DURATIONS, EASING } = THEME_CONFIG.ANIMATIONS;
-    attacker.hasAttacked = true;
-    attacker.setAlpha(0.7);
+  private executeAttack(attacker: Card, target: Card): Promise<void> {
+    return new Promise((resolve) => {
+      const { DURATIONS, EASING } = THEME_CONFIG.ANIMATIONS;
+      attacker.hasAttacked = true;
+      attacker.setAlpha(0.7);
 
-    this.isAnimating = true;
+      this.isAnimating = true;
 
-    EventBus.emit(GameEvent.ATTACK_DECLARED, { attacker, target });
+      EventBus.emit(GameEvent.ATTACK_DECLARED, { attacker, target });
 
-    this.context.tweens.add({
-      targets: attacker,
-      x: target.x,
-      y: target.y,
-      duration: DURATIONS.NORMAL,
-      ease: EASING.BOUNCE,
-      yoyo: true, //attacker return into original pos
-      onYoyoAll: () => {
-        this.triggerImpactEffects(target);
+      this.context.tweens.add({
+        targets: attacker,
+        x: target.x,
+        y: target.y,
+        duration: DURATIONS.NORMAL,
+        ease: EASING.BOUNCE,
+        yoyo: true, //attacker return into original pos
+        onYoyoAll: () => {
+          this.triggerImpactEffects(target);
 
-        const isTargetDefenseMode = target.angle == 270 || target.angle == -90;
+          const isTargetDefenseMode =
+            target.angle == 270 || target.angle == -90;
 
-        if (isTargetDefenseMode) {
-          if (target.isFaceDown) target.setFaceUp();
-          this.resolveAtkVsDef(attacker, target);
-        } else {
-          if (target.isFaceDown) target.setFaceUp();
-          this.resolveAtkVsAtk(attacker, target);
-        }
-      },
-      onComplete: () => {
-        this.isAnimating = false;
-      },
+          if (isTargetDefenseMode) {
+            if (target.isFaceDown) target.setFaceUp();
+            this.resolveAtkVsDef(attacker, target);
+          } else {
+            if (target.isFaceDown) target.setFaceUp();
+            this.resolveAtkVsAtk(attacker, target);
+          }
+        },
+        onComplete: () => {
+          this.isAnimating = false;
+          resolve();
+        },
+      });
     });
   }
 
-  private executeDirectAttack(attacker: Card, targetSide: GameSide) {
-    const { DURATIONS, EASING, SHAKES } = THEME_CONFIG.ANIMATIONS;
-    const damage = attacker.getCardData().atk ?? 0;
-    
-    attacker.hasAttacked = true;
-    attacker.setAlpha(0.7);
+  private executeDirectAttack(
+    attacker: Card,
+    targetSide: GameSide,
+  ): Promise<void> {
+    return new Promise((resolve) => {
+      const { DURATIONS, EASING, SHAKES } = THEME_CONFIG.ANIMATIONS;
+      const damage = attacker.getCardData().atk ?? 0;
 
-    this.isAnimating = true;
+      attacker.hasAttacked = true;
+      attacker.setAlpha(0.7);
 
-    const targetY = targetSide === "OPPONENT" ? 50 : 650;
-    const targetX = 650;
+      this.isAnimating = true;
 
-    this.context.tweens.add({
-      targets: attacker,
-      y: targetY,
-      x: targetX,
-      duration: DURATIONS.NORMAL,
-      ease: EASING.BOUNCE,
-      yoyo: true, //attacker return into original pos
-      onYoyoAll: () => {
-        this.context.cameras.main.shake(
-          SHAKES.MEDIUM.duration,
-          SHAKES.MEDIUM.intensity,
-        );
-        EventBus.emit(GameEvent.DIRECT_ATTACK, {
-          attacker,
-          targetSide,
-          damage,
-        });
-      },
-      onComplete: () => {
-        this.isAnimating = false;
-      },
+      const targetY = targetSide === "OPPONENT" ? 50 : 650;
+      const targetX = 650;
+
+      this.context.tweens.add({
+        targets: attacker,
+        y: targetY,
+        x: targetX,
+        duration: DURATIONS.NORMAL,
+        ease: EASING.BOUNCE,
+        yoyo: true, //attacker return into original pos
+        onYoyoAll: () => {
+          this.context.cameras.main.shake(
+            SHAKES.MEDIUM.duration,
+            SHAKES.MEDIUM.intensity,
+          );
+          EventBus.emit(GameEvent.DIRECT_ATTACK, {
+            attacker,
+            targetSide,
+            damage,
+          });
+        },
+        onComplete: () => {
+          this.isAnimating = false;
+          resolve();
+        },
+      });
     });
   }
 
@@ -315,5 +325,9 @@ export class CombatManager implements ICombatManager {
         if (child.setTint) child.setTint(color);
       }
     });
+  }
+
+  private delay(ms: number) {
+    return new Promise((resolve) => this.context.time.delayedCall(ms, resolve));
   }
 }

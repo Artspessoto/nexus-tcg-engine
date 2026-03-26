@@ -5,8 +5,8 @@ export interface ICombatManager {
   isSelectingTarget: boolean;
   currentAttacker: Card | null;
   isAnimating: boolean;
-  prepareTargeting(attacker: Card): void;
-  handleCardSelection(target: Card): void;
+  prepareTargeting(attacker: Card): Promise<void>;
+  handleCardSelection(target: Card): Promise<void>;
   destroyCard(card: Card, side: GameSide, silent?: boolean): void;
   cancelTarget(): void;
 }
