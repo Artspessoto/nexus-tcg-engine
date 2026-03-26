@@ -10,11 +10,11 @@ export class Card extends Phaser.GameObjects.Container {
   public readonly originalOwner: GameSide; //real owner of card
   public owner: GameSide; //card controller
   public hasAttacked: boolean = false;
-  private frame: Phaser.GameObjects.Image;
-  // private cardImage: Phaser.GameObjects.Image;
-  private nameText: Phaser.GameObjects.Text;
-  private manaText: Phaser.GameObjects.Text;
-  private descText: Phaser.GameObjects.Text;
+  private frame!: Phaser.GameObjects.Image;
+  private cardImage?: Phaser.GameObjects.Image;
+  private nameText!: Phaser.GameObjects.Text;
+  private manaText!: Phaser.GameObjects.Text;
+  private descText!: Phaser.GameObjects.Text;
   private atkText?: Phaser.GameObjects.Text;
   private defText?: Phaser.GameObjects.Text;
   private _isFaceDown: boolean = false;
@@ -24,7 +24,7 @@ export class Card extends Phaser.GameObjects.Container {
   public setTurn: number = -1;
   public hasChangedPosition: boolean = false;
 
-  public visualElements: Phaser.GameObjects.Container;
+  public visualElements!: Phaser.GameObjects.Container;
 
   constructor(
     scene: Scene,
@@ -41,28 +41,103 @@ export class Card extends Phaser.GameObjects.Container {
     this.currentData = { ...data };
     this.baseData = { ...data };
 
-    this.visualElements = scene.add.container(0, 0);
-    this.add(this.visualElements);
-
-    const { NAME, MANA, DESC, ATK, DEF } = CARD_CONFIG.POSITIONS;
     const width = data.width ?? CARD_CONFIG.WIDTH;
     const height = data.height ?? CARD_CONFIG.HEIGHT;
 
-    //define model image by type
-    const frameKey = this.getFrameKey(data.type);
+    this.cardType = data.type;
 
-    // model image
-    this.frame = scene.add.image(0, 0, frameKey);
+    this.setupContainer();
+    this.setFrame(width, height);
+    this.setImage(scene, data, height, width);
+    this.setTexts(data);
+    this.setStats(data);
+
+    this.setSize(width, height);
+    this.setInteractive({ useHandCursor: true, draggable: false });
+    scene.add.existing(this);
+  }
+
+  private setupContainer() {
+    this.visualElements = this.scene.add.container(0, 0);
+    this.add(this.visualElements);
+  }
+
+  private setFrame(width: number, height: number) {
+    const frameKey = this.getFrameKey(this.cardType);
+    this.frame = this.scene.add.image(0, 0, frameKey);
     this.frame.setDisplaySize(width, height);
     this.visualElements.add(this.frame);
+  }
 
-    //add cart art
-    // this.cardImage = scene.add.image(0, -28, data.imageKey);
-    // this.cardImage.setDisplaySize(CARD_CONFIG.WIDTH, CARD_CONFIG.HEIGHT);
-    // this.add(this.cardImage);
+  private setImage(
+    scene: Phaser.Scene,
+    data: CardData,
+    height: number,
+    width: number,
+  ) {
+    if (!data.imageKey || data.imageKey.trim() == "") return;
 
-    //text position
-    this.nameText = scene.add
+    //create card sprite (x: center, y: -50);
+    this.cardImage = scene.add.image(0, -50, data.imageKey);
+
+    //defines that sprite occupies 85% of total width  of the card
+    const targetWidth = width * 0.85;
+    if (this.cardImage.width > 0) {
+      this.cardImage.setScale(targetWidth / this.cardImage.width);
+    }
+
+    this.visualElements.add(this.cardImage);
+
+    const offsetY = -72; //vertical align for the mask
+    const maskWidth = width * 0.82;
+    const maskHeight = height * 0.42;
+    const archHeight = height * 0.16;
+
+    //create "ghost" object (background template) for card image
+    const maskShape = scene.add.graphics();
+    maskShape.setVisible(false); //hide the drawning
+    maskShape.fillStyle(0xffffff);
+
+    //draw rectangular base of mask
+    maskShape.fillRect(
+      -(maskWidth / 2),
+      offsetY - maskHeight / 4,
+      maskWidth,
+      maskHeight,
+    );
+
+    // draw an ellipse at the top of the rectangle to create the smooth dome effect
+    maskShape.fillEllipse(
+      0,
+      offsetY - maskHeight / 4,
+      maskWidth,
+      archHeight * 2,
+    );
+
+    const mask = maskShape.createGeometryMask();
+    this.cardImage.setMask(mask);
+
+    //force mask to following the card in animations (hover, drag)
+    const updateListener = () => {
+      if (!this.active || !this.visualElements) return;
+      const worldPos = this.visualElements.getWorldTransformMatrix();
+      maskShape.setPosition(worldPos.tx, worldPos.ty);
+      maskShape.setRotation(worldPos.rotation);
+      maskShape.setScale(worldPos.scaleX, worldPos.scaleY);
+    };
+
+    scene.events.on("update", updateListener);
+
+    this.once("destroy", () => {
+      scene.events.off("update", updateListener);
+      maskShape.destroy();
+    });
+  }
+
+  private setTexts(data: CardData) {
+    const { NAME, MANA, DESC } = CARD_CONFIG.POSITIONS;
+
+    this.nameText = this.scene.add
       .text(NAME.x, NAME.y, data.nameKey.toUpperCase(), {
         ...CARD_CONFIG.STYLES.NAME,
         align: "center",
@@ -70,38 +145,32 @@ export class Card extends Phaser.GameObjects.Container {
       })
       .setOrigin(0.5);
 
-    this.manaText = scene.add
+    this.manaText = this.scene.add
       .text(MANA.x, MANA.y, data.manaCost.toString(), CARD_CONFIG.STYLES.STATS)
       .setOrigin(0.5);
 
-    this.descText = scene.add
+    this.descText = this.scene.add
       .text(DESC.x, DESC.y, data.descriptionKey || "...", {
         ...CARD_CONFIG.STYLES.DESC,
       })
       .setOrigin(0.5);
 
     this.visualElements.add([this.nameText, this.manaText, this.descText]);
+  }
 
-    this.cardType = data.type;
-
-    if (data.type == "MONSTER" || data.type == "EFFECT_MONSTER") {
-      const atkValue = `${data.atk?.toString() || 0}`;
-      const defValue = `${data.def?.toString() || 0}`;
+  private setStats(data: CardData) {
+    if (data.type === "MONSTER" || data.type === "EFFECT_MONSTER") {
+      const { ATK, DEF } = CARD_CONFIG.POSITIONS;
 
       this.atkText = this.scene.add
-        .text(ATK.x, ATK.y, atkValue, CARD_CONFIG.STYLES.STATS)
+        .text(ATK.x, ATK.y, `${data.atk || 0}`, CARD_CONFIG.STYLES.STATS)
         .setOrigin(0.5);
-
       this.defText = this.scene.add
-        .text(DEF.x, DEF.y, defValue, CARD_CONFIG.STYLES.STATS)
+        .text(DEF.x, DEF.y, `${data.def || 0}`, CARD_CONFIG.STYLES.STATS)
         .setOrigin(0.5);
 
       this.visualElements.add([this.atkText, this.defText]);
     }
-
-    this.setSize(width, height);
-    this.setInteractive({ useHandCursor: true, draggable: false });
-    scene.add.existing(this);
   }
 
   private getFrameKey(type: CardType): string {
@@ -151,6 +220,7 @@ export class Card extends Phaser.GameObjects.Container {
     this.manaText.setVisible(false);
     this.descText.setVisible(false);
 
+    if (this.cardImage) this.cardImage.setVisible(false);
     if (this.atkText) this.atkText.setVisible(false);
     if (this.defText) this.defText.setVisible(false);
 
@@ -160,6 +230,7 @@ export class Card extends Phaser.GameObjects.Container {
   public setFaceUp() {
     this._isFaceDown = false;
     this.frame.setTexture(this.getFrameKey(this.currentData.type));
+    this.cardImage?.setVisible(true);
 
     this.nameText.setVisible(true);
     this.manaText.setVisible(true);
