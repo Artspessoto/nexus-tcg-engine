@@ -5,6 +5,7 @@ import { GameEvent } from "../events/GameEvents";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { IUIManager } from "../interfaces/IUIManager";
 import type { Card } from "../objects/Card";
+import { DecisionModal } from "../objects/DecisionModal";
 import { ToonButton } from "../objects/ToonButton";
 import type {
   GamePhase,
@@ -583,9 +584,14 @@ export class UIManager implements IUIManager {
       //trap or effect monster need wait 1 turn to active
       if (canActive && card.getType() !== "MONSTER") {
         buttons.push(
-          this.createMenuButton(buttonTexts.active, x + 70, y - 35, async () => {
-            await this.context.cardActivation(card, this.side);
-          }),
+          this.createMenuButton(
+            buttonTexts.active,
+            x + 70,
+            y - 35,
+            async () => {
+              await this.context.cardActivation(card, this.side);
+            },
+          ),
         );
       }
     }
@@ -677,6 +683,40 @@ export class UIManager implements IUIManager {
         ANIMATIONS.SHAKES.STRONG.intensity,
       );
     }
+  }
+
+  public async showTrapResponseAction(): Promise<boolean> {
+    return new Promise((resolve) => {
+      const { SCREEN } = LAYOUT_CONFIG;
+      const { DEPTHS } = THEME_CONFIG;
+
+      //opacity block background
+      this.inputBlocker = this.context.add
+        .rectangle(
+          SCREEN.CENTER_X,
+          SCREEN.CENTER_Y,
+          SCREEN.WIDTH,
+          SCREEN.HEIGHT,
+          0x000000,
+          0.6,
+        )
+        .setInteractive()
+        .setDepth(DEPTHS.BANNERS - 1);
+
+      new DecisionModal(
+        this.context.engine,
+        {
+          title: "RESPOSTA",
+          message: "Deseja ativar uma carta em resposta ao ataque?",
+          confirmText: "ATIVAR",
+          cancelText: "PASSAR",
+        },
+        (result) => {
+          this.inputBlocker?.destroy();
+          resolve(result);
+        },
+      ).setDepth(THEME_CONFIG.DEPTHS.BANNERS);
+    });
   }
 }
 

@@ -5,6 +5,7 @@ import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { ICombatManager } from "../interfaces/ICombatManager";
 import type { Card } from "../objects/Card";
 import type { GameSide } from "../types/GameTypes";
+import { Logger } from "../utils/Logger";
 
 export class CombatManager implements ICombatManager {
   private context: IBattleContext;
@@ -40,9 +41,16 @@ export class CombatManager implements ICombatManager {
       opponentSide
     ].some((slot) => slot !== null);
 
-    if (attacker.hasAttacked) return;
-
     if (!existsMonstersIntoField) {
+      const checkResponse = await this.checkOpponentResponse(opponentSide);
+
+      if (checkResponse) {
+        //TODO: trap or effect monster active
+        Logger.debug("COMBAT", "response effect", {
+          attacker: this.currentAttacker,
+          defender: opponentSide,
+        });
+      }
       this.context
         .getUI(opponentSide)
         .showNotice(this.notices.direct_attack, "WARNING");
@@ -75,6 +83,16 @@ export class CombatManager implements ICombatManager {
     const attackOwnCard = target.owner === this.currentAttacker.owner;
     const isValidTargetType = target.getType().includes("MONSTER");
 
+    const checkResponse = await this.checkOpponentResponse(target.owner);
+
+    if (checkResponse) {
+      //TODO: trap or effect monster active
+      Logger.debug("COMBAT", "response effect", {
+        attacker: this.currentAttacker,
+        defender: target,
+      });
+    }
+
     if (attackOwnCard) {
       this.context
         .getUI(this.currentAttacker.owner)
@@ -91,7 +109,10 @@ export class CombatManager implements ICombatManager {
     }
 
     this.isSelectingTarget = false;
-    await this.executeAttack(this.currentAttacker, target);
+
+    if (this.currentAttacker?.active) {
+      await this.executeAttack(this.currentAttacker, target);
+    }
 
     this.cancelTarget();
   }
@@ -325,6 +346,33 @@ export class CombatManager implements ICombatManager {
         if (child.setTint) child.setTint(color);
       }
     });
+  }
+
+  private async checkOpponentResponse(
+    defenderSide: GameSide,
+  ): Promise<boolean> {
+    if (defenderSide === "OPPONENT") {
+      // TODO: npc response with trap or effect monster
+      return false;
+    }
+
+    const monsters = this.context.field.monsterSlots[defenderSide];
+    const spells = this.context.field.spellSlots[defenderSide];
+
+    const hasEffectMonster = monsters.some(
+      (c) => c?.getType() === "EFFECT_MONSTER",
+    );
+    const hasTrap = spells.some((c) => c?.getType() === "TRAP");
+
+    if (!hasEffectMonster && !hasTrap) return false;
+
+    if (defenderSide == "PLAYER") {
+      return await this.context.getUI("PLAYER").showTrapResponseAction();
+    } else {
+      //TODO: npc response
+    }
+
+    return false;
   }
 
   private delay(ms: number) {
