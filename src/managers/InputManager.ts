@@ -2,6 +2,7 @@ import type { IInputManager } from "../interfaces/IInputManager";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { Card } from "../objects/Card";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { Logger } from "../utils/Logger";
 
 export class InputManager implements IInputManager {
   private context: IBattleContext;
@@ -17,12 +18,10 @@ export class InputManager implements IInputManager {
         pointer: Phaser.Input.Pointer,
         currentlyOver: Phaser.GameObjects.GameObject[],
       ) => {
-        //DEBUG LOG
-        if (process.env.NODE_ENV == "test") {
-          console.log(
-            `Debug: X: ${Math.round(pointer.x)}, Y: ${Math.round(pointer.y)}`,
-          );
-        }
+        Logger.debug(
+          "SYSTEM",
+          `X: ${Math.round(pointer.x)}, Y: ${Math.round(pointer.y)}`,
+        );
 
         //click action into void
         if (currentlyOver.length === 0) {

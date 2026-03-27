@@ -13,6 +13,7 @@ import type {
 } from "../types/GameTypes";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
+import { Logger } from "../utils/Logger";
 
 export class EffectManager implements IEffectManager {
   private context: IBattleContext;
@@ -138,6 +139,19 @@ export class EffectManager implements IEffectManager {
     resolution: (target: Card) => Promise<void> | void,
   ) {
     if (aiTarget) {
+      const validator = this.targetValidations[effect.type];
+
+      if (validator && !validator(aiTarget, effect)) {
+        Logger.error(
+          `EffectManager: action blocked. Card: ${source.getCardData().nameKey} try to apply ${effect.type} on an invalid target ${aiTarget}`,
+          {
+            sourceCard: source,
+            invalidTarget: aiTarget,
+            effectData: effect,
+          },
+        );
+        return;
+      }
       await resolution(aiTarget);
     } else {
       this.prepareTargeting(effect, source);
@@ -396,9 +410,6 @@ export class EffectManager implements IEffectManager {
     CHANGE_POS: (target) => this.resolveChangePosition(target),
     BOUNCE: async (target) => {
       this.resolveBounce(target);
-      // await new Promise((resolve) =>
-      //   this.context.time.delayedCall(500, resolve),
-      // );
     },
     REVIVE: (target, source) => this.resolveRevive(target, source),
   };
