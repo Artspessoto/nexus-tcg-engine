@@ -9,6 +9,7 @@ import type {
 } from "../interfaces/IFieldManager";
 import type { Card } from "../objects/Card";
 import type { GameSide, PlacementMode } from "../types/GameTypes";
+import { Logger } from "../utils/Logger";
 
 export class FieldManager implements IFieldManager {
   private context: IBattleContext;
@@ -347,7 +348,7 @@ export class FieldManager implements IFieldManager {
           break;
         }
         default:
-          console.warn("card without local");
+          Logger.warn("card without local", { card });
           break;
       }
     });
