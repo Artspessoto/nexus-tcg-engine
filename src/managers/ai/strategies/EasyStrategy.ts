@@ -225,7 +225,11 @@ export class EasyStrategy implements IAIStrategy {
 
     if (effect.type == "DESTROY") {
       if (effect.targetType == "SPELL" || effect.targetType == "TRAP") {
-        return playerSpells.filter((s) => s !== null)[0];
+        const validTargets = playerSpells.filter(
+          (s) => s !== null && s.getType() == effect.targetType,
+        );
+
+        return validTargets[0] || undefined;
       }
 
       return (
