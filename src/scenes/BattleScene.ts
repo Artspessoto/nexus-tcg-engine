@@ -35,6 +35,7 @@ import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
 import type { IAIManager } from "../interfaces/IAIManager";
 import { AIManager } from "../managers/ai/AIManager";
+import { Logger } from "../utils/Logger";
 
 export class BattleScene extends Phaser.Scene implements IBattleContext {
   public engine = this;
@@ -306,10 +307,16 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       return;
     }
 
+    const removedSuccessfully = this.currentHand.removeCard(card);
+
+    if (!removedSuccessfully) {
+      this.currentHand.reorganizeHand();
+      return;
+    }
+
     this.gameState.setDragging(false);
     this.selectedCard = card;
 
-    this.currentHand.removeCard(card);
     this.currentHand.hideHand();
 
     this.field.previewPlacement(card, slot.x, slot.y);
@@ -369,9 +376,14 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       amount: -manaCost,
     });
 
-    hand.removeCard(card);
+    if (hand.isCardInHand(card)) {
+        hand.removeCard(card);
+    }
+
     this.field.occupySlot(side, type, slot.index, card);
     this.field.playCardToZone(card, slot.x, slot.y, mode);
+
+    Logger.debug("SYSTEM", `Card ${card.getCardData().nameKey} is set`);
   }
 
   public cardActivation(

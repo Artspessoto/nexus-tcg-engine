@@ -8,6 +8,7 @@ import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { EventBus } from "../events/EventBus";
 import { GameEvent, type CardPlayedPayload } from "../events/GameEvents";
+import { Logger } from "../utils/Logger";
 
 export class HandManager implements IHandManager {
   private context: IBattleContext;
@@ -90,7 +91,7 @@ export class HandManager implements IHandManager {
       deckPosition.y,
       cardData,
       this.side,
-      this.side
+      this.side,
     );
 
     if (this.side == "OPPONENT") {
@@ -158,9 +159,21 @@ export class HandManager implements IHandManager {
     });
   }
 
-  public removeCard(card: Card) {
+  public isCardInHand(card: Card): boolean {
+    return this.hand.includes(card);
+  }
+
+  public removeCard(card: Card): boolean {
+    if (!this.isCardInHand(card)) {
+      Logger.error(
+        `[HandManager] attempt to remove a non-existent card from ${this.side}'s hand.`,
+        { invalidTarget: card },
+      );
+      return false
+    }
     this.hand = this.hand.filter((handCard) => handCard !== card);
     this.reorganizeHand();
+    return true;
   }
 
   public addCardBack(card: Card) {

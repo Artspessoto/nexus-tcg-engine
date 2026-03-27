@@ -9,7 +9,8 @@ export interface IHandManager {
 
   drawCard(deckPosition: { x: number; y: number }): void;
   getRandomCardData(): void;
-  removeCard(card: Card): void;
+  isCardInHand(card: Card): boolean;
+  removeCard(card: Card): boolean;
   addCardBack(card: Card): void;
 
   hideHand(): void;
