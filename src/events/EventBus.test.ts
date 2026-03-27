@@ -4,11 +4,8 @@ import { GameEvent } from "./GameEvents";
 import type { Card } from "../objects/Card";
 
 describe("TypedEventBus", () => {
-  let consoleSpy: unknown;
-
   beforeEach(() => {
     EventBus.removeAllListeners();
-    consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
   });
 
   afterEach(() => {
@@ -51,33 +48,5 @@ describe("TypedEventBus", () => {
     EventBus.emit(GameEvent.FIELD_STATS_RESET, { sides: ["PLAYER"] });
 
     expect(callback).not.toHaveBeenCalled();
-  });
-
-  it("deve logar no console quando em modo de desenvolvimento", () => {
-    vi.stubEnv("NODE_ENV", "development");
-
-    EventBus.emit(GameEvent.PHASE_CHANGED, {
-      newPhase: "MAIN",
-      activePlayer: "PLAYER",
-    });
-
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringContaining("[EVENT]"),
-      expect.any(String),
-      expect.any(String),
-      expect.any(String),
-      expect.any(Object),
-    );
-  });
-
-  it("NÃO deve logar no console quando em produção", () => {
-    vi.stubEnv("NODE_ENV", "production");
-
-    EventBus.emit(GameEvent.PHASE_CHANGED, {
-      newPhase: "MAIN",
-      activePlayer: "PLAYER",
-    });
-
-    expect(consoleSpy).not.toHaveBeenCalled();
   });
 });

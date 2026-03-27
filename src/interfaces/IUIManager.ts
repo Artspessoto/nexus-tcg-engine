@@ -25,4 +25,5 @@ export interface IUIManager {
   clearSelectionMenu(): void;
   showGraveyardMenu(cards: Card[], x: number, y: number): void;
   showFieldCardMenu(x: number, y: number, card: Card): void;
+  showTrapResponseAction(): Promise<boolean>;
 }
