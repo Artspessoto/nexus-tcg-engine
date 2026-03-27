@@ -3,6 +3,7 @@ import { FieldManager } from "./FieldManager";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { Card } from "../objects/Card";
 import { createMockBattleContext, createMockCard, createMockGameObject } from "../utils/mocks";
+import { Logger } from "../utils/Logger";
 
 describe("FieldManager", () => {
   let fieldManager: FieldManager;
@@ -232,7 +233,7 @@ describe("FieldManager", () => {
     const card = createMockCard({
       location: "UNKNOWN" as unknown as Card["location"],
     });
-    const spy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const spy = vi.spyOn(Logger, "warn").mockImplementation(() => {});
     fieldManager["setupFieldInteractions"](card as Card);
     const onMock = card.on as ReturnType<typeof vi.fn> & {
       mock?: { calls: Array<[string, (...args: unknown[]) => void]> };
@@ -244,7 +245,7 @@ describe("FieldManager", () => {
     if (call) {
       const clickHandler = call[1];
       clickHandler();
-      expect(spy).toHaveBeenCalledWith("card without local");
+      expect(spy).toHaveBeenCalledWith("card without local", { card });
     }
     spy.mockRestore();
   });
