@@ -73,12 +73,12 @@ describe("CombatManager", () => {
   });
 
   describe("prepareTargeting", () => {
-    it("direct attack when opponent field empty", () => {
+    it("direct attack when opponent field empty", async () => {
       const attacker = setupTestCard({ owner: "PLAYER", atk: 500 });
 
       mockContext.field.monsterSlots.OPPONENT = [null, null];
 
-      combatManager.prepareTargeting(attacker);
+      await combatManager.prepareTargeting(attacker);
 
       expect(mockContext.getUI("OPPONENT").showNotice).toHaveBeenCalled();
     });
@@ -97,19 +97,19 @@ describe("CombatManager", () => {
   });
 
   describe("handleCardSelection validations", () => {
-    it("block attacking own card", () => {
+    it("block attacking own card", async () => {
       const attacker = setupTestCard({ owner: "PLAYER" });
       const target = setupTestCard({ owner: "PLAYER" });
 
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
 
-      combatManager.handleCardSelection(target);
+      await combatManager.handleCardSelection(target);
 
       expect(mockContext.getUI("PLAYER").showNotice).toHaveBeenCalled();
     });
 
-    it("block non monster target", () => {
+    it("block non monster target", async () => {
       const attacker = setupTestCard({ owner: "PLAYER" });
       const target = setupTestCard({ owner: "OPPONENT" });
 
@@ -118,7 +118,7 @@ describe("CombatManager", () => {
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
 
-      combatManager.handleCardSelection(target);
+      await combatManager.handleCardSelection(target);
 
       expect(mockContext.getUI("PLAYER").showNotice).toHaveBeenCalled();
     });
@@ -140,7 +140,7 @@ describe("CombatManager", () => {
   });
 
   describe("Battle Resolution", () => {
-    it("Atk vs Def attacker wins", () => {
+    it("Atk vs Def attacker wins", async () => {
       const attacker = setupTestCard({ owner: "PLAYER", atk: 1000 });
       const target = setupTestCard({ owner: "OPPONENT", def: 500 });
 
@@ -151,7 +151,7 @@ describe("CombatManager", () => {
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
 
-      combatManager.handleCardSelection(target);
+      await combatManager.handleCardSelection(target);
 
       expect(mockContext.field.releaseSlot).toHaveBeenCalledWith(
         target,
@@ -194,7 +194,7 @@ describe("CombatManager", () => {
       expect(mockContext.field.releaseSlot).not.toHaveBeenCalled();
     });
 
-    it("Atk vs Atk tie", () => {
+    it("Atk vs Atk tie", async () => {
       const attacker = setupTestCard({ owner: "PLAYER", atk: 500 });
       const target = setupTestCard({ owner: "OPPONENT", atk: 500 });
 
@@ -204,7 +204,7 @@ describe("CombatManager", () => {
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
 
-      combatManager.handleCardSelection(target);
+      await combatManager.handleCardSelection(target);
 
       expect(mockContext.field.releaseSlot).toHaveBeenCalledWith(
         attacker,
@@ -217,7 +217,7 @@ describe("CombatManager", () => {
       );
     });
 
-    it("Atk vs Atk attacker wins", () => {
+    it("Atk vs Atk attacker wins", async () => {
       const attacker = setupTestCard({ owner: "PLAYER", atk: 1000 });
       const target = setupTestCard({ owner: "OPPONENT", atk: 500 });
 
@@ -226,7 +226,7 @@ describe("CombatManager", () => {
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
 
-      combatManager.handleCardSelection(target);
+      await combatManager.handleCardSelection(target);
 
       expect(mockContext.field.releaseSlot).toHaveBeenCalledWith(
         target,
@@ -234,7 +234,7 @@ describe("CombatManager", () => {
       );
     });
 
-    it("Atk vs Atk defender wins", () => {
+    it("Atk vs Atk defender wins", async () => {
       const attacker = setupTestCard({ owner: "PLAYER", atk: 500 });
       const target = setupTestCard({ owner: "OPPONENT", atk: 1000 });
 
@@ -243,7 +243,7 @@ describe("CombatManager", () => {
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
 
-      combatManager.handleCardSelection(target);
+      await combatManager.handleCardSelection(target);
 
       expect(mockContext.field.releaseSlot).toHaveBeenCalledWith(
         attacker,

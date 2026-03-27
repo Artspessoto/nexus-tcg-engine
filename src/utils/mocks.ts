@@ -65,6 +65,7 @@ export const createMockCard = (overrides: Partial<Card> = {}): Card => {
     owner: "PLAYER",
     originalOwner: "PLAYER",
     location: "HAND",
+    active: true,
     x: 0,
     y: 0,
     angle: 0,
@@ -195,6 +196,7 @@ export const createMockBattleContext = (): IBattleContext => {
       showGraveyardMenu: vi.fn(),
       updateLP: vi.fn(),
       showNotice: vi.fn(),
+      showTrapResponseAction: vi.fn().mockResolvedValue(false),
     }),
     executePlay: vi.fn(),
     getHand: vi.fn().mockReturnValue({
