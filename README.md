@@ -1,17 +1,17 @@
-### Getting Started
+## Getting Started
 
 Follow these instructions to get a copy of the project up and running on your local machine.
 
-#### Requisites
+### Requirements
 
-- **Node.js** (v18 or higher)
+- **Node.js** (v20 or higher)
 - **npm**
 
-#### Installation
+### Installation
 
 1. Clone the repository (Bash):
 ```bash
-git clone https://github.com/your-username/toon_castle.git
+git clone https://github.com/Artspessoto/toon-castle.git
 ```
 
 2. Install dependencies:
@@ -19,7 +19,7 @@ git clone https://github.com/your-username/toon_castle.git
 npm install
 ```
 
-#### Scripts
+### Scripts
 *  **Start the game with:**
 ```bash
 npm run dev
