@@ -20,6 +20,9 @@ export class EffectManager implements IEffectManager {
   public isSelectingTarget: boolean = false;
   private pendingEffect: CardEffect | null = null;
   private pendingSource: Card | null = null;
+  public isSelectingResponse: boolean = false;
+  private responseResolver: ((card: Card | null) => void) | null = null;
+  private targetingResolver: (() => void) | null = null;
   private handlerEffects: Record<
     EffectTypes,
     (
@@ -34,6 +37,12 @@ export class EffectManager implements IEffectManager {
     this.context = context;
 
     EventBus.on(GameEvent.PHASE_CHANGED, () => this.stopTargeting());
+
+    EventBus.on(GameEvent.ACTION_FINALIZED, (data) => {
+      if (this.isSelectingResponse) {
+        this.finalizeResponse(data.card);
+      }
+    });
 
     this.handlerEffects = {
       BURN: async (effect, side) => {
@@ -112,7 +121,7 @@ export class EffectManager implements IEffectManager {
           async (t) => await this.targetResolution.BOUNCE!(t, source, effect),
         ),
       NEGATE: (effect, _side, source) => this.prepareTargeting(effect, source),
-      REVIVE: (effect, _side, source, AIInstructions) => {
+      REVIVE: async (effect, _side, source, AIInstructions) => {
         if (AIInstructions?.target) {
           this.resolveRevive(
             AIInstructions.target,
@@ -120,7 +129,7 @@ export class EffectManager implements IEffectManager {
             AIInstructions.mode || "ATK",
           );
         } else {
-          this.handleRevive(effect, source);
+          await this.handleRevive(effect, source);
         }
       },
 
@@ -154,7 +163,7 @@ export class EffectManager implements IEffectManager {
       }
       await resolution(aiTarget);
     } else {
-      this.prepareTargeting(effect, source);
+      await this.prepareTargeting(effect, source);
     }
   }
 
@@ -178,6 +187,24 @@ export class EffectManager implements IEffectManager {
       return;
     }
 
+    const isTargetedEffect = [
+      "DESTROY",
+      "BOUNCE",
+      "NERF_ATK",
+      "BOOST_ATK",
+      "NERF_DEF",
+      "BOOST_DEF",
+      "REVIVE",
+      "CHANGE_POS",
+    ].includes(effect.type);
+
+    if (isTargetedEffect) {
+      //target effect dont need side
+      await this.executeCardEffect(effect, card.owner, card);
+      return;
+    }
+
+    //global effects -> BURN, HEAL, DRAW
     const targets = this.getEffectTargets(
       card.owner,
       effect.targetSide || "OPPONENT",
@@ -209,7 +236,7 @@ export class EffectManager implements IEffectManager {
     }
   }
 
-  private handleRevive(effect: CardEffect, source: Card) {
+  private async handleRevive(effect: CardEffect, source: Card): Promise<void> {
     const targetSide = effect.targetSide || "OWNER";
 
     const allowedSides = this.getEffectTargets(source.owner, targetSide);
@@ -230,18 +257,26 @@ export class EffectManager implements IEffectManager {
 
     //option to choose between both cemeteries
     if (targetSide == "BOTH") {
-      this.prepareTargeting(effect, source, this.notices.select_graveyard);
+      await this.prepareTargeting(
+        effect,
+        source,
+        this.notices.select_graveyard,
+      );
     } else {
       //if target side is owner open source owner graveyard, else open contrary graveyard
       const sideOpen =
         targetSide == "OWNER"
           ? source.owner
           : this.getOpponentSide(source.owner);
-      this.openGraveyardList(sideOpen, effect, source);
+      await this.openGraveyardList(sideOpen, effect, source);
     }
   }
 
-  private openGraveyardList(side: GameSide, effect: CardEffect, source: Card) {
+  private async openGraveyardList(
+    side: GameSide,
+    effect: CardEffect,
+    source: Card,
+  ): Promise<void> {
     const graveyardCards = this.context.field.graveyardSlot[side];
 
     const validCards = graveyardCards.filter((card) =>
@@ -277,6 +312,10 @@ export class EffectManager implements IEffectManager {
         this.handleCardSelection(selectedCard);
       },
     });
+
+    return new Promise((resolve) => {
+      this.targetingResolver = resolve;
+    });
   }
 
   public onGraveyardClicked(side: GameSide) {
@@ -304,6 +343,11 @@ export class EffectManager implements IEffectManager {
     const isRevive = this.pendingEffect.type === "REVIVE";
 
     this.stopTargeting();
+
+    if (this.targetingResolver) {
+      this.targetingResolver();
+      this.targetingResolver = null;
+    }
 
     if (!isRevive) {
       EventBus.emit(GameEvent.TARGETING_CANCELED, { source, type: "EFFECT" });
@@ -338,6 +382,7 @@ export class EffectManager implements IEffectManager {
     mode: PlacementMode = "ATK",
   ) {
     const side = source.owner;
+    target.active = true;
     const isMonster = target.getCardData().type.includes("MONSTER");
 
     //remove from graveyard
@@ -371,11 +416,21 @@ export class EffectManager implements IEffectManager {
 
           this.stopTargeting();
           this.context.selectedCard = null;
+
+          if (this.targetingResolver) {
+            this.targetingResolver();
+            this.targetingResolver = null;
+          }
         });
     } else {
       this.context.selectedCard = target;
       this.context.field.occupySlot(side, "MONSTER", slot.index, target);
       this.context.field.playCardToZone(target, slot.x, slot.y, mode);
+
+      if (this.targetingResolver) {
+        this.targetingResolver();
+        this.targetingResolver = null;
+      }
     }
   }
 
@@ -462,15 +517,20 @@ export class EffectManager implements IEffectManager {
         });
 
         this.stopTargeting();
+
+        if (this.targetingResolver) {
+          this.targetingResolver();
+          this.targetingResolver = null;
+        }
       }
     }
   }
 
-  public prepareTargeting(
+  public async prepareTargeting(
     effect: CardEffect,
     source: Card,
     customMessage?: string,
-  ) {
+  ): Promise<void> {
     this.isSelectingTarget = true;
     this.pendingEffect = effect;
     this.pendingSource = source;
@@ -482,6 +542,80 @@ export class EffectManager implements IEffectManager {
       type: "EFFECT",
       message,
     });
+
+    return new Promise((resolve) => {
+      this.targetingResolver = resolve;
+    });
+  }
+
+  public async selectResponseActivationSource(
+    side: GameSide,
+  ): Promise<Card | null> {
+    this.isSelectingResponse = true;
+    const validCards = this.getValidTriggerCards(side);
+    console.log(validCards);
+
+    return new Promise((resolve) => {
+      this.responseResolver = resolve;
+    });
+  }
+
+  private finalizeResponse(card: Card | null): void {
+    this.isSelectingResponse = false;
+    if (this.responseResolver) {
+      const resolve = this.responseResolver;
+      this.responseResolver = null;
+      resolve(card);
+    }
+  }
+
+  private getValidTriggerCards(side: GameSide): Card[] {
+    const effectMonsters = this.context.field.monsterSlots[side].filter(
+      (c): c is Card => c?.getType() == "EFFECT_MONSTER",
+    );
+    const supports = this.context.field.spellSlots[side].filter(
+      (c): c is Card => c?.getType() == "TRAP",
+    );
+
+    const validResponse = [...effectMonsters, ...supports];
+
+    return validResponse;
+  }
+
+  public handleGlobalClick(card: Card): void {
+    if (this.isSelectingTarget && this.context.selectedCard) {
+      return;
+    }
+    if (this.isSelectingTarget) {
+      if (card.location === "GRAVEYARD") {
+        this.onGraveyardClicked(card.owner);
+      } else {
+        this.handleCardSelection(card);
+      }
+      return;
+    }
+
+    if (this.isSelectingResponse) {
+      const isValid =
+        card.getType() === "TRAP" || card.getType() === "EFFECT_MONSTER";
+      const isOwner = card.owner === "PLAYER";
+
+      if (!isValid || !isOwner) {
+        EventBus.emit(GameEvent.NOTICE_REQUESTED, {
+          message: "SELECIONE UMA CARTA SUA PARA RESPONDER",
+          type: "WARNING",
+        });
+        return;
+      }
+
+      EventBus.emit(GameEvent.REQUEST_CARD_MENU, {
+        card,
+        x: card.x,
+        y: card.y,
+      });
+
+      return;
+    }
   }
 
   private stopTargeting() {
