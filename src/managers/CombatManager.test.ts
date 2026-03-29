@@ -101,6 +101,9 @@ describe("CombatManager", () => {
       const attacker = setupTestCard({ owner: "PLAYER" });
       const target = setupTestCard({ owner: "PLAYER" });
 
+      attacker.location = "FIELD";
+      target.location = "FIELD";
+
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
 
@@ -113,6 +116,9 @@ describe("CombatManager", () => {
       const attacker = setupTestCard({ owner: "PLAYER" });
       const target = setupTestCard({ owner: "OPPONENT" });
 
+      attacker.location = "FIELD";
+      target.location = "FIELD";
+
       target.getType = vi.fn().mockReturnValue("SPELL");
 
       combatManager.currentAttacker = attacker;
@@ -123,16 +129,19 @@ describe("CombatManager", () => {
       expect(mockContext.getUI("PLAYER").showNotice).toHaveBeenCalled();
     });
 
-    it("should cancel attack if phase changed (cover lines 69-70)", () => {
+    it("should cancel attack if phase changed", async () => {
       const attacker = setupTestCard({ owner: "PLAYER" });
       const target = setupTestCard({ owner: "OPPONENT" });
 
       mockContext.gameState.currentPhase = "MAIN";
 
+      attacker.location = "FIELD";
+      target.location = "FIELD";
+
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
 
-      combatManager.handleCardSelection(target);
+      await combatManager.handleCardSelection(target);
 
       expect(combatManager.currentAttacker).toBeNull();
       expect(combatManager.isSelectingTarget).toBe(false);
@@ -145,6 +154,8 @@ describe("CombatManager", () => {
       const target = setupTestCard({ owner: "OPPONENT", def: 500 });
 
       target.angle = 270;
+      attacker.location = "FIELD";
+      target.location = "FIELD";
 
       mockContext.field.monsterSlots.OPPONENT = [target];
 
@@ -163,6 +174,8 @@ describe("CombatManager", () => {
       const attacker = setupTestCard({ owner: "PLAYER", atk: 500 });
       const target = setupTestCard({ owner: "OPPONENT", def: 1000 });
 
+      attacker.location = "FIELD";
+      target.location = "FIELD";
       target.angle = 270;
 
       mockContext.field.monsterSlots.OPPONENT = [target];
@@ -183,6 +196,8 @@ describe("CombatManager", () => {
       const target = setupTestCard({ owner: "OPPONENT", def: 500 });
 
       target.angle = 270;
+      attacker.location = "FIELD";
+      target.location = "FIELD";
 
       mockContext.field.monsterSlots.OPPONENT = [target];
 
@@ -200,6 +215,9 @@ describe("CombatManager", () => {
 
       mockContext.field.monsterSlots.PLAYER = [attacker];
       mockContext.field.monsterSlots.OPPONENT = [target];
+
+      attacker.location = "FIELD";
+      target.location = "FIELD";
 
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
@@ -226,6 +244,9 @@ describe("CombatManager", () => {
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
 
+      attacker.location = "FIELD";
+      target.location = "FIELD";
+
       await combatManager.handleCardSelection(target);
 
       expect(mockContext.field.releaseSlot).toHaveBeenCalledWith(
@@ -243,6 +264,9 @@ describe("CombatManager", () => {
       combatManager.currentAttacker = attacker;
       combatManager.isSelectingTarget = true;
 
+      attacker.location = "FIELD";
+      target.location = "FIELD";
+
       await combatManager.handleCardSelection(target);
 
       expect(mockContext.field.releaseSlot).toHaveBeenCalledWith(
@@ -253,7 +277,7 @@ describe("CombatManager", () => {
   });
 
   describe("Impact Effects", () => {
-    it("should apply and remove tint (cover line 188)", () => {
+    it("should apply and remove tint", () => {
       const card = setupTestCard({ owner: "OPPONENT" });
 
       const delayedSpy = vi.spyOn(mockContext.time, "delayedCall");
@@ -316,9 +340,7 @@ describe("CombatManager", () => {
 
       expect(card.disableInteractive).toHaveBeenCalled();
 
-      expect(mockContext.field.moveToGraveyard).toHaveBeenCalledWith(
-        card,
-      );
+      expect(mockContext.field.moveToGraveyard).toHaveBeenCalledWith(card);
 
       expect(card.setAlpha).toHaveBeenCalledWith(1);
       expect(card.setScale).toHaveBeenCalledWith(1);

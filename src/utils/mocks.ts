@@ -96,6 +96,8 @@ export const createMockCard = (overrides: Partial<Card> = {}): Card => {
 };
 
 export const createMockBattleContext = (): IBattleContext => {
+  let draggingState = false;
+
   return {
     add: {
       zone: vi
@@ -121,10 +123,12 @@ export const createMockBattleContext = (): IBattleContext => {
       currentTurn: 1,
       getHP: vi.fn().mockReturnValue(600),
       currentPhase: "MAIN",
-      isDragging: false,
+      get isDragging() {
+        return draggingState;
+      },
       modifyHP: vi.fn(),
       setPhase: vi.fn(),
-      setDragging: vi.fn(),
+      setDragging: vi.fn((value: boolean) => (draggingState = value)),
       nextTurn: vi.fn(),
       advanceTurnCount: vi.fn(),
     },

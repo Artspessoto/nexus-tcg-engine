@@ -181,12 +181,57 @@ describe("InputManager", () => {
 
       expect(card.on).toHaveBeenCalledWith("pointerout", expect.any(Function));
     });
+    it("should NOT reset card on pointerout if dragging", () => {
+      const card = createMockCard();
+      context.gameState.setDragging(true);
+
+      const events: Record<string, Function> = {};
+
+      card.on = vi.fn().mockImplementation(function (
+        this: unknown,
+        event: string,
+        cb: Function,
+      ) {
+        events[event] = cb;
+        return this;
+      });
+
+      manager.setupCardInteractions(card);
+
+      events["pointerout"]();
+
+      expect(context.tweens.add).not.toHaveBeenCalled();
+    });
   });
 
   describe("setupDragEvents", () => {
     it("should block dragstart if not in MAIN phase", () => {
       const card = createMockCard();
       context.currentPhase = "BATTLE";
+
+      const events: Record<string, Function> = {};
+
+      card.on = vi.fn().mockImplementation(function (
+        this: unknown,
+        event: string,
+        cb: Function,
+      ) {
+        events[event] = cb;
+        return this;
+      });
+
+      manager.setupDragEvents(card);
+
+      events["dragstart"]({} as Phaser.Input.Pointer);
+
+      expect(context.engine.input.setDragState).toHaveBeenCalled();
+    });
+
+    it("should block dragstart if selection is locked", () => {
+      const card = createMockCard();
+
+      context.effects.isSelectingTarget = true;
+      context.selectedCard = createMockCard();
 
       const events: Record<string, Function> = {};
 
@@ -270,6 +315,32 @@ describe("InputManager", () => {
       expect(context.gameState.setDragging).toHaveBeenCalledWith(false);
     });
 
+    it("should NOT handle drop if selection is locked", () => {
+      const card = createMockCard();
+
+      context.effects.isSelectingTarget = true;
+      context.selectedCard = createMockCard();
+
+      const events: Record<string, Function> = {};
+
+      card.on = vi.fn().mockImplementation(function (
+        this: unknown,
+        event: string,
+        cb: Function,
+      ) {
+        events[event] = cb;
+        return this;
+      });
+
+      manager.setupDragEvents(card);
+
+      const zone = {} as Phaser.GameObjects.Zone;
+
+      events["drop"]({} as Phaser.Input.Pointer, zone);
+
+      expect(context.handleCardDrop).not.toHaveBeenCalled();
+    });
+
     it("should reorganize hand if not dropped", () => {
       const card = createMockCard();
 
@@ -312,6 +383,90 @@ describe("InputManager", () => {
       events["drop"]({} as Phaser.Input.Pointer, zone);
 
       expect(context.handleCardDrop).toHaveBeenCalledWith(zone, card);
+    });
+  });
+  describe("isSelectionLocked", () => {
+    it("should return true when selecting target and has selected card", () => {
+      context.effects.isSelectingTarget = true;
+      context.selectedCard = createMockCard();
+
+      expect(manager.isSelectionLocked()).toBe(true);
+    });
+
+    it("should return false when not selecting target", () => {
+      context.effects.isSelectingTarget = false;
+      context.selectedCard = createMockCard();
+
+      expect(manager.isSelectionLocked()).toBe(false);
+    });
+  });
+  describe("hover behavior", () => {
+    it("should block hover when dragging", () => {
+      const card = createMockCard();
+      context.gameState.setDragging(true);
+
+      const events: Record<string, Function> = {};
+
+      card.on = vi.fn().mockImplementation(function (
+        this: unknown,
+        event: string,
+        cb: Function,
+      ) {
+        events[event] = cb;
+        return this;
+      });
+
+      manager.setupCardInteractions(card);
+
+      events["pointerover"]();
+
+      expect(context.tweens.add).not.toHaveBeenCalled();
+    });
+
+    it("should block hover when selection is locked", () => {
+      const card = createMockCard();
+
+      context.effects.isSelectingTarget = true;
+      context.selectedCard = createMockCard();
+
+      const events: Record<string, Function> = {};
+
+      card.on = vi.fn().mockImplementation(function (
+        this: unknown,
+        event: string,
+        cb: Function,
+      ) {
+        events[event] = cb;
+        return this;
+      });
+
+      manager.setupCardInteractions(card);
+
+      events["pointerover"]();
+
+      expect(context.tweens.add).not.toHaveBeenCalled();
+    });
+
+    it("should execute hover normally", () => {
+      const card = createMockCard();
+
+      const events: Record<string, Function> = {};
+
+      card.on = vi.fn().mockImplementation(function (
+        this: unknown,
+        event: string,
+        cb: Function,
+      ) {
+        events[event] = cb;
+        return this;
+      });
+
+      manager.setupCardInteractions(card);
+
+      events["pointerover"]();
+
+      expect(context.tweens.add).toHaveBeenCalled();
+      expect(card.setDepth).toHaveBeenCalledWith(200);
     });
   });
 });
