@@ -248,9 +248,11 @@ export class EffectManager implements IEffectManager {
     );
 
     if (!hasAnyValidCard) {
-      this.context
-        .getUI(source.owner)
-        .showNotice(this.notices.no_valid_graveyard, "WARNING");
+      EventBus.emit(GameEvent.NOTICE_REQUESTED, {
+        message: this.notices.no_valid_graveyard,
+        type: "WARNING",
+      });
+
       this.stopTargeting();
       return;
     }
@@ -293,7 +295,7 @@ export class EffectManager implements IEffectManager {
         "{type}",
         typeLabel,
       );
-      this.context.getUI(source.owner).showNotice(message, "NEUTRAL");
+      EventBus.emit(GameEvent.NOTICE_REQUESTED, { message, type: "NEUTRAL" });
 
       if (effect.targetSide !== "BOTH") {
         this.stopTargeting();
@@ -500,9 +502,10 @@ export class EffectManager implements IEffectManager {
 
     //check if validator exists for pendingEffect type and apply validation
     if (validator && !validator(target, this.pendingEffect)) {
-      this.context
-        .getUI(this.pendingSource.owner)
-        .showNotice(this.notices.invalid_target, "WARNING");
+      EventBus.emit(GameEvent.NOTICE_REQUESTED, {
+        message: this.notices.invalid_target,
+        type: "WARNING",
+      });
       return;
     }
 

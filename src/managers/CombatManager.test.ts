@@ -41,6 +41,9 @@ describe("CombatManager", () => {
     mockContext = createMockBattleContext();
     (mockContext.gameState as any).currentPhase = "BATTLE";
 
+    vi.spyOn(EventBus, "emit");
+    vi.mocked(EventBus.emit).mockClear();
+
     combatManager = new CombatManager(mockContext as unknown as IBattleContext);
   });
 
@@ -80,7 +83,13 @@ describe("CombatManager", () => {
 
       await combatManager.prepareTargeting(attacker);
 
-      expect(mockContext.getUI("OPPONENT").showNotice).toHaveBeenCalled();
+      expect(EventBus.emit).toHaveBeenCalledWith(
+        GameEvent.NOTICE_REQUESTED,
+        expect.objectContaining({
+          message: mockContext.translationText.combat_notices.direct_attack,
+          type: "WARNING",
+        }),
+      );
     });
 
     it("enable targeting when monsters exist", () => {
@@ -109,7 +118,13 @@ describe("CombatManager", () => {
 
       await combatManager.handleCardSelection(target);
 
-      expect(mockContext.getUI("PLAYER").showNotice).toHaveBeenCalled();
+      expect(EventBus.emit).toHaveBeenCalledWith(
+        GameEvent.NOTICE_REQUESTED,
+        expect.objectContaining({
+          message: mockContext.translationText.combat_notices.invalid_own_card,
+          type: "WARNING",
+        }),
+      );
     });
 
     it("block non monster target", async () => {
@@ -126,7 +141,14 @@ describe("CombatManager", () => {
 
       await combatManager.handleCardSelection(target);
 
-      expect(mockContext.getUI("PLAYER").showNotice).toHaveBeenCalled();
+      expect(EventBus.emit).toHaveBeenCalledWith(
+        GameEvent.NOTICE_REQUESTED,
+        expect.objectContaining({
+          message:
+            mockContext.translationText.combat_notices.select_attack_target,
+          type: "WARNING",
+        }),
+      );
     });
 
     it("should cancel attack if phase changed", async () => {

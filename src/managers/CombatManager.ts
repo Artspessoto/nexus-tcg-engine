@@ -51,9 +51,11 @@ export class CombatManager implements ICombatManager {
         return;
       }
 
-      this.context
-        .getUI(opponentSide)
-        .showNotice(this.notices.direct_attack, "WARNING");
+      EventBus.emit(GameEvent.NOTICE_REQUESTED, {
+        message: this.notices.direct_attack,
+        type: "WARNING",
+      });
+
       attacker.setAlpha(0.7);
 
       await this.delay(200);
@@ -101,17 +103,19 @@ export class CombatManager implements ICombatManager {
     }
 
     if (attackOwnCard) {
-      this.context
-        .getUI(this.currentAttacker.owner)
-        .showNotice(this.notices.invalid_own_card, "WARNING");
+      EventBus.emit(GameEvent.NOTICE_REQUESTED, {
+        message: this.notices.invalid_own_card,
+        type: "WARNING",
+      });
       this.cancelTarget();
       return;
     }
 
     if (!isValidTargetType) {
-      this.context
-        .getUI(this.currentAttacker.owner)
-        .showNotice(this.notices.select_attack_target, "WARNING");
+      EventBus.emit(GameEvent.NOTICE_REQUESTED, {
+        message: this.notices.select_attack_target,
+        type: "WARNING",
+      });
       return;
     }
 
