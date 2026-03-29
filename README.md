@@ -4,7 +4,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 ### Requirements
 
-- **Node.js** (v20 or higher)
+- **Node.js** (v22 or higher)
 - **npm**
 
 ### Installation
