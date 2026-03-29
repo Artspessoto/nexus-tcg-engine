@@ -23,6 +23,7 @@ export enum GameEvent {
   //INPUT
   TARGETING_STARTED = "TARGETING_STARTED",
   TARGETING_CANCELED = "TARGETING_CANCELED",
+  FIELD_CARD_CLICKED = "FIELD_CARD_CLICKED",
 
   //COMBAT
   ATTACK_DECLARED = "ATTACK_DECLARED",
@@ -35,6 +36,9 @@ export enum GameEvent {
   LP_CHANGED = "LP_CHANGED",
   INSUFFICIENT_MANA = "INSUFFICIENT_MANA",
   ZONE_OCCUPIED = "ZONE_OCCUPIED",
+  REQUEST_CARD_MENU = "REQUEST_CARD_MENU",
+  ACTION_FINALIZED = "ACTION_FINALIZED",
+  NOTICE_REQUESTED = "NOTICE_REQUESTED",
 
   //EFFECTS
   EFFECT_ACTIVATED = "EFFECT_ACTIVATED",
@@ -104,6 +108,23 @@ export type CardPositionChangedPayload = {
   newMode: PlacementMode;
   isFlip: boolean;
 };
+export type FieldCardClickedPayload = {
+  card: Card;
+};
+export type RequestCardMenuPayload = {
+  card: Card;
+  x: number;
+  y: number;
+};
+
+export type ActionFinalizedPayload = {
+  card: Card;
+};
+
+export type NoticeRequestedPayload = {
+  message: string;
+  type: "PHASE" | "WARNING" | "TURN" | "NEUTRAL";
+};
 
 export interface GameEventMap {
   [GameEvent.PHASE_CHANGED]: PhaseChangedPayload;
@@ -129,4 +150,8 @@ export interface GameEventMap {
   [GameEvent.EFFECT_RESOLVED]: EffectResolvedPayload;
   [GameEvent.CARD_STATS_CHANGED]: CardStatsChanged;
   [GameEvent.CARD_POSITION_CHANGED]: CardPositionChangedPayload;
+  [GameEvent.FIELD_CARD_CLICKED]: FieldCardClickedPayload;
+  [GameEvent.REQUEST_CARD_MENU]: RequestCardMenuPayload;
+  [GameEvent.ACTION_FINALIZED]: ActionFinalizedPayload;
+  [GameEvent.NOTICE_REQUESTED]: NoticeRequestedPayload;
 }
