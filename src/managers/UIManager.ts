@@ -45,6 +45,29 @@ export class UIManager implements IUIManager {
       });
     }
 
+    EventBus.on(GameEvent.NOTICE_REQUESTED, (data) => {
+      if (this.side == "PLAYER") {
+        this.showNotice(data.message, data.type);
+      }
+    });
+
+    EventBus.on(GameEvent.REQUEST_CARD_MENU, (data) => {
+      if (this.side == "PLAYER") {
+        const { card, x, y } = data;
+
+        if (card.location == "FIELD") {
+          this.showFieldCardMenu(x, y, card);
+          this.context.getHand("PLAYER").hideHand();
+        } else if (card.location == "GRAVEYARD") {
+          this.showGraveyardMenu(
+            this.context.field.graveyardSlot[card.owner],
+            x,
+            y,
+          );
+        }
+      }
+    });
+
     EventBus.on(GameEvent.DIRECT_ATTACK, (data) => {
       if (data.targetSide == this.side) {
         this.updateLP(this.side, -data.damage);
@@ -477,15 +500,19 @@ export class UIManager implements IUIManager {
 
     const isPlayerCard = card.owner === "PLAYER";
     const myTurn = this.context.gameState.activePlayer == "PLAYER";
+    const isResponseWindow = this.context.effects.isSelectingResponse;
 
-    if (isPlayerCard && myTurn) {
-      this.addPositionButtons(buttonArgs);
-      this.addAttackButton(buttonArgs);
-      this.addActivationButton(buttonArgs);
+    if (isPlayerCard) {
+      if (myTurn) {
+        this.addPositionButtons(buttonArgs);
+        this.addAttackButton(buttonArgs);
+        this.addActivationButton(buttonArgs);
+      } else if (isResponseWindow) {
+        this.addActivationButton(buttonArgs);
+      }
     }
 
     this.addDetailsButton(buttonArgs);
-
     this.selectionButtons = buttons;
   }
 
@@ -590,6 +617,8 @@ export class UIManager implements IUIManager {
             y - 35,
             async () => {
               await this.context.cardActivation(card, this.side);
+
+              EventBus.emit(GameEvent.ACTION_FINALIZED, { card });
             },
           ),
         );
