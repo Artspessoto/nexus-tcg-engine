@@ -213,14 +213,18 @@ export const createMockBattleContext = (): IBattleContext => {
       prepareTargeting: vi.fn(),
       destroyCard: vi.fn(),
       cancelTarget: vi.fn(),
+      handleGlobalClick: vi.fn(),
     },
     effects: {
       isSelectingTarget: false,
+      isSelectingResponse: false,
       handleCardSelection: vi.fn(),
       applyCardEffect: vi.fn(),
       prepareTargeting: vi.fn(),
       cancelTargeting: vi.fn(),
       onGraveyardClicked: vi.fn(),
+      handleGlobalClick: vi.fn(),
+      selectResponseActivationSource: vi.fn(),
     },
     engine: {
       scene: { launch: vi.fn() } as unknown as Phaser.Scenes.ScenePlugin,
