@@ -9,7 +9,6 @@ import type {
 } from "../interfaces/IFieldManager";
 import type { Card } from "../objects/Card";
 import type { GameSide, PlacementMode } from "../types/GameTypes";
-import { Logger } from "../utils/Logger";
 
 export class FieldManager implements IFieldManager {
   private context: IBattleContext;
@@ -302,55 +301,7 @@ export class FieldManager implements IFieldManager {
     card.removeAllListeners();
 
     card.on("pointerdown", () => {
-      if (this.context.effects.isSelectingTarget && this.context.selectedCard) {
-        return;
-      }
-
-      const currentX = card.x;
-      const currentY = card.y;
-
-      //card in battle mode
-      if (this.context.combat.isSelectingTarget) {
-        this.context.combat.handleCardSelection(card);
-        return;
-      }
-
-      if (
-        this.context.effects.isSelectingTarget &&
-        card.location === "GRAVEYARD"
-      ) {
-        this.context.effects.onGraveyardClicked(card.owner);
-        return;
-      }
-
-      //effect card activated
-      if (this.context.effects.isSelectingTarget) {
-        this.context.effects.handleCardSelection(card);
-        return;
-      }
-
-      switch (card.location) {
-        case "FIELD":
-          this.context
-            .getUI(card.owner)
-            .showFieldCardMenu(currentX, currentY, card);
-          this.context.getHand("PLAYER").hideHand();
-          break;
-        case "GRAVEYARD": {
-          const cardOwner = card.owner;
-          this.context
-            .getUI(cardOwner)
-            .showGraveyardMenu(
-              this.graveyardSlot[cardOwner],
-              currentX,
-              currentY,
-            );
-          break;
-        }
-        default:
-          Logger.warn("card without local", { card });
-          break;
-      }
+      EventBus.emit(GameEvent.FIELD_CARD_CLICKED, { card });
     });
   }
 
