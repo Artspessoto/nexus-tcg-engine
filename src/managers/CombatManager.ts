@@ -42,15 +42,15 @@ export class CombatManager implements ICombatManager {
     ].some((slot) => slot !== null);
 
     if (!existsMonstersIntoField) {
-      const checkResponse = await this.checkOpponentResponse(opponentSide);
+      await this.triggerActivation(opponentSide);
 
-      if (checkResponse) {
-        //TODO: trap or effect monster active
-        Logger.debug("COMBAT", "response effect", {
-          attacker: this.currentAttacker,
-          defender: opponentSide,
-        });
+      const isExecuteDirectAttackValid = attacker && attacker.active;
+
+      if (!isExecuteDirectAttackValid) {
+        this.cancelTarget();
+        return;
       }
+
       this.context
         .getUI(opponentSide)
         .showNotice(this.notices.direct_attack, "WARNING");
@@ -74,7 +74,10 @@ export class CombatManager implements ICombatManager {
   }
 
   public async handleCardSelection(target: Card): Promise<void> {
-    if (!this.isSelectingTarget || !this.currentAttacker) return;
+    if (!this.isSelectingTarget || !this.currentAttacker || this.isAnimating)
+      return;
+
+    this.isSelectingTarget = false;
 
     if (this.context.gameState.currentPhase !== "BATTLE") {
       this.cancelTarget();
@@ -83,14 +86,18 @@ export class CombatManager implements ICombatManager {
     const attackOwnCard = target.owner === this.currentAttacker.owner;
     const isValidTargetType = target.getType().includes("MONSTER");
 
-    const checkResponse = await this.checkOpponentResponse(target.owner);
+    await this.triggerActivation(target.owner);
 
-    if (checkResponse) {
-      //TODO: trap or effect monster active
-      Logger.debug("COMBAT", "response effect", {
-        attacker: this.currentAttacker,
-        defender: target,
-      });
+    const isCombatStillValid =
+      this.currentAttacker &&
+      this.currentAttacker.active &&
+      target &&
+      target.active &&
+      target.location === "FIELD";
+
+    if (!isCombatStillValid) {
+      this.cancelTarget();
+      return;
     }
 
     if (attackOwnCard) {
@@ -108,13 +115,31 @@ export class CombatManager implements ICombatManager {
       return;
     }
 
-    this.isSelectingTarget = false;
-
-    if (this.currentAttacker?.active) {
-      await this.executeAttack(this.currentAttacker, target);
-    }
+    await this.executeAttack(this.currentAttacker, target);
 
     this.cancelTarget();
+  }
+
+  private async triggerActivation(side: GameSide): Promise<void> {
+    if (!this.currentAttacker) return;
+
+    const checkResponse = await this.checkOpponentResponse(side);
+
+    if (checkResponse) {
+      const triggerCard =
+        await this.context.effects.selectResponseActivationSource(side);
+
+      if (triggerCard) {
+        if (!this.currentAttacker || !this.currentAttacker.active) {
+          Logger.debug(
+            "COMBAT",
+            "Attack canceled. The attacking monster/warrior was negated/destroyed by the effect",
+          );
+          this.cancelTarget();
+          return;
+        }
+      }
+    }
   }
 
   public cancelTarget() {
@@ -131,6 +156,9 @@ export class CombatManager implements ICombatManager {
   }
 
   private executeAttack(attacker: Card, target: Card): Promise<void> {
+    if (!attacker.active || !target.active) {
+      return Promise.resolve();
+    }
     return new Promise((resolve) => {
       const { DURATIONS, EASING } = THEME_CONFIG.ANIMATIONS;
       attacker.hasAttacked = true;
@@ -301,6 +329,7 @@ export class CombatManager implements ICombatManager {
     // if card isnt in slot returns
     if (currentSlots.indexOf(card) === -1) return;
 
+    card.active = false;
     this.context.field.releaseSlot(card, side);
     card.disableInteractive();
 
@@ -377,5 +406,11 @@ export class CombatManager implements ICombatManager {
 
   private delay(ms: number) {
     return new Promise((resolve) => this.context.time.delayedCall(ms, resolve));
+  }
+
+  public handleGlobalClick(card: Card) {
+    if (!this.isSelectingTarget) return;
+
+    this.handleCardSelection(card);
   }
 }

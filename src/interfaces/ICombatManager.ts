@@ -9,4 +9,5 @@ export interface ICombatManager {
   handleCardSelection(target: Card): Promise<void>;
   destroyCard(card: Card, side: GameSide, silent?: boolean): void;
   cancelTarget(): void;
+  handleGlobalClick(card: Card): void
 }
