@@ -134,6 +134,10 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.translationText = TRANSLATIONS[lang].battle_scene;
     this.npcAction = new AIManager(this, this.gameDifficulty);
 
+    EventBus.on(GameEvent.FIELD_CARD_CLICKED, (data) => {
+      this.handleInteractionOrchestrator(data.card);
+    });
+
     this.events.once("shutdown", () => {
       EventBus.removeAllListeners();
     });
@@ -377,7 +381,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     });
 
     if (hand.isCardInHand(card)) {
-        hand.removeCard(card);
+      hand.removeCard(card);
     }
 
     this.field.occupySlot(side, type, slot.index, card);
@@ -385,6 +389,30 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
     Logger.debug("SYSTEM", `Card ${card.getCardData().nameKey} is set`);
   }
+
+private handleInteractionOrchestrator(card: Card) {
+    const { x, y } = card;
+
+    // effect priority
+    if (this.effects.isSelectingTarget) {
+        this.effects.handleGlobalClick(card);
+        return;
+    }
+
+    // trigger response
+    if (this.effects.isSelectingResponse) {
+        this.effects.handleGlobalClick(card);
+        return;
+    }
+
+    // battle
+    if (this.combat.isSelectingTarget) {
+        this.combat.handleCardSelection(card);
+        return;
+    }
+
+    EventBus.emit(GameEvent.REQUEST_CARD_MENU, { card, x, y });
+}
 
   public cardActivation(
     card: Card,
@@ -462,16 +490,17 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
             this.add.existing(card);
             this.currentHand.showHand();
 
-            await this.effects.applyCardEffect(card, instructions);
-
             if (!isEffectMonster) {
               // remove card from slot
               this.field.releaseSlot(card, side);
 
               // move card to graveyard
               this.field.moveToGraveyard(card);
-              resolve();
-            } else {
+            }
+
+            await this.effects.applyCardEffect(card, instructions);
+
+            if (isEffectMonster) {
               //effect monster returns into original position after active effect
               this.tweens.add({
                 targets: card,
@@ -486,6 +515,8 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
                   resolve();
                 },
               });
+            } else {
+              resolve();
             }
           },
         });
