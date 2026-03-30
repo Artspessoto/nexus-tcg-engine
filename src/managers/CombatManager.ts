@@ -131,7 +131,7 @@ export class CombatManager implements ICombatManager {
 
     if (checkResponse) {
       const triggerCard =
-        await this.context.effects.selectResponseActivationSource(side);
+        await this.context.effects.selectResponseActivationSource();
 
       if (triggerCard) {
         if (!this.currentAttacker || !this.currentAttacker.active) {

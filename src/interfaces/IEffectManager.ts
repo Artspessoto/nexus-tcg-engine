@@ -13,6 +13,6 @@ export interface IEffectManager {
   onGraveyardClicked(side: GameSide): void;
   handleCardSelection(target: Card): void;
   prepareTargeting(effect: CardEffect, source: Card): Promise<void>;
-  selectResponseActivationSource(side: GameSide): Promise<Card | null>;
+  selectResponseActivationSource(): Promise<Card | null>;
   handleGlobalClick(card: Card): void
 }

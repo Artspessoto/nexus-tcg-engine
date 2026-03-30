@@ -20,9 +20,16 @@ export class EffectManager implements IEffectManager {
   public isSelectingTarget: boolean = false;
   private pendingEffect: CardEffect | null = null;
   private pendingSource: Card | null = null;
-  public isSelectingResponse: boolean = false;
+
+  //controller for await player choose card response (ex: active trap)
+  public isSelectingResponse: boolean = false; 
+
+  //resolve a promise that pauses combat while awaiting the choice of response card
   private responseResolver: ((card: Card | null) => void) | null = null;
+
+  //resolve a promise that pauses effect execution (await the target select in field/graveyard)
   private targetingResolver: (() => void) | null = null;
+
   private handlerEffects: Record<
     EffectTypes,
     (
@@ -551,18 +558,16 @@ export class EffectManager implements IEffectManager {
     });
   }
 
-  public async selectResponseActivationSource(
-    side: GameSide,
-  ): Promise<Card | null> {
+  //pause request to use in combat manager (to trigger response trap/effect monster)
+  public async selectResponseActivationSource(): Promise<Card | null> {
     this.isSelectingResponse = true;
-    const validCards = this.getValidTriggerCards(side);
-    console.log(validCards);
 
     return new Promise((resolve) => {
       this.responseResolver = resolve;
     });
   }
 
+  //break the pause and return to combat
   private finalizeResponse(card: Card | null): void {
     this.isSelectingResponse = false;
     if (this.responseResolver) {
@@ -570,19 +575,6 @@ export class EffectManager implements IEffectManager {
       this.responseResolver = null;
       resolve(card);
     }
-  }
-
-  private getValidTriggerCards(side: GameSide): Card[] {
-    const effectMonsters = this.context.field.monsterSlots[side].filter(
-      (c): c is Card => c?.getType() == "EFFECT_MONSTER",
-    );
-    const supports = this.context.field.spellSlots[side].filter(
-      (c): c is Card => c?.getType() == "TRAP",
-    );
-
-    const validResponse = [...effectMonsters, ...supports];
-
-    return validResponse;
   }
 
   public handleGlobalClick(card: Card): void {
