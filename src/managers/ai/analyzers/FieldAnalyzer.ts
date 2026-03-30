@@ -68,6 +68,22 @@ export class FieldAnalyzer {
     return monsters.filter((m): m is Card => m !== null);
   }
 
+  public static getValidTriggerCards(
+    side: GameSide,
+    context: IBattleContext,
+  ): Card[] {
+    const effectMonsters = context.field.monsterSlots[side].filter(
+      (c): c is Card => c?.getType() == "EFFECT_MONSTER",
+    );
+    const supports = context.field.spellSlots[side].filter(
+      (c): c is Card => c?.getType() == "TRAP",
+    );
+
+    const validResponse = [...effectMonsters, ...supports];
+
+    return validResponse;
+  }
+
   public static getWeaknessPlayerTarget(
     playerMonsters: (Card | null)[],
   ): Card | null {
