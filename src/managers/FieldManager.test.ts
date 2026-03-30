@@ -6,7 +6,7 @@ import {
   createMockBattleContext,
   createMockCard,
   createMockGameObject,
-} from "../utils/mocks";
+} from "../utils/Mocks";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
 

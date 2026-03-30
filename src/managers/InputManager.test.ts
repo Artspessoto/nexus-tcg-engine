@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { InputManager } from "./InputManager";
 import type { IBattleContext } from "../interfaces/IBattleContext";
-import { createMockBattleContext, createMockCard } from "../utils/mocks";
+import { createMockBattleContext, createMockCard } from "../utils/Mocks";
 
 describe("InputManager", () => {
   let context: IBattleContext;

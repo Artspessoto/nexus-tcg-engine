@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CombatManager } from "./CombatManager";
-import { createMockBattleContext, createMockCard } from "../utils/mocks";
+import { createMockBattleContext, createMockCard } from "../utils/Mocks";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
 import type { IBattleContext } from "../interfaces/IBattleContext";

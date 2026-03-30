@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { DeckManager } from "./DeckManager";
-import { createMockBattleContext } from "../utils/mocks";
+import { createMockBattleContext } from "../utils/Mocks";
 
 describe("DeckManager", () => {
   it("should create a new DeckManager instance", () => {

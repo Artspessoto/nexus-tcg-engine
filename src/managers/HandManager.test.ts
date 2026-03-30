@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { HandManager } from "./HandManager";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { GameSide } from "../types/GameTypes";
-import { createMockBattleContext, createMockCard } from "../utils/mocks";
+import { createMockBattleContext, createMockCard } from "../utils/Mocks";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
 
