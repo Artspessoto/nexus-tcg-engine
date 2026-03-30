@@ -29,7 +29,8 @@ describe("DeckManager", () => {
     expect(mockContext.add.plane).toHaveBeenCalledWith(
       LAYOUT_CONFIG.DECK.PLAYER.x - 16,
       LAYOUT_CONFIG.DECK.PLAYER.y,
-      "card_back",
+      "battle_ui",
+      "card_back2",
     );
 
     const firstCard = planeMock.mock.results[0].value;

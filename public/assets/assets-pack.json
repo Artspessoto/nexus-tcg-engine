@@ -1,0 +1,57 @@
+{
+  "battle_assets": {
+    "files": [
+      {
+        "type": "image",
+        "key": "battle-scene-background",
+        "url": "assets/battle/background/battle_scene_1.jpeg"
+      },
+      {
+        "type": "image",
+        "key": "crossed-swords",
+        "url": "assets/battle/icons/crossed-swords.svg"
+      },
+      {
+        "type": "image",
+        "key": "round-shield",
+        "url": "assets/battle/icons/round-shield.svg"
+      },
+      {
+        "type": "atlas",
+        "key": "battle_ui",
+        "textureURL": "assets/battle/texture.png",
+        "atlasURL": "assets/battle/texture.json"
+      },
+      {
+        "type": "image",
+        "key": "buff_example",
+        "url": "assets/battle/illustrations/buff_example.png"
+      },
+      {
+        "type": "image",
+        "key": "fire_ball_example",
+        "url": "assets/battle/illustrations/fire_ball_example.png"
+      },
+      {
+        "type": "image",
+        "key": "revive_example",
+        "url": "assets/battle/illustrations/revive_example.png"
+      },
+      {
+        "type": "image",
+        "key": "twister_example",
+        "url": "assets/battle/illustrations/twister_example.png"
+      },
+      {
+        "type": "image",
+        "key": "warrior1_example",
+        "url": "assets/battle/illustrations/warrior1_example.png"
+      },
+      {
+        "type": "image",
+        "key": "warrior2_example",
+        "url": "assets/battle/illustrations/warrior2_example.png"
+      }
+    ]
+  }
+}

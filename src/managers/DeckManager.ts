@@ -28,7 +28,8 @@ export class DeckManager implements IDeckManager {
       const deckCard = this.context.add.plane(
         this.deckPosition.x - xOffset,
         this.deckPosition.y - yOffset,
-        "card_back",
+        "battle_ui",
+        "card_back2",
       );
       // deckCard.modelRotation.x = -1.02; // deep card
       // deckCard.modelRotation.y = 0.29;

@@ -64,7 +64,7 @@ export class Card extends Phaser.GameObjects.Container {
 
   private setFrame(width: number, height: number) {
     const frameKey = this.getFrameKey(this.cardType);
-    this.frame = this.scene.add.image(0, 0, frameKey);
+    this.frame = this.scene.add.image(0, 0, "battle_ui", frameKey);
     this.frame.setDisplaySize(width, height);
     this.visualElements.add(this.frame);
   }
@@ -176,13 +176,13 @@ export class Card extends Phaser.GameObjects.Container {
   private getFrameKey(type: CardType): string {
     switch (type) {
       case "EFFECT_MONSTER":
-        return "card_template_effect";
+        return "effect_monster_card";
       case "SPELL":
-        return "card_template_spell";
+        return "spell_card";
       case "TRAP":
-        return "card_template_trap";
+        return "trap_card";
       default:
-        return "card_template_monster";
+        return "monster_card";
     }
   }
 
@@ -214,7 +214,7 @@ export class Card extends Phaser.GameObjects.Container {
 
   public setFaceDown() {
     this._isFaceDown = true;
-    this.frame.setTexture("card_back");
+    this.frame.setTexture("battle_ui", "card_back2");
 
     this.nameText.setVisible(false);
     this.manaText.setVisible(false);
@@ -229,7 +229,8 @@ export class Card extends Phaser.GameObjects.Container {
 
   public setFaceUp() {
     this._isFaceDown = false;
-    this.frame.setTexture(this.getFrameKey(this.currentData.type));
+    const frameKey = this.getFrameKey(this.currentData.type);
+    this.frame.setTexture("battle_ui", frameKey);
     this.cardImage?.setVisible(true);
 
     this.nameText.setVisible(true);
@@ -263,7 +264,7 @@ export class Card extends Phaser.GameObjects.Container {
     this.currentData = { ...data };
     this.cardType = data.type;
 
-    this.frame.setTexture(this.getFrameKey(data.type));
+    this.frame.setTexture("battle_ui", this.getFrameKey(data.type));
 
     this.nameText.setText(data.nameKey.toUpperCase());
     this.descText.setText(data.descriptionKey || "");

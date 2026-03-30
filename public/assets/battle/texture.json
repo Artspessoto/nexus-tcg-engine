@@ -1,0 +1,166 @@
+{
+	"textures": [
+		{
+			"image": "texture",
+			"format": "RGBA8888",
+			"size": {
+				"w": 630,
+				"h": 1816
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "card_back",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 408,
+						"h": 612
+					},
+					"spriteSourceSize": {
+						"x": 19,
+						"y": 32,
+						"w": 369,
+						"h": 538
+					},
+					"frame": {
+						"x": 0,
+						"y": 0,
+						"w": 369,
+						"h": 538
+					}
+				},
+				{
+					"filename": "trap_card",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 260,
+						"h": 367
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 260,
+						"h": 367
+					},
+					"frame": {
+						"x": 0,
+						"y": 538,
+						"w": 260,
+						"h": 367
+					}
+				},
+				{
+					"filename": "spell_card",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 261,
+						"h": 365
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 261,
+						"h": 365
+					},
+					"frame": {
+						"x": 0,
+						"y": 905,
+						"w": 261,
+						"h": 365
+					}
+				},
+				{
+					"filename": "monster_card",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 261,
+						"h": 363
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 261,
+						"h": 363
+					},
+					"frame": {
+						"x": 260,
+						"y": 538,
+						"w": 261,
+						"h": 363
+					}
+				},
+				{
+					"filename": "effect_monster_card",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 261,
+						"h": 362
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 261,
+						"h": 362
+					},
+					"frame": {
+						"x": 369,
+						"y": 0,
+						"w": 261,
+						"h": 362
+					}
+				},
+				{
+					"filename": "card_back2",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 261,
+						"h": 362
+					},
+					"spriteSourceSize": {
+						"x": 11,
+						"y": 18,
+						"w": 238,
+						"h": 319
+					},
+					"frame": {
+						"x": 0,
+						"y": 1270,
+						"w": 238,
+						"h": 319
+					}
+				},
+				{
+					"filename": "mana_icon",
+					"rotated": false,
+					"trimmed": true,
+					"sourceSize": {
+						"w": 236,
+						"h": 247
+					},
+					"spriteSourceSize": {
+						"x": 8,
+						"y": 9,
+						"w": 216,
+						"h": 227
+					},
+					"frame": {
+						"x": 0,
+						"y": 1589,
+						"w": 216,
+						"h": 227
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "http://free-tex-packer.com",
+		"version": "0.6.7"
+	}
+}

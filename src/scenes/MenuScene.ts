@@ -16,7 +16,7 @@ export class MenuScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("background", "assets/menu_background.jpg");
+    this.load.image("background", "assets/system/menu_background.jpg");
   }
 
   create() {

@@ -105,24 +105,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   }
 
   preload() {
-    this.load.image(
-      "battle-scene-background",
-      "assets/frameCards/battle_scene_1.jpeg",
-    );
-    this.load.image("card_back", "assets/frameCards/card_back2.png");
-    this.load.image(
-      "card_template_monster",
-      "assets/frameCards/monster_card.png",
-    );
-    this.load.image(
-      "card_template_effect",
-      "assets/frameCards/effect_monster_card.png",
-    );
-    this.load.image("card_template_spell", "assets/frameCards/spell_card.png");
-    this.load.image("card_template_trap", "assets/frameCards/trap_card.png");
-    this.load.image("sword_icon", "assets/frameCards/crossed-swords.svg");
-    this.load.image("shield_icon", "assets/frameCards/round-shield.svg");
-    this.load.image("mana_icon", "assets/frameCards/mana_icon.png");
+    this.load.pack("battle_pack", "assets/assets-pack.json", "battle_assets");
   }
 
   create() {
@@ -390,29 +373,29 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     Logger.debug("SYSTEM", `Card ${card.getCardData().nameKey} is set`);
   }
 
-private handleInteractionOrchestrator(card: Card) {
+  private handleInteractionOrchestrator(card: Card) {
     const { x, y } = card;
 
     // effect priority
     if (this.effects.isSelectingTarget) {
-        this.effects.handleGlobalClick(card);
-        return;
+      this.effects.handleGlobalClick(card);
+      return;
     }
 
     // trigger response
     if (this.effects.isSelectingResponse) {
-        this.effects.handleGlobalClick(card);
-        return;
+      this.effects.handleGlobalClick(card);
+      return;
     }
 
     // battle
     if (this.combat.isSelectingTarget) {
-        this.combat.handleCardSelection(card);
-        return;
+      this.combat.handleCardSelection(card);
+      return;
     }
 
     EventBus.emit(GameEvent.REQUEST_CARD_MENU, { card, x, y });
-}
+  }
 
   public cardActivation(
     card: Card,

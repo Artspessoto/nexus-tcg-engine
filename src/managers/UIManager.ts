@@ -159,14 +159,14 @@ export class UIManager implements IUIManager {
     const initialMana = this.context.gameState.getMana(this.side);
 
     this.manaAura = this.context.add
-      .image(this.manaPosition.x, this.manaPosition.y, "mana_icon")
+      .image(this.manaPosition.x, this.manaPosition.y, "battle_ui", "mana_icon")
       .setScale(0.5)
       .setAlpha(0)
       .setTint(0xffffff)
       .setDepth(DEPTHS.UI_BASE - 1);
 
     this.manaIcon = this.context.add
-      .image(this.manaPosition.x, this.manaPosition.y, "mana_icon")
+      .image(this.manaPosition.x, this.manaPosition.y, "battle_ui", "mana_icon")
       .setScale(0.4)
       .setDepth(DEPTHS.UI_BASE);
 
@@ -438,8 +438,8 @@ export class UIManager implements IUIManager {
     let rightConfig = null;
 
     if (isMonster) {
-      leftConfig = { text: "", icon: "sword_icon", width: 70 };
-      rightConfig = { text: "", icon: "shield_icon", width: 70 };
+      leftConfig = { text: "", icon: "crossed-swords", width: 70 };
+      rightConfig = { text: "", icon: "round-shield", width: 70 };
     } else if (cardType === "SPELL") {
       leftConfig = { text: buttonTexts.active, width: 90 };
       rightConfig = { text: buttonTexts.set, width: 110 };
