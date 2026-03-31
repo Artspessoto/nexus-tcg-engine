@@ -22,7 +22,7 @@ export class EffectManager implements IEffectManager {
   private pendingSource: Card | null = null;
 
   //controller for await player choose card response (ex: active trap)
-  public isSelectingResponse: boolean = false; 
+  public isSelectingResponse: boolean = false;
 
   //resolve a promise that pauses combat while awaiting the choice of response card
   private responseResolver: ((card: Card | null) => void) | null = null;
@@ -43,12 +43,19 @@ export class EffectManager implements IEffectManager {
   constructor(context: IBattleContext) {
     this.context = context;
 
-    EventBus.on(GameEvent.PHASE_CHANGED, () => this.stopTargeting());
+    EventBus.on(GameEvent.PHASE_CHANGED, () => {
+      this.stopTargeting();
+      this.cleanupResponseState();
+    });
 
     EventBus.on(GameEvent.ACTION_FINALIZED, (data) => {
       if (this.isSelectingResponse) {
         this.finalizeResponse(data.card);
       }
+    });
+
+    EventBus.on(GameEvent.FIELD_STATS_RESET, () => {
+      this.cancelTargeting();
     });
 
     this.handlerEffects = {
@@ -238,8 +245,18 @@ export class EffectManager implements IEffectManager {
     const count = effect.value || 0;
     const hand = this.context.getHand(side);
     const deck = this.context.getDeck(side);
+
     for (let i = 0; i < count; i++) {
-      hand.drawCard(deck.position);
+      const drawCard = this.context.gameState.setDeckState(side);
+
+      if (drawCard) {
+        this.context.time.delayedCall(i * 250, () => {
+          hand.drawCard(deck.position, drawCard);
+        });
+      } else {
+        Logger.debug("SYSTEM", "Deck out");
+        break;
+      }
     }
   }
 
@@ -617,5 +634,11 @@ export class EffectManager implements IEffectManager {
     this.isSelectingTarget = false;
     this.pendingEffect = null;
     this.pendingSource = null;
+  }
+
+  private cleanupResponseState(): void {
+    if (this.isSelectingResponse) {
+      this.finalizeResponse(null);
+    }
   }
 }

@@ -501,12 +501,16 @@ export class UIManager implements IUIManager {
     const isPlayerCard = card.owner === "PLAYER";
     const myTurn = this.context.gameState.activePlayer == "PLAYER";
     const isResponseWindow = this.context.effects.isSelectingResponse;
+    const currentPhase = this.context.currentPhase;
 
     if (isPlayerCard) {
       if (myTurn) {
         this.addPositionButtons(buttonArgs);
         this.addAttackButton(buttonArgs);
-        this.addActivationButton(buttonArgs);
+
+        if (currentPhase == "BATTLE") {
+          this.addActivationButton(buttonArgs);
+        }
       } else if (isResponseWindow) {
         this.addActivationButton(buttonArgs);
       }
