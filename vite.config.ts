@@ -2,7 +2,7 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
-  base: "/toon-castle/",
+  base: "/nexus-tcg-engine/",
 
   plugins: [],
 

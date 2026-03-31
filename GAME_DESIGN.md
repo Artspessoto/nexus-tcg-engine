@@ -1,4 +1,4 @@
-# TOON CASTLE - Documentation (subject to updates)
+# Toon Castle - Documentation (subject to updates)
 
 ## 1. Overview
 **Toon Castle** is a single-player roguelike card game. The focus is on the tactical ascent of a 5-story tower, where wisdom, patience, and a lean deck of 20 cards are key to conquering the castle.

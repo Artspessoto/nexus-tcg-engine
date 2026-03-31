@@ -1,3 +1,6 @@
+# Toon Castle: TCG Engine & Event-Driven Architecture
+### High-Performance Game Engine built with Phaser 3, TypeScript, and Vitest
+
 ## Getting Started
 
 Follow these instructions to get a copy of the project up and running on your local machine.
@@ -11,7 +14,7 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 1. Clone the repository (Bash):
 ```bash
-git clone https://github.com/Artspessoto/toon-castle.git
+git clone https://github.com/Artspessoto/nexus-tcg-engine.git
 ```
 
 2. Install dependencies:
