@@ -34,6 +34,10 @@ export const createMockGameObject = () => {
     setScale: vi.fn().mockReturnThis(),
     setX: vi.fn().mockReturnThis(),
     setY: vi.fn().mockReturnThis(),
+    setOrigin: vi.fn().mockReturnThis(), 
+    setShadow: vi.fn().mockReturnThis(),
+    setText: vi.fn().mockReturnThis(),  
+    setColor: vi.fn().mockReturnThis(),
     setStrokeStyle: vi.fn().mockReturnThis(),
     fillStyle: vi.fn().mockReturnThis(),
     fillRoundedRect: vi.fn().mockReturnThis(),
@@ -43,6 +47,7 @@ export const createMockGameObject = () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     on: vi.fn((event: string, cb: Function) => {
       listeners[event] = cb;
+      return this;
     }),
 
     emit: vi.fn((event: string, ...args: unknown[]) => {
@@ -106,7 +111,7 @@ export const createMockBattleContext = (): IBattleContext => {
       graphics: vi.fn().mockReturnValue(createMockGameObject()),
       existing: vi.fn(),
       container: vi.fn().mockReturnValue({ add: vi.fn(), setY: vi.fn() }),
-      text: vi.fn().mockReturnValue({ setOrigin: vi.fn(), setShadow: vi.fn() }),
+      text: vi.fn().mockReturnValue(createMockGameObject()),
       image: vi.fn().mockReturnValue(createMockGameObject()),
       plane: vi.fn().mockImplementation((_x, y, texture) => {
         const plane =
@@ -117,6 +122,7 @@ export const createMockBattleContext = (): IBattleContext => {
       }) as unknown as PlaneFunction,
     } as unknown as Phaser.GameObjects.GameObjectFactory,
     gameState: {
+      getDeckCount: vi.fn().mockReturnValue(20),
       getMana: vi.fn().mockReturnValue(10),
       modifyMana: vi.fn(),
       activePlayer: "PLAYER",
@@ -131,6 +137,9 @@ export const createMockBattleContext = (): IBattleContext => {
       setDragging: vi.fn((value: boolean) => (draggingState = value)),
       nextTurn: vi.fn(),
       advanceTurnCount: vi.fn(),
+      setDeckState: vi.fn(),
+      initializeDecks: vi.fn(),
+      setPlayerName: vi.fn()
     },
     currentPhase: "MAIN",
     translationText: {
@@ -260,7 +269,7 @@ export const createMockBattleContext = (): IBattleContext => {
       playCardToZone: vi.fn(),
       previewPlacement: vi.fn(),
       moveToGraveyard: vi.fn(),
-      resetAttackFlags: vi.fn(),
+      resetFieldFlags: vi.fn(),
     },
     time: {
       delayedCall: vi.fn((_, cb) => {

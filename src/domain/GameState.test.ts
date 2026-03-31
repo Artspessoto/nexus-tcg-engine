@@ -1,5 +1,12 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GameState } from "./GameState";
+
+vi.mock("../constants/CardDatabase", () => ({
+  CARD_DATABASE: {
+    CARD_01: { id: "CARD_01", nameKey: "Test Card 1" },
+    CARD_02: { id: "CARD_02", nameKey: "Test Card 2" },
+  },
+}));
 
 describe("GameState", () => {
   let gameState: GameState;
@@ -17,6 +24,13 @@ describe("GameState", () => {
       expect(gameState.playerMana).toBe(5);
       expect(gameState.currentTurn).toBe(1);
       expect(gameState.isDragging).toBe(false);
+    });
+  });
+
+  describe("Player Configuration", () => {
+    it("should set and get player name correctly", () => {
+      gameState.setPlayerName("Arthur");
+      expect(gameState.playerName).toBe("Arthur");
     });
   });
 
@@ -59,6 +73,45 @@ describe("GameState", () => {
       gameState.advanceTurnCount();
       gameState.advanceTurnCount();
       expect(gameState.currentTurn).toBe(3);
+    });
+  });
+
+  describe("Deck Management", () => {
+    const mockPlayerDeck = ["CARD_01", "CARD_02"];
+    const mockOpponentDeck = ["CARD_01"];
+
+    beforeEach(() => {
+      gameState.initializeDecks(mockPlayerDeck, mockOpponentDeck);
+    });
+
+    it("should return the correct deck count for both sides", () => {
+      expect(gameState.getDeckCount("PLAYER")).toBe(2);
+      expect(gameState.getDeckCount("OPPONENT")).toBe(1);
+    });
+
+    it("should return card data and decrease count when drawing (pop)", () => {
+      const card = gameState.setDeckState("PLAYER");
+
+      expect(card?.id).toBe("CARD_02");
+      expect(gameState.getDeckCount("PLAYER")).toBe(1);
+    });
+
+    it("should return null when attempting to draw from an empty deck (Deck Out)", () => {
+      gameState.setDeckState("OPPONENT");
+      const deckOutCard = gameState.setDeckState("OPPONENT");
+
+      expect(deckOutCard).toBeNull();
+      expect(gameState.getDeckCount("OPPONENT")).toBe(0);
+    });
+  });
+
+  describe("Interaction State", () => {
+    it("should update dragging state correctly", () => {
+      gameState.setDragging(true);
+      expect(gameState.isDragging).toBe(true);
+
+      gameState.setDragging(false);
+      expect(gameState.isDragging).toBe(false);
     });
   });
 });

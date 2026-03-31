@@ -222,7 +222,7 @@ describe("FieldManager", () => {
     emitSpy.mockRestore();
   });
 
-  it("resetAttackFlags resets all monster flags", () => {
+  it("resetFieldFlags resets all monster flags", () => {
     const card = createMockCard({
       hasAttacked: true,
       hasChangedPosition: true,
@@ -231,7 +231,7 @@ describe("FieldManager", () => {
 
     fieldManager.monsterSlots.PLAYER[0] = card;
 
-    fieldManager.resetAttackFlags();
+    fieldManager.resetFieldFlags();
 
     expect(card.hasAttacked).toBe(false);
     expect(card.hasChangedPosition).toBe(false);

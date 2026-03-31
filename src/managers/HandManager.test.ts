@@ -5,6 +5,20 @@ import type { GameSide } from "../types/GameTypes";
 import { createMockBattleContext, createMockCard } from "../utils/Mocks";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
+import type { CardData } from "../types/CardTypes";
+
+const MOCK_CARD_DATA: CardData = {
+  id: "test-card",
+  type: "MONSTER",
+  nameKey: "Test Monster",
+  descriptionKey: "Description",
+  manaCost: 2,
+  atk: 10,
+  def: 10,
+  imageKey: "test_image",
+  width: 300,
+  height: 400,
+};
 
 vi.mock("../objects/Card", () => {
   return {
@@ -41,7 +55,7 @@ describe("HandManager", () => {
 
     const spy = vi.spyOn(handManager, "animateCardEntry");
 
-    handManager.drawCard({ x: 0, y: 0 });
+    handManager.drawCard({ x: 0, y: 0 }, MOCK_CARD_DATA);
 
     expect(handManager.hand.length).toBe(1);
     expect(spy).toHaveBeenCalled();
@@ -51,7 +65,7 @@ describe("HandManager", () => {
     (handManager as unknown as { maxHandSize: number }).maxHandSize = 1;
     handManager.hand = [createMockCard()];
 
-    handManager.drawCard({ x: 0, y: 0 });
+    handManager.drawCard({ x: 0, y: 0 }, MOCK_CARD_DATA);
 
     expect(handManager.hand.length).toBe(1);
   });
@@ -167,7 +181,7 @@ describe("HandManager", () => {
       manaCost: 1,
     });
 
-    opponentManager.drawCard({ x: 0, y: 0 });
+    opponentManager.drawCard({ x: 0, y: 0 }, MOCK_CARD_DATA);
 
     const card = opponentManager.hand[0];
 
