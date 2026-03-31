@@ -13,7 +13,6 @@ export interface IFieldManager {
   graveyardSlot: { PLAYER: Card[]; OPPONENT: Card[] };
 
   setupFieldZones(): void;
-  resetAttackFlags(): void;
 
   releaseSlot(card: Card, side: GameSide): void;
   occupySlot(
@@ -41,6 +40,7 @@ export interface IFieldManager {
   validatePlay(card: Card, zone: Phaser.GameObjects.Zone): IFieldPlayResult;
 
   moveToGraveyard(card: Card): void;
+  resetFieldFlags(): void;
   playCardToZone(
     card: Card,
     targetX: number,

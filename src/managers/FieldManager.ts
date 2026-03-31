@@ -34,7 +34,7 @@ export class FieldManager implements IFieldManager {
 
     EventBus.on(GameEvent.PHASE_CHANGED, (data: PhaseChangedPayload) => {
       if (data.newPhase == "CHANGE_TURN") {
-        this.resetAttackFlags();
+        this.resetFieldFlags();
       }
     });
   }
@@ -264,6 +264,13 @@ export class FieldManager implements IFieldManager {
     const realSide = card.originalOwner;
     const coords = FIELD[realSide].GRAVEYARD;
 
+    const previousTopCard = this.graveyardSlot[realSide][0];
+
+    if (previousTopCard) {
+      previousTopCard.active = false;
+    }
+
+    card.active = true;
     //sent to original owner location
     card.setOwner(realSide);
 
@@ -305,7 +312,7 @@ export class FieldManager implements IFieldManager {
     });
   }
 
-  public resetAttackFlags() {
+  public resetFieldFlags() {
     const sides: GameSide[] = ["PLAYER", "OPPONENT"];
 
     sides.forEach((side) => {
