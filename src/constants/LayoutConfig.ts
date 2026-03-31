@@ -39,7 +39,8 @@ export const LAYOUT_CONFIG = {
   },
   GAME_STATE: {
     BASE_LP: 500,
-    BASE_MANA: 5
+    BASE_MANA: 5,
+    BASE_DECK: 20
   },
   HAND: {
     PLAYER: { NORMAL_Y: 710, HIDDEN_Y: 850 },
