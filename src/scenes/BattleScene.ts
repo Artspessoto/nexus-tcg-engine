@@ -32,37 +32,45 @@ import type { IUIManager } from "../interfaces/IUIManager";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { EventBus } from "../events/EventBus";
-import { GameEvent } from "../events/GameEvents";
+import { GameEvent, type TurnStartedPayload } from "../events/GameEvents";
 import type { IAIManager } from "../interfaces/IAIManager";
 import { AIManager } from "../managers/ai/AIManager";
 import { Logger } from "../utils/Logger";
+import { PLAYER_INITIAL_DECK } from "../constants/DeckConfig";
+import { DeckGenerator } from "../utils/DeckGenerator";
+import type { IGameState } from "../interfaces/IGameState";
 
 export class BattleScene extends Phaser.Scene implements IBattleContext {
   public engine = this;
-  public gameState: GameState;
+  public gameState!: IGameState;
   public translationText!: BattleTranslations;
-  public phaseManager: IPhaseManager;
-  public playerHand: IHandManager;
-  public opponentHand: IHandManager;
-  public field: IFieldManager;
-  public controls: IInputManager;
-  public playerDeck: IDeckManager;
-  public opponentDeck: IDeckManager;
-  public playerUI: IUIManager;
-  public opponentUI: IUIManager;
-  public combat: ICombatManager;
-  public effects: IEffectManager;
+  public phaseManager!: IPhaseManager;
+  public playerHand!: IHandManager;
+  public opponentHand!: IHandManager;
+  public field!: IFieldManager;
+  public controls!: IInputManager;
+  public playerDeck!: IDeckManager;
+  public opponentDeck!: IDeckManager;
+  public playerUI!: IUIManager;
+  public opponentUI!: IUIManager;
+  public combat!: ICombatManager;
+  public effects!: IEffectManager;
   public npcAction!: IAIManager;
 
   public phaseButton!: ToonButton;
   private isChangingPhase: boolean = false;
   public selectedCard: Card | null = null;
   private overlayLayer!: Phaser.GameObjects.Container;
-  // private playerDisplayName!: string = "";
+  private playerDisplayName!: string;
   private gameDifficulty: Difficulty = "EASY";
 
   constructor() {
     super("BattleScene");
+  }
+
+  init(data: { playerName: string; difficulty: Difficulty }) {
+    this.playerDisplayName = data.playerName || "PLAYER 1";
+    this.gameDifficulty = data.difficulty;
 
     this.gameState = new GameState();
     this.phaseManager = new PhaseManager(this);
@@ -80,28 +88,11 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.playerDeck = new DeckManager(this, "PLAYER");
     this.opponentDeck = new DeckManager(this, "OPPONENT");
 
-    EventBus.on(GameEvent.TURN_STARTED, (data) => {
-      const isFirstTurn = data.turnCount == 1;
-      const side = data.side;
+    const playerDeckIds = Phaser.Utils.Array.Shuffle([...PLAYER_INITIAL_DECK]);
+    const NPCDeckIds = DeckGenerator.generateNPCDeck(this.gameDifficulty);
 
-      if (!isFirstTurn || side === "OPPONENT") {
-        const manaGain = 2;
-        EventBus.emit(GameEvent.MANA_CHANGED, {
-          side: this.gameState.activePlayer,
-          amount: manaGain,
-        });
-      }
-
-      if (side === "OPPONENT") {
-        this.opponentHand.drawCard(this.opponentDeck.position);
-        this.npcAction.executeTurn();
-      }
-    });
-  }
-
-  init(data: { playerName: string; difficulty: Difficulty }) {
-    // this.playerDisplayName = data.playerName;
-    this.gameDifficulty = data.difficulty;
+    this.gameState.setPlayerName(this.playerDisplayName);
+    this.gameState.initializeDecks(playerDeckIds, NPCDeckIds);
   }
 
   preload() {
@@ -117,11 +108,8 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.translationText = TRANSLATIONS[lang].battle_scene;
     this.npcAction = new AIManager(this, this.gameDifficulty);
 
-    EventBus.on(GameEvent.FIELD_CARD_CLICKED, (data) => {
-      this.handleInteractionOrchestrator(data.card);
-    });
-
     this.events.once("shutdown", () => {
+      Logger.debug("SYSTEM", "Clean battle scene");
       EventBus.removeAllListeners();
     });
 
@@ -172,11 +160,23 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
     this.controls.setupGlobalInputs();
 
+    this.setupEventListeners();
+
     this.startInitialDraw();
   }
 
   public get currentPhase(): GamePhase {
     return this.gameState.currentPhase;
+  }
+
+  private setupEventListeners(): void {
+    EventBus.on(GameEvent.TURN_STARTED, (data) => {
+      this.handleAITurnBasedAction(data);
+    });
+
+    EventBus.on(GameEvent.FIELD_CARD_CLICKED, (data) => {
+      this.handleInteractionOrchestrator(data.card);
+    });
   }
 
   private getManagerBySide<T>(
@@ -217,18 +217,66 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     let delay = 0;
     for (let i = 0; i < 5; i++) {
       this.time.delayedCall(delay, () => {
-        this.playerHand.drawCard(this.playerDeck.position);
-        this.opponentHand.drawCard(this.opponentDeck.position);
+        const playerData = this.gameState.setDeckState("PLAYER");
+        if (playerData) {
+          this.playerHand.drawCard(this.playerDeck.position, playerData);
+        }
+
+        const opponentData = this.gameState.setDeckState("OPPONENT");
+        if (opponentData) {
+          this.opponentHand.drawCard(this.opponentDeck.position, opponentData);
+        }
       });
       delay += 200;
     }
     this.time.delayedCall(delay, () => this.setPhase("MAIN"));
   }
 
+  private handleAITurnBasedAction(data: TurnStartedPayload) {
+    const isFirstTurn = data.turnCount == 1;
+    const side = data.side;
+    const drawnCardData = this.gameState.setDeckState("OPPONENT");
+
+    if (!isFirstTurn) {
+      const manaGain = 2;
+
+      EventBus.emit(GameEvent.MANA_CHANGED, {
+        side: this.gameState.activePlayer,
+        amount: manaGain,
+      });
+    }
+
+    if (side == "OPPONENT") {
+      if (drawnCardData) {
+        this.getHand(side).drawCard(
+          this.getDeck("OPPONENT").position,
+          drawnCardData,
+        );
+      } else {
+        //deck out
+        Logger.warn("SYSTEM", "Deck out");
+      }
+
+      this.time.delayedCall(1000, () => {
+        this.npcAction.executeTurn();
+      });
+    }
+  }
+
   public handlePlayerCard() {
     if (this.currentPhase == "DRAW" && this.gameState.currentTurn !== 1) {
-      this.setPhase("MAIN");
-      this.currentHand.drawCard(this.currentDeck.position);
+      const activeSide = this.gameState.activePlayer;
+
+      const cardData = this.gameState.setDeckState(activeSide);
+
+      if (cardData) {
+        this.setPhase("MAIN");
+
+        this.currentHand.drawCard(this.currentDeck.position, cardData);
+      } else {
+        //deck out
+        Logger.debug("SYSTEM", "Deck out");
+      }
     }
   }
 
