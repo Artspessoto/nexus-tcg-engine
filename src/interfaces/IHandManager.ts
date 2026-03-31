@@ -1,4 +1,5 @@
 import { Card } from "../objects/Card";
+import type { CardData } from "../types/CardTypes";
 
 export interface IHandManager {
   readonly hand: Card[];
@@ -7,7 +8,7 @@ export interface IHandManager {
   readonly normalY: number;
   readonly maxHandSize: number;
 
-  drawCard(deckPosition: { x: number; y: number }): void;
+  drawCard(deckPosition: { x: number; y: number }, cardData: CardData): void;
   getRandomCardData(): void;
   isCardInHand(card: Card): boolean;
   removeCard(card: Card): boolean;

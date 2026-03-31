@@ -9,6 +9,7 @@ import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { EventBus } from "../events/EventBus";
 import { GameEvent, type CardPlayedPayload } from "../events/GameEvents";
 import { Logger } from "../utils/Logger";
+import type { CardData } from "../types/CardTypes";
 
 export class HandManager implements IHandManager {
   private context: IBattleContext;
@@ -76,14 +77,12 @@ export class HandManager implements IHandManager {
     });
   }
 
-  public drawCard(deckPosition: { x: number; y: number }) {
+  public drawCard(deckPosition: { x: number; y: number }, cardData: CardData) {
     const { DEPTHS } = THEME_CONFIG;
     if (this.hand.length >= this.maxHandSize) {
       EventBus.emit(GameEvent.HAND_FULL, { side: this.side });
       return;
     }
-
-    const cardData = this.getRandomCardData();
 
     const newCard = new Card(
       this.context.engine,

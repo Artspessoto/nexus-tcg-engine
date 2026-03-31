@@ -1,5 +1,7 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { EventBus } from "../events/EventBus";
+import { GameEvent } from "../events/GameEvents";
 import type { IBattleContext } from "../interfaces/IBattleContext";
 import type { IDeckManager } from "../interfaces/IDeckManager";
 import type { GameSide } from "../types/GameTypes";
@@ -8,6 +10,7 @@ export class DeckManager implements IDeckManager {
   public readonly context: IBattleContext;
   public readonly side: GameSide;
   private readonly deckPosition: { x: number; y: number };
+  private countText!: Phaser.GameObjects.Text;
 
   constructor(context: IBattleContext, side: GameSide) {
     this.context = context;
@@ -50,6 +53,46 @@ export class DeckManager implements IDeckManager {
       if (i > 0) {
         deckCard.setTint(TINT_DISABLED);
       }
+    }
+
+    this.countText = this.context.add
+      .text(
+        this.position.x,
+        this.position.y + 95,
+        this.context.gameState.getDeckCount(this.side).toString(),
+        {
+          fontSize: "20px",
+          color: "#FFD966",
+          fontStyle: "bold",
+          stroke: "#000",
+          strokeThickness: 3,
+        },
+      )
+      .setOrigin(0.5)
+      .setDepth(100);
+
+    EventBus.on(GameEvent.CARD_DRAW, (data) => {
+      if (data.side === this.side) {
+        this.updateCounter();
+      }
+    });
+  }
+
+  public updateCounter() {
+    const { DURATIONS, EASING } = THEME_CONFIG.ANIMATIONS;
+    const count = this.context.gameState.getDeckCount(this.side);
+    this.countText.setText(count.toString());
+
+    this.context.tweens.add({
+      targets: this.countText,
+      scale: 1.5,
+      yoyo: true,
+      duration: DURATIONS.FAST,
+      ease: EASING.QUART_OUT,
+    });
+
+    if (count <= 3) {
+      this.countText.setColor("#ff4d4d");
     }
   }
 }
