@@ -77,8 +77,10 @@ export class Card extends Phaser.GameObjects.Container {
   ) {
     if (!data.imageKey || data.imageKey.trim() == "") return;
 
-    //create card sprite (x: center, y: -50);
-    this.cardImage = scene.add.image(0, -50, data.imageKey);
+    const textureKey = data.atlasKey || data.imageKey;
+    const frameKey = data.atlasKey ? data.imageKey : undefined;
+
+    this.cardImage = scene.add.image(0, -50, textureKey, frameKey);
 
     //defines that sprite occupies 85% of total width  of the card
     const targetWidth = width * 0.85;

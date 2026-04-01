@@ -12,6 +12,7 @@ export interface CardData {
   effects?: CardEffect;
   manaCost: number;
   imageKey: string;
+  atlasKey?: string;
   descriptionKey: string;
   width?: number;
   height?: number;
