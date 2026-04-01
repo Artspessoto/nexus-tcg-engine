@@ -1,0 +1,376 @@
+{
+	"textures": [
+		{
+			"image": "monsters",
+			"format": "RGBA8888",
+			"size": {
+				"w": 4096,
+				"h": 3840
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "alligator_warrior",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "amazon",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 0,
+						"y": 768,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "apprentice_warrior",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 0,
+						"y": 1536,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "apprentice_wizard",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 0,
+						"y": 2304,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "baby_dragon",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 0,
+						"y": 3072,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "bandit_archer",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 512,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "bard",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 512,
+						"y": 768,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "bowler",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 512,
+						"y": 1536,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "darkness_wizard",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 512,
+						"y": 2304,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "goblins",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 512,
+						"y": 3072,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "iron_sentinel",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 1024,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "king_knight",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 1536,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "knight",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 2048,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "priestess",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 2560,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "rato flautista",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 3072,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "red_dragon",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 3584,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					}
+				},
+				{
+					"filename": "valkyrie",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 512,
+						"h": 768
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 512,
+						"h": 768
+					},
+					"frame": {
+						"x": 1024,
+						"y": 768,
+						"w": 512,
+						"h": 768
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "http://free-tex-packer.com",
+		"version": "0.6.7"
+	}
+}

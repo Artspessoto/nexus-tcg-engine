@@ -22,6 +22,12 @@
         "textureURL": "assets/battle/texture.png",
         "atlasURL": "assets/battle/texture.json"
       },
+      { 
+        "type": "atlas",
+        "key": "card_illustrations_monsters",
+        "textureURL": "assets/battle/illustrations/monsters.webp",
+        "atlasURL": "assets/battle/illustrations/monsters.json"
+      },
       {
         "type": "image",
         "key": "buff_example",
