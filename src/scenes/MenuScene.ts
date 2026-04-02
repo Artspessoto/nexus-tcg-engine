@@ -20,6 +20,9 @@ export class MenuScene extends Phaser.Scene {
   }
 
   create() {
+    this.load.pack("battle_pack", "assets/assets-pack.json", "battle_assets");
+    this.load.start();
+
     const { SCREEN, MENU } = LAYOUT_CONFIG;
     const { COLORS, FONTS, COMPONENTS } = THEME_CONFIG;
 

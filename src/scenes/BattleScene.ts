@@ -95,10 +95,6 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.gameState.initializeDecks(playerDeckIds, NPCDeckIds);
   }
 
-  preload() {
-    this.load.pack("battle_pack", "assets/assets-pack.json", "battle_assets");
-  }
-
   create() {
     const { SCREEN, BATTLE } = LAYOUT_CONFIG;
     const { DEPTHS, COMPONENTS } = THEME_CONFIG;
