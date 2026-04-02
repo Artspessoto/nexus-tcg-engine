@@ -112,9 +112,9 @@ export const CARD_DATABASE: Record<string, CardData> = {
     nameKey: "Reviver magia",
     descriptionKey:
       "Restaure uma carta mágica do seu cemitério, devolva-a pra sua mão.",
-    effects: { type: "REVIVE", targetSide: "OWNER" },
+    effects: { type: "REVIVE", targetSide: "OWNER", targetType: "SPELL" },
     manaCost: 1,
-    imageKey: "spell_fireball",
+    imageKey: "",
     width: 300,
     height: 400,
   },

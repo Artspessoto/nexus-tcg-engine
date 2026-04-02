@@ -47,16 +47,6 @@
         "type": "image",
         "key": "twister_example",
         "url": "assets/battle/illustrations/twister_example.png"
-      },
-      {
-        "type": "image",
-        "key": "warrior1_example",
-        "url": "assets/battle/illustrations/warrior1_example.png"
-      },
-      {
-        "type": "image",
-        "key": "warrior2_example",
-        "url": "assets/battle/illustrations/warrior2_example.png"
       }
     ]
   }
