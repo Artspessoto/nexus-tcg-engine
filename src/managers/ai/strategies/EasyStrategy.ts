@@ -78,7 +78,7 @@ export class EasyStrategy implements IAIStrategy {
     return moves;
   }
 
-  private mainPhaseAvailableMoves(playableCards: Card[]): Move[] {
+  public mainPhaseAvailableMoves(playableCards: Card[]): Move[] {
     const moves: Move[] = [];
 
     //monster options
@@ -143,7 +143,7 @@ export class EasyStrategy implements IAIStrategy {
     return moves;
   }
 
-  private battlePhaseAvailableMoves(): Move[] {
+  public battlePhaseAvailableMoves(): Move[] {
     const moves: Move[] = [];
     const NPCMonsters = this.context.field.monsterSlots.OPPONENT;
     const playerMonsters = this.context.field.monsterSlots.PLAYER;
@@ -341,7 +341,7 @@ export class EasyStrategy implements IAIStrategy {
     return -50;
   }
 
-  public evaluateSupport(card: Card, params?: { target?: Card }) {
+  public evaluateSupport(card: Card, params?: { target?: Card }): number {
     const effect = card.getCardData().effects;
     if (!effect) return 0;
 
@@ -452,7 +452,7 @@ export class EasyStrategy implements IAIStrategy {
     return finalScored[0].move;
   }
 
-  public async executeMove(move: Move) {
+  public async executeMove(move: Move): Promise<void> {
     switch (move.type) {
       case "PLAY_MONSTER":
         this.context.executePlay(
@@ -482,7 +482,7 @@ export class EasyStrategy implements IAIStrategy {
     }
   }
 
-  private delay(ms: number) {
+  public async delay(ms: number): Promise<Phaser.Time.TimerEvent> {
     return new Promise((resolve) => this.context.time.delayedCall(ms, resolve));
   }
 }
