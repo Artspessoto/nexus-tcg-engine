@@ -1,10 +1,17 @@
-import type { Move } from "../types/GameTypes";
+import type { Card } from "../objects/Card";
+import type { GameSide, Move } from "../types/GameTypes";
 import type { IBattleContext } from "./IBattleContext";
 
 export interface IAIStrategy {
-  context: IBattleContext;
+  readonly context: IBattleContext;
+  readonly side: GameSide;
   playMainPhase(): Promise<void>;
   playBattlePhase(): Promise<void>;
   generateMoves(): Move[];
+  mainPhaseAvailableMoves(playableCards: Card[]): Move[];
+  battlePhaseAvailableMoves(): Move[];
+  evaluateMove(move: Move): number;
+  executeMove(move: Move): Promise<void>;
+  delay(ms: number): Promise<Phaser.Time.TimerEvent>;
   //  TODO: move by card score
 }
