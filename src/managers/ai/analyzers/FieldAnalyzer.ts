@@ -42,7 +42,7 @@ export class FieldAnalyzer {
     );
   }
 
-  public static getStrongestMonsterOption(
+  public static getStrongestMonsterOptionOnHand(
     hand: Card[],
     currentMana: number,
     option: "ATK" | "DEF",
@@ -98,11 +98,11 @@ export class FieldAnalyzer {
     )[0];
   }
 
-  public static getStrongestPlayerTarget(
-    playerMonsters: (Card | null)[],
+  public static getStrongestMonsterTarget(
+    monsterList: (Card | null)[],
     option: "ATK" | "DEF" = "ATK",
   ): Card | null {
-    const activeMonsters = playerMonsters.filter(
+    const activeMonsters = monsterList.filter(
       (monster): monster is Card => monster !== null && !monster.isFaceDown,
     );
 

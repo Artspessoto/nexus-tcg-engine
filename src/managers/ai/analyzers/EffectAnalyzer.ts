@@ -14,7 +14,7 @@ export class EffectAnalyzer {
   public static getRelativeImpact(value: number, totalLP: number): number {
     return value / totalLP;
   }
-  
+
   public static analyzeCardUrgency(context: IBattleContext): number {
     const actualHand = context.getHand("OPPONENT").hand.length;
     const maxHand = context.getHand("OPPONENT").maxHandSize;
@@ -40,7 +40,7 @@ export class EffectAnalyzer {
   public static analyzeMonsterDestructionValue(
     context: IBattleContext,
   ): number {
-    const strongestPlayerMonster = FieldAnalyzer.getStrongestPlayerTarget(
+    const strongestPlayerMonster = FieldAnalyzer.getStrongestMonsterTarget(
       context.field.monsterSlots.PLAYER,
     );
 
@@ -66,7 +66,8 @@ export class EffectAnalyzer {
   public static analyzeRevivePotential(
     context: IBattleContext,
     targetSide: EffectTargetSide,
-    targetType?: string
+    targetType?: string,
+    stat: "ATK" | "DEF" = "ATK",
   ): Card | null {
     const npcGraveyard = FieldAnalyzer.getGraveyardMonsters(
       context,
@@ -79,16 +80,23 @@ export class EffectAnalyzer {
 
     let availableCards = [...npcGraveyard, ...playerGraveyard];
 
-    
-    if(targetType) {
-      availableCards = availableCards.filter(c => c.getType().includes(targetType));
+    if (targetType) {
+      availableCards = availableCards.filter((c) =>
+        c.getType().includes(targetType),
+      );
     }
-    
+
     if (availableCards.length == 0) return null;
 
-    return availableCards.sort(
-      (a, b) => (b.getCardData().atk || 0) - (a.getCardData().atk || 0),
-    )[0];
+    if (stat == "ATK") {
+      return availableCards.sort(
+        (a, b) => (b.getCardData().atk || 0) - (a.getCardData().atk || 0),
+      )[0];
+    } else {
+      return availableCards.sort(
+        (a, b) => (b.getCardData().def || 0) - (a.getCardData().def || 0),
+      )[0];
+    }
   }
 
   //burn priority (increases as the player's life decreases)
@@ -114,7 +122,7 @@ export class EffectAnalyzer {
   ): BuffAnalysis {
     const playerMonsters = context.field.monsterSlots.PLAYER;
     const playerStrongestMonster =
-      FieldAnalyzer.getStrongestPlayerTarget(playerMonsters);
+      FieldAnalyzer.getStrongestMonsterTarget(playerMonsters);
 
     if (!playerStrongestMonster)
       return { isGameChanger: false, targetValue: 0 };
@@ -128,7 +136,7 @@ export class EffectAnalyzer {
       context.field.monsterSlots.OPPONENT,
     );
 
-    const npcHandMonster = FieldAnalyzer.getStrongestMonsterOption(
+    const npcHandMonster = FieldAnalyzer.getStrongestMonsterOptionOnHand(
       context.getHand("OPPONENT").hand,
       context.gameState.getMana("OPPONENT"),
       statType === "atk" ? "ATK" : "DEF",
@@ -159,11 +167,11 @@ export class EffectAnalyzer {
   ): BounceAnalysis {
     const playerField = context.field.monsterSlots.PLAYER;
 
-    const strongestAtk = FieldAnalyzer.getStrongestPlayerTarget(
+    const strongestAtk = FieldAnalyzer.getStrongestMonsterTarget(
       playerField,
       "ATK",
     );
-    const strongestDef = FieldAnalyzer.getStrongestPlayerTarget(
+    const strongestDef = FieldAnalyzer.getStrongestMonsterTarget(
       playerField,
       "DEF",
     );
@@ -190,7 +198,7 @@ export class EffectAnalyzer {
   ): ChangePosAnalysis {
     const playerField = context.field.monsterSlots.PLAYER;
 
-    const target = FieldAnalyzer.getStrongestPlayerTarget(playerField, "ATK");
+    const target = FieldAnalyzer.getStrongestMonsterTarget(playerField, "ATK");
 
     if (!target)
       return { targetAtk: 0, targetDef: 0, isCurrentAtkMode: true, statGap: 0 };
