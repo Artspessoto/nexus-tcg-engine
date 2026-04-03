@@ -3,6 +3,7 @@ import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
 import type { CardEffect, EffectTypes } from "../../../types/EffectTypes";
 import type { GameSide, Move } from "../../../types/GameTypes";
+import { Logger } from "../../../utils/Logger";
 import { EffectAnalyzer } from "../analyzers/EffectAnalyzer";
 import { FieldAnalyzer } from "../analyzers/FieldAnalyzer";
 
@@ -14,8 +15,28 @@ export class MediumStrategy implements IAIStrategy {
     this.context = context;
   }
   public async playMainPhase(): Promise<void> {
-    const moves = this.generateMoves();
-    console.log(moves);
+    let safetyBreak = 0;
+
+    //limit AI to 10 moves
+    while (safetyBreak < 10) {
+      const moves = this.generateMoves();
+
+      const betterChoice = moves[0]; //example
+
+      if (!betterChoice || betterChoice.type == "PASS") {
+        Logger.debug("AI", "PASS");
+        break;
+      }
+
+      //TODO in hard strategy:
+      //hard difficulty detects if score move is good or bad, if score is bad it pass the play
+      // if (this.evaluateMove(betterChoice) < 50) break;
+
+      await this.delay(1200);
+      await this.executeMove(betterChoice);
+
+      safetyBreak++;
+    }
   }
 
   public generateMoves(): Move[] {
@@ -275,8 +296,42 @@ export class MediumStrategy implements IAIStrategy {
   }
 
   public async executeMove(move: Move): Promise<void> {
-    console.log(move);
-    await this.delay(200);
+    switch (move.type) {
+      case "PLAY_MONSTER":
+        this.context.executePlay(
+          move.card,
+          this.side,
+          "MONSTER",
+          move.slot,
+          move.mode,
+        );
+        break;
+      case "PLAY_SPELL":
+        this.context.executePlay(
+          move.card,
+          this.side,
+          "SPELL",
+          move.slot,
+          move.mode,
+        );
+
+        if (move.mode == "FACE_UP") {
+          await this.delay(800);
+          this.context.cardActivation(move.card, this.side, move.params);
+        }
+        break;
+      case "ATTACK":
+        this.context.onAttackDeclared(move.attacker, move.target);
+        break;
+      case "ACTIVATE_EFFECT":
+        //reactive priority (active effect of monster or trap)
+        this.context.cardActivation(move.card, this.side, {
+          target: move.target,
+        });
+        break;
+      default:
+        break;
+    }
   }
 
   public async delay(ms: number): Promise<Phaser.Time.TimerEvent> {

@@ -19,7 +19,8 @@ export class EasyStrategy implements IAIStrategy {
   public async playMainPhase(): Promise<void> {
     let safetyBreak = 0; //security lock (preventing bugs)
 
-    while (safetyBreak < 15) {
+    //limit AI to 10 moves
+    while (safetyBreak < 10) {
       const moves = this.generateMoves();
 
       const betterChoice = this.chooseBestMove(moves);
