@@ -76,7 +76,7 @@ export class EffectManager implements IEffectManager {
       },
       BOOST_ATK: async (effect, _side, source, AIInstructions) =>
         await this.resolveOrTarget(
-          AIInstructions?.target,
+          AIInstructions?.target ?? null,
           source,
           effect,
           async (t) => {
@@ -85,7 +85,7 @@ export class EffectManager implements IEffectManager {
         ),
       NERF_ATK: async (effect, _side, source, AIInstructions) =>
         await this.resolveOrTarget(
-          AIInstructions?.target,
+          AIInstructions?.target ?? null,
           source,
           effect,
           async (t) => {
@@ -94,7 +94,7 @@ export class EffectManager implements IEffectManager {
         ),
       BOOST_DEF: async (effect, _side, source, AIInstructions) =>
         await this.resolveOrTarget(
-          AIInstructions?.target,
+          AIInstructions?.target ?? null,
           source,
           effect,
           async (t) => {
@@ -103,7 +103,7 @@ export class EffectManager implements IEffectManager {
         ),
       NERF_DEF: async (effect, _side, source, AIInstructions) =>
         await this.resolveOrTarget(
-          AIInstructions?.target,
+          AIInstructions?.target ?? null,
           source,
           effect,
           async (t) => {
@@ -112,7 +112,7 @@ export class EffectManager implements IEffectManager {
         ),
       CHANGE_POS: async (effect, _side, source, AIInstructions) => {
         await this.resolveOrTarget(
-          AIInstructions?.target,
+          AIInstructions?.target ?? null,
           source,
           effect,
           (t) => this.targetResolution.CHANGE_POS!(t, source, effect),
@@ -121,7 +121,7 @@ export class EffectManager implements IEffectManager {
       },
       DESTROY: async (effect, _side, source, AIInstructions) => {
         await this.resolveOrTarget(
-          AIInstructions?.target,
+          AIInstructions?.target ?? null,
           source,
           effect,
           async (t) => await this.targetResolution.DESTROY!(t, source, effect),
@@ -129,7 +129,7 @@ export class EffectManager implements IEffectManager {
       },
       BOUNCE: async (effect, _side, source, AIInstructions) =>
         await this.resolveOrTarget(
-          AIInstructions?.target,
+          AIInstructions?.target ?? null,
           source,
           effect,
           async (t) => await this.targetResolution.BOUNCE!(t, source, effect),
@@ -156,7 +156,7 @@ export class EffectManager implements IEffectManager {
   }
 
   private async resolveOrTarget(
-    aiTarget: Card | undefined,
+    aiTarget: Card | null,
     source: Card,
     effect: CardEffect,
     resolution: (target: Card) => Promise<void> | void,

@@ -45,9 +45,9 @@ export interface IBattleContext {
   cardActivation(
     card: Card,
     side: GameSide,
-    instructions?: { target?: Card },
+    instructions?: { target?: Card | null },
   ): Promise<void>;
-  onAttackDeclared(attacker: Card, target?: Card): Promise<void>;
+  onAttackDeclared(attacker: Card, target?: Card | null): Promise<void>;
   clearAllMenus(): void;
 
   add: Phaser.GameObjects.GameObjectFactory;

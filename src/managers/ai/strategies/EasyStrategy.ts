@@ -196,7 +196,7 @@ export class EasyStrategy implements IAIStrategy {
     return finalScore;
   }
 
-  private getBestTargetToApplyEffect(effect: CardEffect): Card | undefined {
+  private getBestTargetToApplyEffect(effect: CardEffect): Card | null {
     const playerField = this.context.field.monsterSlots.PLAYER;
     const playerSpells = this.context.field.spellSlots.PLAYER;
     const npcField = this.context.field.monsterSlots.OPPONENT;
@@ -207,7 +207,7 @@ export class EasyStrategy implements IAIStrategy {
     if (offensiveEffects.includes(effect.type)) {
       const targetStat = effect.type === "CHANGE_POS" ? "DEF" : "ATK";
 
-      const monsterTarget = FieldAnalyzer.getStrongestPlayerTarget(
+      const monsterTarget = FieldAnalyzer.getStrongestMonsterTarget(
         playerField,
         targetStat,
       );
@@ -219,7 +219,7 @@ export class EasyStrategy implements IAIStrategy {
 
     if (defensiveEffects.includes(effect.type)) {
       return (
-        FieldAnalyzer.getStrongestPlayerTarget(npcField, "ATK") || undefined
+        FieldAnalyzer.getStrongestMonsterTarget(npcField, "ATK") || null
       );
     }
 
@@ -229,11 +229,11 @@ export class EasyStrategy implements IAIStrategy {
           (s) => s !== null && s.getType() == effect.targetType,
         );
 
-        return validTargets[0] || undefined;
+        return validTargets[0] || null;
       }
 
       return (
-        FieldAnalyzer.getStrongestPlayerTarget(playerField, "ATK") || undefined
+        FieldAnalyzer.getStrongestMonsterTarget(playerField, "ATK") || null
       );
     }
 
@@ -245,11 +245,11 @@ export class EasyStrategy implements IAIStrategy {
           this.context,
           effect.targetSide || "OWNER",
           targetType,
-        ) || undefined
+        ) || null
       );
     }
 
-    return undefined;
+    return null;
   }
 
   private evaluateMonsterPlay(card: Card): number {
@@ -261,7 +261,7 @@ export class EasyStrategy implements IAIStrategy {
       hand,
       currentMana,
     );
-    const strongestOption = FieldAnalyzer.getStrongestMonsterOption(
+    const strongestOption = FieldAnalyzer.getStrongestMonsterOptionOnHand(
       hand,
       currentMana,
       "ATK",
@@ -299,7 +299,7 @@ export class EasyStrategy implements IAIStrategy {
     return actionScore;
   }
 
-  private evaluateAttack(attacker: Card, target?: Card): number {
+  private evaluateAttack(attacker: Card, target?: Card | null): number {
     if (!target) return 150;
 
     const attackerAtk = attacker.getCardData().atk || 0;
@@ -341,7 +341,7 @@ export class EasyStrategy implements IAIStrategy {
     return -50;
   }
 
-  public evaluateSupport(card: Card, params?: { target?: Card }): number {
+  public evaluateSupport(card: Card, params?: { target?: Card | null }): number {
     const effect = card.getCardData().effects;
     if (!effect) return 0;
 
