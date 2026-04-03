@@ -1,7 +1,7 @@
 import type { IAIStrategy } from "../../../interfaces/IAIStrategy";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
-import type { EffectTypes } from "../../../types/EffectTypes";
+import type { CardEffect, EffectTypes } from "../../../types/EffectTypes";
 import type { GameSide, Move } from "../../../types/GameTypes";
 import { EffectAnalyzer } from "../analyzers/EffectAnalyzer";
 import { FieldAnalyzer } from "../analyzers/FieldAnalyzer";
@@ -13,7 +13,10 @@ export class MediumStrategy implements IAIStrategy {
   constructor(context: IBattleContext) {
     this.context = context;
   }
-  public async playMainPhase(): Promise<void> {}
+  public async playMainPhase(): Promise<void> {
+    const moves = this.generateMoves();
+    console.log(moves);
+  }
 
   public generateMoves(): Move[] {
     const moves: Move[] = [];
@@ -81,7 +84,7 @@ export class MediumStrategy implements IAIStrategy {
           "REVIVE",
           "CHANGE_POS",
         ];
-        const target = undefined; //TODO: target logic
+        const target = this.getBestTargetToApplyEffect(effect);
 
         if (needsTarget.includes(effect.type) && !target) {
           continue;
@@ -105,6 +108,108 @@ export class MediumStrategy implements IAIStrategy {
     return moves;
   }
 
+  private getBestTargetToApplyEffect(effect: CardEffect): Card | null {
+    const hasAdvantage = FieldAnalyzer.getFieldSideAdvantage(this.context);
+    const playerMonsters = FieldAnalyzer.getValidMonsters(
+      this.context.field.monsterSlots.PLAYER,
+    );
+    const npcMonsters = FieldAnalyzer.getValidMonsters(
+      this.context.field.monsterSlots.OPPONENT,
+    );
+    const playerSupports = this.context.field.spellSlots.PLAYER;
+
+    const offensiveEffects: EffectTypes[] = [
+      "NERF_ATK",
+      "NERF_DEF",
+      "CHANGE_POS",
+      "BOUNCE",
+      "DESTROY",
+    ];
+    const defensiveEffects: EffectTypes[] = [
+      "BOOST_ATK",
+      "BOOST_DEF",
+      "PROTECT",
+    ];
+
+    if (offensiveEffects.includes(effect.type)) {
+      if (playerMonsters.length == 0) return null;
+
+      if (
+        effect.type == "DESTROY" &&
+        (effect.targetType == "SPELL" || effect.targetType == "TRAP")
+      ) {
+        const validOptions = playerSupports.filter(
+          (s) => s !== null && s.getType() == effect.targetType,
+        )[0];
+
+        return validOptions || null;
+      }
+
+      //npc best attacker
+      const npcBestMonster = FieldAnalyzer.getStrongestMonsterTarget(
+        npcMonsters,
+        "ATK",
+      );
+      const npcMaxAtk = npcBestMonster?.getCardData().atk || 0;
+      const assumedDefWhenIsFaceDown = 30;
+
+      // enemy danger
+      const sortedEnemies = [...playerMonsters].sort((a, b) => {
+        const valA = a.isFaceDown
+          ? assumedDefWhenIsFaceDown
+          : a.getCardData().atk || 0;
+        const valB = b.isFaceDown
+          ? assumedDefWhenIsFaceDown
+          : b.getCardData().atk || 0;
+
+        return valB - valA;
+      });
+
+      for (const target of sortedEnemies) {
+        let targetPowerStat: number;
+
+        if (target.isFaceDown) {
+          targetPowerStat = assumedDefWhenIsFaceDown;
+        } else {
+          const isDef = target.angle == 270 || target.angle == -90;
+          targetPowerStat = isDef
+            ? target.getCardData().def || 0
+            : target.getCardData().atk || 0;
+        }
+
+        if (targetPowerStat > npcMaxAtk) return target;
+      }
+
+      return sortedEnemies[0];
+    }
+
+    if (defensiveEffects.includes(effect.type)) {
+      return (
+        FieldAnalyzer.getStrongestMonsterTarget(npcMonsters, "ATK") || null
+      );
+    }
+
+    if (effect.type == "REVIVE") {
+      const targetType = effect.targetType;
+      let stat: "ATK" | "DEF" = "DEF";
+
+      if (hasAdvantage > 0) {
+        stat = "ATK";
+      }
+
+      return (
+        EffectAnalyzer.analyzeRevivePotential(
+          this.context,
+          effect.targetSide || "OWNER",
+          targetType,
+          stat,
+        ) || null
+      );
+    }
+
+    return null;
+  }
+
   private evaluateMonsterPlacement(
     monsterToPlay: Card,
     hand: Card[],
@@ -114,7 +219,7 @@ export class MediumStrategy implements IAIStrategy {
     const remainingMana = currentMana - monsterData.manaCost;
 
     const currentAdvantage = FieldAnalyzer.getFieldSideAdvantage(this.context);
-    if (currentAdvantage > 0) return "ATK";
+    if (currentAdvantage >= 0) return "ATK";
 
     const buff = hand.find(
       (card) =>
@@ -165,7 +270,7 @@ export class MediumStrategy implements IAIStrategy {
   public async playBattlePhase(): Promise<void> {}
 
   public evaluateMove(move: Move): number {
-    console.log(move);
+    if (move.type == "PASS") return 2;
     return 1;
   }
 
