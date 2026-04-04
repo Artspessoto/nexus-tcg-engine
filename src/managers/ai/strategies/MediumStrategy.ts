@@ -1,3 +1,5 @@
+import { EventBus } from "../../../events/EventBus";
+import { GameEvent } from "../../../events/GameEvents";
 import type { IAIStrategy } from "../../../interfaces/IAIStrategy";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
@@ -6,6 +8,13 @@ import type { GameSide, Move } from "../../../types/GameTypes";
 import { Logger } from "../../../utils/Logger";
 import { EffectAnalyzer } from "../analyzers/EffectAnalyzer";
 import { FieldAnalyzer } from "../analyzers/FieldAnalyzer";
+
+interface TacticalAdvantage {
+  isThreatened: boolean; // does the player have an invincible monster on field?
+  resourceLead: number; // hand card diff between npc x player
+  defensiveGap: number; // best monster def (ai) x best monster atk (player)
+  isWinning: boolean; // final situation
+}
 
 export class MediumStrategy implements IAIStrategy {
   public readonly context: IBattleContext;
@@ -42,12 +51,9 @@ export class MediumStrategy implements IAIStrategy {
   public generateMoves(): Move[] {
     const moves: Move[] = [];
     const currentPhase = this.context.currentPhase;
-    const hand = this.context.getHand(this.side).hand;
-    const currentMana = this.context.gameState.getMana(this.side);
-    const playableCards = FieldAnalyzer.getPlayableCards(hand, currentMana);
 
     if (currentPhase == "MAIN") {
-      moves.push(...this.mainPhaseAvailableMoves(playableCards));
+      moves.push(...this.mainPhaseAvailableMoves());
     }
 
     if (currentPhase == "BATTLE") {
@@ -59,9 +65,21 @@ export class MediumStrategy implements IAIStrategy {
     return moves;
   }
 
-  public mainPhaseAvailableMoves(playableCards: Card[]): Move[] {
-    const moves: Move[] = [];
+  public mainPhaseAvailableMoves(): Move[] {
+    const hand = this.context.getHand(this.side).hand;
     const currentMana = this.context.gameState.getMana(this.side);
+    const playableCards = FieldAnalyzer.getPlayableCards(hand, currentMana);
+
+    const moves: Move[] = [];
+
+    moves.push(...this.getHandMoves(playableCards));
+    moves.push(...this.getFieldMoves());
+
+    return moves;
+  }
+
+  private getHandMoves(playableCards: Card[]) {
+    const moves: Move[] = [];
 
     //monster options
     for (const card of playableCards) {
@@ -74,11 +92,7 @@ export class MediumStrategy implements IAIStrategy {
         if (slot !== null) {
           moves.push({
             card,
-            mode: this.evaluateMonsterPlacement(
-              card,
-              playableCards,
-              currentMana,
-            ),
+            mode: this.evaluateMonsterPlacement(card),
             slot,
             type: "PLAY_MONSTER",
           });
@@ -113,8 +127,10 @@ export class MediumStrategy implements IAIStrategy {
 
         if (slot !== null) {
           const mode = card.getType() === "SPELL" ? "FACE_UP" : "SET";
+          const monsterToEvaluate =
+            effect.type === "REVIVE" && target ? target : card;
           const revivalMonsterPlacementMode: "ATK" | "DEF" =
-            this.evaluateMonsterPlacement(card, playableCards, currentMana);
+            this.evaluateMonsterPlacement(monsterToEvaluate);
 
           moves.push({
             card,
@@ -126,15 +142,61 @@ export class MediumStrategy implements IAIStrategy {
         }
       }
     }
+
+    return moves;
+  }
+
+  private getFieldMoves(): Move[] {
+    const fieldMonsters = FieldAnalyzer.getValidFieldCards(
+      this.context.field.monsterSlots.OPPONENT,
+    );
+    // const fieldSupports = FieldAnalyzer.getValidFieldCards(
+    //   this.context.field.spellSlots.OPPONENT,
+    // );
+
+    const moves: Move[] = [];
+
+    for (const monster of fieldMonsters) {
+      const hasAdvantage = FieldAnalyzer.getSimpleFieldSideAdvantage(
+        this.context,
+      );
+      const isFaceDown = monster.isFaceDown;
+      const isAtkMode = monster.angle == 0;
+      const currentTurn = this.context.gameState.currentTurn;
+      const hasWaited = currentTurn > monster.setTurn;
+
+      const canChangePos =
+        hasWaited && !monster.hasChangedPosition && !monster.hasAttacked;
+
+      if (!canChangePos) {
+        continue;
+      }
+
+      if (hasAdvantage < 0 && isAtkMode) {
+        moves.push({
+          type: "CHANGE_POS",
+          card: monster,
+          newMode: "DEF",
+          isFlip: false,
+        });
+      } else if (isFaceDown) {
+        moves.push({
+          type: "CHANGE_POS",
+          card: monster,
+          newMode: "FACE_UP",
+          isFlip: true,
+        });
+      }
+    }
+
     return moves;
   }
 
   private getBestTargetToApplyEffect(effect: CardEffect): Card | null {
-    const hasAdvantage = FieldAnalyzer.getFieldSideAdvantage(this.context);
-    const playerMonsters = FieldAnalyzer.getValidMonsters(
+    const playerMonsters = FieldAnalyzer.getValidFieldCards(
       this.context.field.monsterSlots.PLAYER,
     );
-    const npcMonsters = FieldAnalyzer.getValidMonsters(
+    const npcMonsters = FieldAnalyzer.getValidFieldCards(
       this.context.field.monsterSlots.OPPONENT,
     );
     const playerSupports = this.context.field.spellSlots.PLAYER;
@@ -172,6 +234,7 @@ export class MediumStrategy implements IAIStrategy {
         "ATK",
       );
       const npcMaxAtk = npcBestMonster?.getCardData().atk || 0;
+      const effectValue = effect.value || 0;
       const assumedDefWhenIsFaceDown = 30;
 
       // enemy danger
@@ -198,7 +261,11 @@ export class MediumStrategy implements IAIStrategy {
             : target.getCardData().atk || 0;
         }
 
-        if (targetPowerStat > npcMaxAtk) return target;
+        if (
+          targetPowerStat > npcMaxAtk &&
+          targetPowerStat - effectValue < npcMaxAtk
+        )
+          return target;
       }
 
       return sortedEnemies[0];
@@ -212,11 +279,11 @@ export class MediumStrategy implements IAIStrategy {
 
     if (effect.type == "REVIVE") {
       const targetType = effect.targetType;
+      const advantage = this.calculateTacticalAdvantage();
+
       let stat: "ATK" | "DEF" = "DEF";
 
-      if (hasAdvantage > 0) {
-        stat = "ATK";
-      }
+      if (advantage.isWinning && !advantage.isThreatened) stat = "ATK";
 
       return (
         EffectAnalyzer.analyzeRevivePotential(
@@ -231,35 +298,19 @@ export class MediumStrategy implements IAIStrategy {
     return null;
   }
 
-  private evaluateMonsterPlacement(
-    monsterToPlay: Card,
-    hand: Card[],
-    currentMana: number,
-  ): "ATK" | "DEF" {
+  private evaluateMonsterPlacement(monsterToPlay: Card): "ATK" | "DEF" {
     const monsterData = monsterToPlay.getCardData();
+    const currentMana = this.context.gameState.getMana(this.side);
     const remainingMana = currentMana - monsterData.manaCost;
 
-    const currentAdvantage = FieldAnalyzer.getFieldSideAdvantage(this.context);
-    if (currentAdvantage >= 0) return "ATK";
+    if (this.canBuffTurnTable(remainingMana)) return "ATK";
 
-    const buff = hand.find(
-      (card) =>
-        card.getType() === "SPELL" &&
-        card.getCardData().effects?.type === "BOOST_ATK" &&
-        card.getCardData().manaCost <= remainingMana,
-    );
+    const advantage = this.calculateTacticalAdvantage();
 
-    if (buff) {
-      const buffValue = buff.getCardData().effects?.value || 0;
-      const potential = EffectAnalyzer.analyzeCombatStatShiftPotential(
-        this.context,
-        buffValue,
-        "atk",
-        true,
-      );
+    if (advantage.isThreatened) return "DEF";
 
-      if (potential.isGameChanger) return "ATK";
-    }
+    if (advantage.isWinning) return "ATK";
+
     return "DEF";
   }
 
@@ -268,8 +319,8 @@ export class MediumStrategy implements IAIStrategy {
     const NPCMonsters = this.context.field.monsterSlots.OPPONENT;
     const playerMonsters = this.context.field.monsterSlots.PLAYER;
 
-    const attackers = FieldAnalyzer.getValidMonsters(NPCMonsters);
-    const targets = FieldAnalyzer.getValidMonsters(playerMonsters);
+    const attackers = FieldAnalyzer.getValidFieldCards(NPCMonsters);
+    const targets = FieldAnalyzer.getValidFieldCards(playerMonsters);
 
     attackers.forEach((attacker) => {
       if (!attacker) return;
@@ -288,7 +339,26 @@ export class MediumStrategy implements IAIStrategy {
     return moves;
   }
 
-  public async playBattlePhase(): Promise<void> {}
+  public async playBattlePhase(): Promise<void> {
+    let atkLimit = 0;
+
+    while (atkLimit < 3) {
+      const moves = this.generateMoves();
+
+      const combatMoves = moves.filter(
+        (action) => action.type == "ATTACK" || action.type == "PASS",
+      );
+
+      const bestAttack = combatMoves[0];
+
+      if (!bestAttack || bestAttack.type == "PASS") break;
+
+      this.executeMove(bestAttack);
+      await this.delay(1200);
+
+      atkLimit++;
+    }
+  }
 
   public evaluateMove(move: Move): number {
     if (move.type == "PASS") return 2;
@@ -320,6 +390,17 @@ export class MediumStrategy implements IAIStrategy {
           this.context.cardActivation(move.card, this.side, move.params);
         }
         break;
+      case "CHANGE_POS":
+        move.card.hasChangedPosition = true;
+
+        EventBus.emit(GameEvent.CARD_POSITION_CHANGED, {
+          card: move.card,
+          isFlip: move.isFlip,
+          newMode: move.newMode,
+        });
+
+        await this.delay(600);
+        break;
       case "ATTACK":
         this.context.onAttackDeclared(move.attacker, move.target);
         break;
@@ -336,5 +417,48 @@ export class MediumStrategy implements IAIStrategy {
 
   public async delay(ms: number): Promise<Phaser.Time.TimerEvent> {
     return new Promise((resolve) => this.context.time.delayedCall(ms, resolve));
+  }
+
+  private calculateTacticalAdvantage(): TacticalAdvantage {
+    const invincibleEnemies = FieldAnalyzer.getInvincibleMonsters(
+      this.context,
+      "PLAYER",
+    );
+    const handDiff = FieldAnalyzer.simpleHandAdvantage(this.context);
+    const defDiff = FieldAnalyzer.getDefensiveAdvantageLevel(this.context);
+
+    const isWinning =
+      invincibleEnemies.length == 0 && (handDiff >= 0 || defDiff > 0);
+
+    return {
+      isWinning,
+      defensiveGap: defDiff,
+      resourceLead: handDiff,
+      isThreatened: invincibleEnemies.length > 0,
+    };
+  }
+
+  private canBuffTurnTable(remainingMana: number): boolean {
+    const hand = this.context.getHand("OPPONENT").hand;
+    const buff = hand.find(
+      (card) =>
+        card.getType() === "SPELL" &&
+        card.getCardData().effects?.type === "BOOST_ATK" &&
+        card.getCardData().manaCost <= remainingMana,
+    );
+
+    if (!buff) return false;
+
+    const buffValue = buff.getCardData().effects?.value || 0;
+    const potential = EffectAnalyzer.analyzeCombatStatShiftPotential(
+      this.context,
+      buffValue,
+      "atk",
+      true,
+      remainingMana,
+      "ALL",
+    );
+
+    return potential.isGameChanger;
   }
 }
