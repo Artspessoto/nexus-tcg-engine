@@ -1,6 +1,5 @@
 import type { IAIStrategy } from "../../../interfaces/IAIStrategy";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
-import type { Card } from "../../../objects/Card";
 import type { GameSide, Move } from "../../../types/GameTypes";
 
 export class HardStrategy implements IAIStrategy {
@@ -16,8 +15,7 @@ export class HardStrategy implements IAIStrategy {
     return [];
   }
 
-  public mainPhaseAvailableMoves(playableCards: Card[]): Move[] {
-    console.log(playableCards);
+  public mainPhaseAvailableMoves(): Move[] {
     return [];
   }
 

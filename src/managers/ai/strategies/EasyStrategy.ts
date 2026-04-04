@@ -59,13 +59,9 @@ export class EasyStrategy implements IAIStrategy {
   public generateMoves(): Move[] {
     const moves: Move[] = [];
     const currentPhase = this.context.currentPhase;
-    const hand = this.context.getHand(this.side).hand;
-    const currentMana = this.context.gameState.getMana(this.side);
-
-    const playableCards = FieldAnalyzer.getPlayableCards(hand, currentMana);
 
     if (currentPhase == "MAIN") {
-      const mainMoves = this.mainPhaseAvailableMoves(playableCards);
+      const mainMoves = this.mainPhaseAvailableMoves();
       moves.push(...mainMoves);
     }
 
@@ -79,7 +75,11 @@ export class EasyStrategy implements IAIStrategy {
     return moves;
   }
 
-  public mainPhaseAvailableMoves(playableCards: Card[]): Move[] {
+  public mainPhaseAvailableMoves(): Move[] {
+    const hand = this.context.getHand(this.side).hand;
+    const currentMana = this.context.gameState.getMana(this.side);
+    const playableCards = FieldAnalyzer.getPlayableCards(hand, currentMana);
+
     const moves: Move[] = [];
 
     //monster options
@@ -149,8 +149,8 @@ export class EasyStrategy implements IAIStrategy {
     const NPCMonsters = this.context.field.monsterSlots.OPPONENT;
     const playerMonsters = this.context.field.monsterSlots.PLAYER;
 
-    const attackers = FieldAnalyzer.getValidMonsters(NPCMonsters);
-    const targets = FieldAnalyzer.getValidMonsters(playerMonsters);
+    const attackers = FieldAnalyzer.getValidFieldCards(NPCMonsters);
+    const targets = FieldAnalyzer.getValidFieldCards(playerMonsters);
 
     attackers.forEach((attacker) => {
       if (!attacker) return;
@@ -219,9 +219,7 @@ export class EasyStrategy implements IAIStrategy {
     }
 
     if (defensiveEffects.includes(effect.type)) {
-      return (
-        FieldAnalyzer.getStrongestMonsterTarget(npcField, "ATK") || null
-      );
+      return FieldAnalyzer.getStrongestMonsterTarget(npcField, "ATK") || null;
     }
 
     if (effect.type == "DESTROY") {
@@ -342,7 +340,10 @@ export class EasyStrategy implements IAIStrategy {
     return -50;
   }
 
-  public evaluateSupport(card: Card, params?: { target?: Card | null }): number {
+  public evaluateSupport(
+    card: Card,
+    params?: { target?: Card | null },
+  ): number {
     const effect = card.getCardData().effects;
     if (!effect) return 0;
 

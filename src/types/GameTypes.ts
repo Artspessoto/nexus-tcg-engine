@@ -19,9 +19,9 @@ export type Slot = {
 };
 
 export type EffectInstructions = {
-  target?: Card | null,
-  mode?: PlacementMode
-}
+  target?: Card | null;
+  mode?: PlacementMode;
+};
 
 export type Move =
   | { type: "PLAY_MONSTER"; card: Card; slot: Slot; mode: "ATK" | "DEF" }
@@ -30,8 +30,9 @@ export type Move =
       card: Card;
       slot: Slot;
       mode: "FACE_UP" | "SET";
-      params?: EffectInstructions
+      params?: EffectInstructions;
     }
   | { type: "ACTIVATE_EFFECT"; card: Card; target?: Card | null }
+  | { type: "CHANGE_POS"; card: Card; newMode: PlacementMode, isFlip: boolean }
   | { type: "ATTACK"; attacker: Card; target?: Card | null }
   | { type: "PASS" };
