@@ -113,52 +113,71 @@ export class EffectAnalyzer {
     };
   }
 
-  //boost or nerf priority
+  // boost or nerf priority
   public static analyzeCombatStatShiftPotential(
     context: IBattleContext,
     value: number,
     statType: "atk" | "def",
     isBuff: boolean,
+    availableMana: number,
+    targetSelection: "STRONGEST" | "ALL" = "STRONGEST",
   ): BuffAnalysis {
     const playerMonsters = context.field.monsterSlots.PLAYER;
-    const playerStrongestMonster =
-      FieldAnalyzer.getStrongestMonsterTarget(playerMonsters);
 
-    if (!playerStrongestMonster)
-      return { isGameChanger: false, targetValue: 0 };
+    // targets by AI level
+    const targets =
+      targetSelection === "STRONGEST"
+        ? [FieldAnalyzer.getStrongestMonsterTarget(playerMonsters)].filter(
+            (m): m is Card => m !== null,
+          )
+        : FieldAnalyzer.getValidFieldCards(playerMonsters);
 
-    const playerValue =
-      statType == "atk"
-        ? playerStrongestMonster.getCardData().atk || 0
-        : playerStrongestMonster.getCardData().def || 0;
+    if (targets.length === 0) return { isGameChanger: false, targetValue: 0 };
 
-    const npcFieldMonsters = FieldAnalyzer.getValidMonsters(
+    const npcFieldMonsters = FieldAnalyzer.getValidFieldCards(
       context.field.monsterSlots.OPPONENT,
     );
 
     const npcHandMonster = FieldAnalyzer.getStrongestMonsterOptionOnHand(
       context.getHand("OPPONENT").hand,
-      context.gameState.getMana("OPPONENT"),
+      availableMana,
       statType === "atk" ? "ATK" : "DEF",
     );
 
-    const validOptions = [...npcFieldMonsters];
-    if (npcHandMonster) validOptions.push(npcHandMonster);
+    const myOptions = [...npcFieldMonsters];
+    if (npcHandMonster) myOptions.push(npcHandMonster);
 
-    const canChangeAdvantage = validOptions.some((monster) => {
-      const currentStat =
-        statType == "atk"
-          ? monster.getCardData().atk || 0
-          : monster.getCardData().def || 0;
+    let canChangeAdvantage = false;
+    let highestValueMet = 0;
 
-      if (isBuff) {
-        return currentStat <= playerValue && currentStat + value > playerValue;
-      } else {
-        return playerValue >= currentStat && playerValue - value < currentStat;
+    // verify all ai monsters have game change against player monsters
+    for (const myMonster of myOptions) {
+      const myStat =
+        statType === "atk"
+          ? myMonster.getCardData().atk || 0
+          : myMonster.getCardData().def || 0;
+
+      for (const enemy of targets) {
+        const enemyStat =
+          statType === "atk"
+            ? enemy.getCardData().atk || 0
+            : enemy.getCardData().def || 0;
+
+        const condition = isBuff
+          ? myStat <= enemyStat && myStat + value > enemyStat
+          : enemyStat >= myStat && enemyStat - value < myStat;
+
+        if (condition) {
+          canChangeAdvantage = true;
+          highestValueMet = Math.max(highestValueMet, enemyStat);
+
+          if (targetSelection === "STRONGEST") break;
+        }
       }
-    });
+      if (canChangeAdvantage && targetSelection === "STRONGEST") break;
+    }
 
-    return { isGameChanger: canChangeAdvantage, targetValue: playerValue };
+    return { isGameChanger: canChangeAdvantage, targetValue: highestValueMet };
   }
 
   //bounce priority
