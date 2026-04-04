@@ -288,7 +288,7 @@ export class EasyStrategy implements IAIStrategy {
     }
 
     //field analyze advantage
-    const advantage = FieldAnalyzer.getFieldSideAdvantage(this.context);
+    const advantage = FieldAnalyzer.getSimpleFieldSideAdvantage(this.context);
 
     //NPC being at a disadvantage => monster with high defense priority
     if (advantage < 0 || !numericMonstersAdvantage) {
@@ -382,11 +382,14 @@ export class EasyStrategy implements IAIStrategy {
         break;
       }
       case "BOOST_ATK": {
+        const currentMana = this.context.gameState.getMana(this.side);
         const buff = EffectAnalyzer.analyzeCombatStatShiftPotential(
           this.context,
           effectValue,
           "atk",
           true,
+          currentMana,
+          "STRONGEST",
         );
         if (buff.isGameChanger) baseScore += 150;
         baseScore += buff.targetValue * 2;
