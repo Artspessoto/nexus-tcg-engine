@@ -129,7 +129,7 @@ export class FieldAnalyzer {
     return activeMonsters;
   }
 
-  public static getFieldSideAdvantage(context: IBattleContext): number {
+  public static getSimpleFieldSideAdvantage(context: IBattleContext): number {
     const npcAtk = context.field.monsterSlots.OPPONENT.reduce(
       (acc, card) => acc + (card?.getCardData().atk || 0),
       0,
@@ -140,6 +140,60 @@ export class FieldAnalyzer {
     );
 
     return npcAtk - playerAtk;
+  }
+
+  public static getInvincibleMonsters(
+    context: IBattleContext,
+    side: GameSide,
+  ): Card[] {
+    const myMonsters = this.getValidFieldCards(
+      context.field.monsterSlots[side],
+    );
+    const opponentSide = side == "PLAYER" ? "OPPONENT" : "PLAYER";
+    const opponentMonsters = this.getValidFieldCards(
+      context.field.monsterSlots[opponentSide],
+    );
+
+    const opponentMaxAtk = opponentMonsters.reduce((max, card) => {
+      const atk = card.getCardData().atk || 0;
+      return atk > max ? atk : max;
+    }, 0);
+
+    return myMonsters.filter((monster) => {
+      const isDefMode = monster.angle == 270 || monster.angle == -90;
+
+      const stat = isDefMode
+        ? monster.getCardData().def || 0
+        : monster.getCardData().atk || 0;
+
+      return stat > opponentMaxAtk;
+    });
+  }
+
+  //it does no focus on cards quality in hand
+  public static simpleHandAdvantage(context: IBattleContext): number {
+    const npcHand = context.getHand("OPPONENT").hand.length;
+    const playerHand = context.getHand("PLAYER").hand.length;
+
+    return npcHand - playerHand;
+  }
+
+  public static getDefensiveAdvantageLevel(context: IBattleContext): number {
+    const npcMonsters = this.getValidFieldCards(
+      context.field.monsterSlots.OPPONENT,
+    );
+    const playerMonsters = this.getValidFieldCards(
+      context.field.monsterSlots.PLAYER,
+    );
+
+    const npcDef =
+      this.getStrongestMonsterTarget(npcMonsters, "DEF")?.getCardData().def ||
+      0;
+    const playerAtk =
+      this.getStrongestMonsterTarget(playerMonsters, "ATK")?.getCardData()
+        .atk || 0;
+
+    return npcDef - playerAtk;
   }
 
   public static hasNumericMonstersAdvantage(context: IBattleContext): boolean {
