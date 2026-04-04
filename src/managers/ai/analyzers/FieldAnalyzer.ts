@@ -64,8 +64,8 @@ export class FieldAnalyzer {
     }
   }
 
-  public static getValidMonsters(monsters: (Card | null)[]): Card[] {
-    return monsters.filter((m): m is Card => m !== null);
+  public static getValidFieldCards(fieldList: (Card | null)[]): Card[] {
+    return fieldList.filter((card): card is Card => card !== null);
   }
 
   public static getValidTriggerCards(
@@ -143,10 +143,10 @@ export class FieldAnalyzer {
   }
 
   public static hasNumericMonstersAdvantage(context: IBattleContext): boolean {
-    const npcCount = this.getValidMonsters(
+    const npcCount = this.getValidFieldCards(
       context.field.monsterSlots.OPPONENT,
     ).length;
-    const playerCount = this.getValidMonsters(
+    const playerCount = this.getValidFieldCards(
       context.field.monsterSlots.PLAYER,
     ).length;
 
@@ -154,10 +154,10 @@ export class FieldAnalyzer {
   }
 
   public static hasNumericSupportAdvantage(context: IBattleContext): boolean {
-    const npcCount = this.getValidMonsters(
+    const npcCount = this.getValidFieldCards(
       context.field.spellSlots.OPPONENT,
     ).length;
-    const playerCount = this.getValidMonsters(
+    const playerCount = this.getValidFieldCards(
       context.field.spellSlots.PLAYER,
     ).length;
 
@@ -165,17 +165,17 @@ export class FieldAnalyzer {
   }
 
   public static getGraveyardMonsters(context: IBattleContext, side: GameSide) {
-    return this.getValidMonsters(context.field.graveyardSlot[side]);
+    return this.getValidFieldCards(context.field.graveyardSlot[side]);
   }
 
   public static continueWithAdvantageAfterCombatTrade(
     context: IBattleContext,
     isTargetInDefense: boolean,
   ) {
-    const npcMonsters = this.getValidMonsters(
+    const npcMonsters = this.getValidFieldCards(
       context.field.monsterSlots.OPPONENT,
     );
-    const playerMonsters = this.getValidMonsters(
+    const playerMonsters = this.getValidFieldCards(
       context.field.monsterSlots.PLAYER,
     );
 

@@ -1,4 +1,3 @@
-import type { Card } from "../objects/Card";
 import type { GameSide, Move } from "../types/GameTypes";
 import type { IBattleContext } from "./IBattleContext";
 
@@ -8,7 +7,7 @@ export interface IAIStrategy {
   playMainPhase(): Promise<void>;
   playBattlePhase(): Promise<void>;
   generateMoves(): Move[];
-  mainPhaseAvailableMoves(playableCards: Card[]): Move[];
+  mainPhaseAvailableMoves(): Move[];
   battlePhaseAvailableMoves(): Move[];
   evaluateMove(move: Move): number;
   executeMove(move: Move): Promise<void>;
