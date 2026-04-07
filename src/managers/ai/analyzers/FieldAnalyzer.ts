@@ -207,7 +207,7 @@ export class FieldAnalyzer {
     return npcCount > playerCount;
   }
 
-  public static hasNumericSupportAdvantage(context: IBattleContext): boolean {
+  public static hasNumericSupportAdvantage(context: IBattleContext): number {
     const npcCount = this.getValidFieldCards(
       context.field.spellSlots.OPPONENT,
     ).length;
@@ -215,7 +215,7 @@ export class FieldAnalyzer {
       context.field.spellSlots.PLAYER,
     ).length;
 
-    return npcCount > playerCount;
+    return npcCount - playerCount;
   }
 
   public static getGraveyardMonsters(context: IBattleContext, side: GameSide) {

@@ -1,8 +1,10 @@
+import { LAYOUT_CONFIG } from "../../../constants/LayoutConfig";
 import { EventBus } from "../../../events/EventBus";
 import { GameEvent } from "../../../events/GameEvents";
 import type { IAIStrategy } from "../../../interfaces/IAIStrategy";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
+import type { BurnAnalysis } from "../../../types/AnalyzerTypes";
 import type { CardEffect, EffectTypes } from "../../../types/EffectTypes";
 import type { GameSide, Move } from "../../../types/GameTypes";
 import { Logger } from "../../../utils/Logger";
@@ -303,6 +305,7 @@ export class MediumStrategy implements IAIStrategy {
     const currentMana = this.context.gameState.getMana(this.side);
     const remainingMana = currentMana - monsterData.manaCost;
 
+    console.log(this.context.getHand("OPPONENT").hand);
     if (this.canBuffTurnTable(remainingMana)) return "ATK";
 
     const advantage = this.calculateTacticalAdvantage();
@@ -353,7 +356,7 @@ export class MediumStrategy implements IAIStrategy {
 
       if (!bestAttack || bestAttack.type == "PASS") break;
 
-      this.executeMove(bestAttack);
+      await this.executeMove(bestAttack);
       await this.delay(1200);
 
       atkLimit++;
@@ -362,7 +365,107 @@ export class MediumStrategy implements IAIStrategy {
 
   public evaluateMove(move: Move): number {
     if (move.type == "PASS") return 2;
-    return 1;
+
+    let finalScore = 0;
+
+    switch (move.type) {
+      case "PLAY_MONSTER":
+        finalScore = 0;
+        break;
+      case "PLAY_SPELL":
+        finalScore += this.evaluateSupport(move.card, move.params);
+        break;
+      case "ACTIVATE_EFFECT":
+        finalScore = 0;
+        break;
+      default:
+        break;
+    }
+    return finalScore;
+  }
+
+  public evaluateSupport(
+    card: Card,
+    params?: { target?: Card | null },
+  ): number {
+    const effect = card.getCardData().effects;
+    if (!effect) return 0;
+
+    const targetEffects: EffectTypes[] = [
+      "BOOST_ATK",
+      "BOOST_DEF",
+      "NERF_ATK",
+      "NERF_DEF",
+      "DESTROY",
+      "BOUNCE",
+      "CHANGE_POS",
+    ];
+
+    //dont apply effects in wrong situations
+    if (targetEffects.includes(effect.type) && !params?.target) return 0;
+
+    let baseScore = 0;
+    const effectValue = effect.value || 0;
+    const totalLP = LAYOUT_CONFIG.GAME_STATE.BASE_LP;
+
+    switch (effect.type) {
+      case "BURN": {
+        const burn: BurnAnalysis = EffectAnalyzer.analyzeBurnImpact(
+          this.context,
+          effectValue,
+        );
+
+        if (burn.isLethal) return 9999;
+        baseScore +=
+          EffectAnalyzer.getRelativeImpact(effectValue, totalLP) * 1000;
+
+        if (burn.damagePotential > totalLP * 0.5) baseScore += 30;
+        break;
+      }
+      case "HEAL": {
+        const healPriority = EffectAnalyzer.analyzeHealUrgency(this.context);
+        baseScore +=
+          EffectAnalyzer.getRelativeImpact(healPriority, totalLP) * 200;
+        break;
+      }
+      case "DRAW_CARD": {
+        const newCardPriority = EffectAnalyzer.analyzeCardUrgency(this.context);
+        const hasHandAdvantage = FieldAnalyzer.simpleHandAdvantage(
+          this.context,
+        );
+
+        console.log(newCardPriority, hasHandAdvantage);
+        break;
+      }
+      case "DESTROY": {
+        const dangerousMonster = FieldAnalyzer.getInvincibleMonsters(
+          this.context,
+          "PLAYER",
+        );
+        if (
+          effect.targetType?.includes("MONSTER") &&
+          dangerousMonster.length !== 0
+        ) {
+          baseScore += dangerousMonster.length * 3;
+        } else if (
+          effect.targetType == "SPELL" ||
+          effect.targetType == "TRAP"
+        ) {
+          const playerSupports = FieldAnalyzer.hasNumericSupportAdvantage(
+            this.context,
+          );
+
+          baseScore += playerSupports * 3;
+        }
+
+        break;
+      }
+
+      default:
+        break;
+    }
+
+    return baseScore;
   }
 
   public async executeMove(move: Move): Promise<void> {
@@ -387,7 +490,7 @@ export class MediumStrategy implements IAIStrategy {
 
         if (move.mode == "FACE_UP") {
           await this.delay(800);
-          this.context.cardActivation(move.card, this.side, move.params);
+          await this.context.cardActivation(move.card, this.side, move.params);
         }
         break;
       case "CHANGE_POS":
@@ -402,11 +505,12 @@ export class MediumStrategy implements IAIStrategy {
         await this.delay(600);
         break;
       case "ATTACK":
-        this.context.onAttackDeclared(move.attacker, move.target);
+        await this.context.onAttackDeclared(move.attacker, move.target);
         break;
       case "ACTIVATE_EFFECT":
         //reactive priority (active effect of monster or trap)
-        this.context.cardActivation(move.card, this.side, {
+        await this.delay(1000);
+        await this.context.cardActivation(move.card, this.side, {
           target: move.target,
         });
         break;
