@@ -7,6 +7,7 @@ import type { Card } from "../../../objects/Card";
 import type { BurnAnalysis } from "../../../types/AnalyzerTypes";
 import type { CardEffect, EffectTypes } from "../../../types/EffectTypes";
 import type { GameSide, Move } from "../../../types/GameTypes";
+import { Logger } from "../../../utils/Logger";
 import { EffectAnalyzer } from "../analyzers/EffectAnalyzer";
 import { FieldAnalyzer } from "../analyzers/FieldAnalyzer";
 
@@ -22,6 +23,7 @@ export interface FieldSnapshot {
   playerMonsters: Card[];
   advantage: TacticalAdvantage;
   currentMana: number;
+  npcHandCards: Card[];
 }
 
 export class MediumStrategy implements IAIStrategy {
@@ -62,6 +64,7 @@ export class MediumStrategy implements IAIStrategy {
       ),
       advantage: this.calculateTacticalAdvantage(),
       currentMana: this.context.gameState.getMana(this.side),
+      npcHandCards: this.context.getHand(this.side).hand,
     };
   }
 
@@ -393,12 +396,16 @@ export class MediumStrategy implements IAIStrategy {
 
   public evaluateMove(move: Move, data: FieldSnapshot): number {
     if (move.type == "PASS") return 2;
+    Logger.debug(
+      "AI",
+      `NPC cards: ${data.npcHandCards.map((c) => c.getCardData().nameKey)}`,
+    );
 
     let finalScore = 0;
 
     switch (move.type) {
       case "PLAY_MONSTER":
-        finalScore = 0;
+        finalScore += this.evaluateMonsterPlay(move.card, data);
         break;
       case "PLAY_SPELL":
         finalScore += this.evaluateSupport(move.card, data, move.params);
@@ -413,6 +420,140 @@ export class MediumStrategy implements IAIStrategy {
         break;
     }
     return finalScore;
+  }
+
+  private evaluateMonsterPlay(card: Card, snapshot: FieldSnapshot): number {
+    const {
+      advantage,
+      npcMonsters,
+      currentMana,
+      playerMonsters,
+      npcHandCards,
+    } = snapshot;
+    const cardData = card.getCardData();
+    const reactiveTraps = npcHandCards.filter((card) => {
+      const effect = card.getCardData().effects;
+      return (
+        card.getType() === "TRAP" &&
+        (effect?.type === "DESTROY" || effect?.type === "BOUNCE")
+      );
+    });
+    const atkModifiers = [...npcHandCards, ...npcMonsters].filter((c) => {
+      const eff = c.getCardData().effects;
+      return eff?.type.includes("ATK");
+    });
+    const posModifiers = [...npcHandCards, ...npcMonsters].filter((c) => {
+      const eff = c.getCardData().effects;
+      return eff?.type == "CHANGE_POS";
+    });
+    const monsterStat: "ATK" | "DEF" = card.angle == 0 ? "ATK" : "DEF";
+
+    let actionScore = 10;
+
+    //monster power
+    const powerValue =
+      monsterStat == "ATK" ? cardData.atk || 0 : cardData.def || 0;
+    actionScore += powerValue;
+
+    //field control
+    if (npcMonsters.length == 0) {
+      actionScore += 25;
+    } else if (npcMonsters.length == 3) {
+      actionScore -= 20;
+    }
+
+    //mana efficient score
+    actionScore += this.calculateManaEconomicScore(
+      cardData.manaCost,
+      currentMana,
+      actionScore,
+      snapshot,
+    );
+
+    //trap game changer
+    if (
+      reactiveTraps.length > 0 &&
+      monsterStat == "ATK" &&
+      cardData.atk! < 35
+    ) {
+      actionScore += 20; //try to bait player with weakness monster
+      Logger.debug(
+        "AI",
+        `bait card: ${cardData.nameKey}, trap reactive: ${reactiveTraps[0].getCardData().nameKey}`,
+      );
+    }
+
+    //boost or nerf atk helper (hand or field)
+    if (atkModifiers.length > 0 && monsterStat == "ATK") {
+      const strongestEnemy = FieldAnalyzer.getStrongestMonsterTarget(
+        playerMonsters,
+        "ATK",
+      );
+
+      if (strongestEnemy) {
+        const enemyAtk = strongestEnemy.getCardData().atk || 0;
+        const myAtk = cardData.atk || 0;
+
+        //buff or nerf with high value
+        const bestModifier = Math.max(
+          ...atkModifiers.map((m) => m.getCardData().effects?.value || 0),
+        );
+
+        if (myAtk <= enemyAtk && myAtk + bestModifier > enemyAtk) {
+          actionScore += 45;
+          Logger.debug("AI", `synergy with ${cardData.nameKey} + atk modifier`);
+        }
+      }
+    }
+
+    if (posModifiers.length > 0 && monsterStat === "ATK") {
+      const strongestEnemy = FieldAnalyzer.getStrongestMonsterTarget(
+        playerMonsters,
+        "ATK",
+      );
+      if (strongestEnemy && !strongestEnemy.isFaceDown) {
+        const enemyAtk = strongestEnemy.getCardData().atk || 0;
+        const enemyDef = strongestEnemy.getCardData().def || 0;
+        const myAtk = cardData.atk || 0;
+
+        // tactical scene: npc monster kill if enemy monster change pos
+        if (myAtk <= enemyAtk && myAtk > enemyDef) {
+          actionScore += 50;
+          Logger.debug(
+            "AI",
+            `synergy with: ${cardData.nameKey} + change position.`,
+          );
+        }
+      }
+    }
+
+    //threat analysis
+    if (advantage.isThreatened) {
+      if (monsterStat == "DEF") {
+        const threatAtk = advantage.defensiveGap;
+        if (cardData.def! > threatAtk) actionScore += 40;
+        else actionScore += 15;
+      } else {
+        //dont throw monster into atk mode while threatned
+        actionScore -= 10;
+      }
+    }
+
+    //agressive potential
+    if (monsterStat == "ATK" && playerMonsters.length > 0) {
+      const strongestEnemy = FieldAnalyzer.getStrongestMonsterTarget(
+        playerMonsters,
+        "ATK",
+      );
+      if (
+        strongestEnemy &&
+        cardData.atk! > (strongestEnemy.getCardData().atk || 0)
+      ) {
+        actionScore += 35;
+      }
+    }
+
+    return actionScore;
   }
 
   public evaluateSupport(
@@ -495,7 +636,6 @@ export class MediumStrategy implements IAIStrategy {
 
         break;
       }
-      case "CHANGE_POS":
       case "REVIVE": {
         const npcMonsters = FieldAnalyzer.getValidFieldCards(
           this.context.field.monsterSlots.OPPONENT,
@@ -625,6 +765,27 @@ export class MediumStrategy implements IAIStrategy {
 
   public async delay(ms: number): Promise<Phaser.Time.TimerEvent> {
     return new Promise((resolve) => this.context.time.delayedCall(ms, resolve));
+  }
+
+  private calculateManaEconomicScore(
+    cost: number,
+    currentMana: number,
+    currentScore: number,
+    snapshot: FieldSnapshot,
+  ): number {
+    const ratio = cost / currentMana;
+    let adjustment = 0;
+
+    // reactive (keep reserve)
+    const hasTraps = snapshot.npcHandCards.some((c) => c.getType() === "TRAP");
+
+    // punish high spendings on low impact plays
+    if (ratio > 0.6 && currentScore < 40) adjustment -= 20;
+
+    // bait play
+    if (currentMana - cost >= 2 && hasTraps) adjustment += 15;
+
+    return adjustment;
   }
 
   private calculateTacticalAdvantage(): TacticalAdvantage {
