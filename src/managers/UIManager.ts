@@ -606,28 +606,41 @@ export class UIManager implements IUIManager {
 
     const currentTurn = this.context.gameState.currentTurn;
     const hasWaited = currentTurn > card.setTurn;
-    const isEffectCard =
-      card.getType() === "TRAP" || card.getType() == "EFFECT_MONSTER";
 
-    if (card.isFaceDown && card.owner == "PLAYER") {
-      const canActive = isEffectCard ? hasWaited : true;
+    const isTrap = card.getType() == "TRAP";
+    const isEffectMonster = card.getType() == "EFFECT_MONSTER";
 
-      //trap or effect monster need wait 1 turn to active
-      if (canActive && card.getType() !== "MONSTER") {
-        buttons.push(
-          this.createMenuButton(
-            buttonTexts.active,
-            x + 70,
-            y - 35,
-            async () => {
-              await this.context.cardActivation(card, this.side);
+    if (card.owner == "PLAYER") {
+      if (isTrap && card.isFaceDown && hasWaited) {
+        this.pushActiveButton(buttons, x, y, buttonTexts.active, card);
+        return;
+      }
 
-              EventBus.emit(GameEvent.ACTION_FINALIZED, { card });
-            },
-          ),
-        );
+      if (isEffectMonster) {
+        const canActivateFaceUp = !card.isFaceDown && hasWaited;
+        const canActivateDown = card.isFaceDown && hasWaited;
+
+        if (canActivateFaceUp || canActivateDown) {
+          this.pushActiveButton(buttons, x, y, buttonTexts.active, card);
+        }
       }
     }
+  }
+
+  private pushActiveButton(
+    buttons: ToonButton[],
+    x: number,
+    y: number,
+    label: string,
+    card: Card,
+  ) {
+    buttons.push(
+      this.createMenuButton(label, x + 70, y - 35, async () => {
+        await this.context.cardActivation(card, this.side);
+
+        EventBus.emit(GameEvent.ACTION_FINALIZED, { card });
+      }),
+    );
   }
 
   private addDetailsButton({ card, buttons, x, y }: ButtonParams) {
