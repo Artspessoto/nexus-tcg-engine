@@ -133,15 +133,17 @@ export class CombatManager implements ICombatManager {
       const triggerCard =
         await this.context.effects.selectResponseActivationSource();
 
-      if (triggerCard) {
-        if (!this.currentAttacker || !this.currentAttacker.active) {
-          Logger.debug(
-            "COMBAT",
-            "Attack canceled. The attacking monster/warrior was negated/destroyed by the effect",
-          );
-          this.cancelTarget();
-          return;
-        }
+      if (!triggerCard) {
+        await this.delay(1000);
+      }
+
+      if (!this.currentAttacker || !this.currentAttacker.active) {
+        Logger.debug(
+          "COMBAT",
+          "Attack canceled. The attacking monster/warrior was negated/destroyed by the effect",
+        );
+        this.cancelTarget();
+        return;
       }
     }
   }
