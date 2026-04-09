@@ -38,6 +38,11 @@ export class InputManager implements IInputManager {
             this.context.effects.cancelTargeting();
           }
 
+          //cancel trap or effect monster response after response window
+          if (this.context.effects.isSelectingResponse) {
+            this.context.effects.cancelResponseAction();
+          }
+
           // cancel combat target
           if (this.context.currentPhase === "BATTLE") {
             this.context.combat.cancelTarget();
@@ -52,6 +57,15 @@ export class InputManager implements IInputManager {
 
     this.context.engine.input.keyboard?.on("keydown-ESC", () => {
       if (this.isSelectionLocked()) return;
+
+      //cancel trap or monster effect response
+      if (this.context.effects.isSelectingResponse) {
+        this.context.effects.cancelResponseAction();
+        this.context.clearAllMenus();
+        return;
+      }
+
+      //cancel target into battle phase
       if (this.context.currentPhase == "BATTLE") {
         this.context.combat.cancelTarget();
       }
