@@ -1,5 +1,5 @@
-import type { FieldSnapshot } from "../managers/ai/strategies/MediumStrategy";
 import type { GameSide, Move } from "../types/GameTypes";
+import type { FieldSnapshot } from "../types/StrategyTypes";
 import type { IBattleContext } from "./IBattleContext";
 
 export interface IAIStrategy {
