@@ -8,26 +8,45 @@ export class DeckGenerator {
     const deck: DeckList = [];
     const allIds = Object.keys(CARD_DATABASE);
 
-    const monsters = allIds.filter(
-      (id) =>
-        CARD_DATABASE[id].type == "MONSTER" ||
-        CARD_DATABASE[id].type == "EFFECT_MONSTER",
-    );
-    const utilities = allIds.filter(
-      (id) =>
-        CARD_DATABASE[id].type == "TRAP" || CARD_DATABASE[id].type == "SPELL",
-    );
+    const monsterPool = allIds.filter((id) => {
+      const card = CARD_DATABASE[id];
+      const isMonster = card.type == "MONSTER";
+      const isEffect = card.type == "EFFECT_MONSTER";
 
-    const targetMonsterCount =
-      difficulty == "EASY"
-        ? Phaser.Math.Between(12, 14)
-        : Phaser.Math.Between(10, 11);
+      if (difficulty == "EASY") return isMonster;
+      return isMonster || isEffect;
+    });
+
+    const utilityPool = allIds.filter((id) => {
+      const card = CARD_DATABASE[id];
+      const isSpell = card.type == "SPELL";
+      const isTrap = card.type == "TRAP";
+
+      if (difficulty == "EASY") return isSpell;
+      if (difficulty == "MEDIUM") return isSpell || isTrap;
+
+      return (isSpell || isTrap) && card.manaCost <= 3;
+    });
+
+    let targetMonsterCount: number;
+
+    switch (difficulty) {
+      case "EASY":
+        targetMonsterCount = Phaser.Math.Between(12, 14);
+        break;
+      case "MEDIUM":
+        targetMonsterCount = Phaser.Math.Between(11, 12);
+        break;
+      case "HARD":
+        targetMonsterCount = 10;
+        break;
+    }
 
     const targetUtility =
       LAYOUT_CONFIG.GAME_STATE.BASE_DECK - targetMonsterCount;
 
-    this.fillDeck(deck, monsters, targetMonsterCount);
-    this.fillDeck(deck, utilities, targetUtility);
+    this.fillDeck(deck, monsterPool, targetMonsterCount);
+    this.fillDeck(deck, utilityPool, targetUtility);
 
     return Phaser.Utils.Array.Shuffle(deck);
   }
