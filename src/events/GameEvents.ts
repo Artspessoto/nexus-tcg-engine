@@ -66,8 +66,8 @@ export type TargetingStartedPayload = {
   message?: string;
 };
 export type TargetingCanceledPayload = {
-  source: Card;
-  type: "ATTACK" | "EFFECT";
+  source: Card | null;
+  type: "ATTACK" | "EFFECT" | "RESPONSE";
 };
 export type AttackDeclaredPayload = { attacker: Card; target: Card };
 export type BattleResolvedPayload = {

@@ -14,5 +14,6 @@ export interface IEffectManager {
   handleCardSelection(target: Card): void;
   prepareTargeting(effect: CardEffect, source: Card): Promise<void>;
   selectResponseActivationSource(): Promise<Card | null>;
-  handleGlobalClick(card: Card): void
+  handleGlobalClick(card: Card): void;
+  cancelResponseAction(): void;
 }
