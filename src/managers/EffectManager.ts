@@ -201,7 +201,7 @@ export class EffectManager implements IEffectManager {
       return;
     }
 
-    const isTargetedEffect = [
+    const isTargetedEffect: boolean = [
       "DESTROY",
       "BOUNCE",
       "NERF_ATK",
@@ -611,10 +611,11 @@ export class EffectManager implements IEffectManager {
       const isValid =
         card.getType() === "TRAP" || card.getType() === "EFFECT_MONSTER";
       const isOwner = card.owner === "PLAYER";
+      
 
       if (!isValid || !isOwner) {
         EventBus.emit(GameEvent.NOTICE_REQUESTED, {
-          message: "SELECIONE UMA CARTA SUA PARA RESPONDER",
+          message: this.notices.select_valid_response,
           type: "WARNING",
         });
         return;

@@ -552,7 +552,7 @@ export class UIManager implements IUIManager {
 
     if (card.isFaceDown) {
       buttons.push(
-        this.createMenuButton("VIRAR", x + 70, y - 35, () =>
+        this.createMenuButton(buttonTexts.flip, x + 70, y - 35, () =>
           // this.handleFlipSummon(card),
           EventBus.emit(GameEvent.CARD_POSITION_CHANGED, {
             card: card,
@@ -735,6 +735,8 @@ export class UIManager implements IUIManager {
     return new Promise((resolve) => {
       const { SCREEN } = LAYOUT_CONFIG;
       const { DEPTHS } = THEME_CONFIG;
+      const { response_title, response_message, confirm_btn, cancel_btn } =
+        this.translations.battle_scene.effect_notices;
 
       //opacity block background
       this.inputBlocker = this.context.add
@@ -752,10 +754,10 @@ export class UIManager implements IUIManager {
       new DecisionModal(
         this.context.engine,
         {
-          title: "RESPOSTA",
-          message: "Deseja ativar uma carta em resposta ao ataque?",
-          confirmText: "ATIVAR",
-          cancelText: "PASSAR",
+          title: response_title,
+          message: response_message,
+          confirmText: confirm_btn,
+          cancelText: cancel_btn,
         },
         (result) => {
           this.inputBlocker?.destroy();

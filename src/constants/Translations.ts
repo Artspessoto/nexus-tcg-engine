@@ -48,6 +48,7 @@ export const TRANSLATIONS = {
         set: "BAIXAR",
         attack: "ATACAR",
         change_pos: "MUDAR POS.",
+        flip: "VIRAR"
       },
       card_types: {
         MONSTER: "MONSTRO",
@@ -68,6 +69,12 @@ export const TRANSLATIONS = {
         select_graveyard: "SELECIONE UM CEMITÉRIO",
         action_canceled: "AÇÃO CANCELADA",
         field_full: "CAMPO CHEIO!",
+        response_title: "JANELA DE RESPOSTA",
+        response_message:
+          "Um ataque foi declarado. Deseja ativar um card ou efeito?",
+        confirm_btn: "ATIVAR",
+        cancel_btn: "NÃO",
+        select_valid_response: "SELECIONE UM CARD OU EFEITO PARA ATIVAR"
       },
     },
   },
@@ -120,6 +127,7 @@ export const TRANSLATIONS = {
         set: "SET",
         attack: "ATTACK",
         change_pos: "CHANGE POS.",
+        flip: "FLIP"
       },
       card_types: {
         MONSTER: "MONSTER",
@@ -140,6 +148,12 @@ export const TRANSLATIONS = {
         select_graveyard: "SELECT A GRAVEYARD",
         action_canceled: "ACTION CANCELED",
         field_full: "FIELD FULL!",
+        response_title: "RESPONSE WINDOW",
+        response_message:
+          "An attack has been declared. Would you like to activate a card or effect?",
+        confirm_btn: "ACTIVATE",
+        cancel_btn: "NO",
+        select_valid_response: "SELECT A CARD OR EFFECT TO ACTIVATE"
       },
     },
   },
