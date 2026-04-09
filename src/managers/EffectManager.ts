@@ -611,7 +611,6 @@ export class EffectManager implements IEffectManager {
       const isValid =
         card.getType() === "TRAP" || card.getType() === "EFFECT_MONSTER";
       const isOwner = card.owner === "PLAYER";
-      
 
       if (!isValid || !isOwner) {
         EventBus.emit(GameEvent.NOTICE_REQUESTED, {
@@ -641,5 +640,18 @@ export class EffectManager implements IEffectManager {
     if (this.isSelectingResponse) {
       this.finalizeResponse(null);
     }
+  }
+
+  public cancelResponseAction(): void {
+    if (!this.isSelectingResponse) return;
+
+    Logger.debug("EFFECT", "Response selection canceled by user");
+
+    this.finalizeResponse(null);
+
+    EventBus.emit(GameEvent.TARGETING_CANCELED, {
+      source: null,
+      type: "RESPONSE",
+    });
   }
 }
