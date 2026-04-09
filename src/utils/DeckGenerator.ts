@@ -56,18 +56,28 @@ export class DeckGenerator {
     category: string[],
     targetCount: number,
   ): void {
-    let count = 0;
+    if (category.length == 0) return;
 
-    while (count < targetCount) {
-      const randomId = category[Math.floor(Math.random() * category.length)];
+    //ensure that target never exceeds the limit (3 per card)
+    const maxPossibleCards = category.length * 3;
+    const finalTarget = Math.min(targetCount, maxPossibleCards);
+
+    let count = 0;
+    const availableCategory = [...category]; //copy
+
+    while (count < finalTarget && availableCategory.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableCategory.length);
+      const randomId = availableCategory[randomIndex];
+
       const copies = deck.filter((id) => id == randomId).length;
 
       if (copies < 3) {
         deck.push(randomId);
         count++;
+      } else {
+        //if all 3 copies have been over remove it from draw pool
+        availableCategory.splice(randomIndex, 1);
       }
-
-      if (count < targetCount && category.length == 0) break;
     }
   }
 }
