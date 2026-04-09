@@ -34,9 +34,9 @@ export const createMockGameObject = () => {
     setScale: vi.fn().mockReturnThis(),
     setX: vi.fn().mockReturnThis(),
     setY: vi.fn().mockReturnThis(),
-    setOrigin: vi.fn().mockReturnThis(), 
+    setOrigin: vi.fn().mockReturnThis(),
     setShadow: vi.fn().mockReturnThis(),
-    setText: vi.fn().mockReturnThis(),  
+    setText: vi.fn().mockReturnThis(),
     setColor: vi.fn().mockReturnThis(),
     setStrokeStyle: vi.fn().mockReturnThis(),
     fillStyle: vi.fn().mockReturnThis(),
@@ -139,7 +139,7 @@ export const createMockBattleContext = (): IBattleContext => {
       advanceTurnCount: vi.fn(),
       setDeckState: vi.fn(),
       initializeDecks: vi.fn(),
-      setPlayerName: vi.fn()
+      setPlayerName: vi.fn(),
     },
     currentPhase: "MAIN",
     translationText: {
@@ -161,6 +161,7 @@ export const createMockBattleContext = (): IBattleContext => {
         set: "",
         attack: "",
         change_pos: "",
+        flip: "",
       },
       card_types: {
         MONSTER: "MONSTRO",
@@ -181,6 +182,11 @@ export const createMockBattleContext = (): IBattleContext => {
         select_graveyard: "SELECIONE UM CEMITÉRIO",
         action_canceled: "AÇÃO CANCELADA",
         field_full: "CAMPO CHEIO!",
+        response_title: "",
+        response_message: "",
+        confirm_btn: "",
+        cancel_btn: "",
+        select_valid_response: "",
       },
     },
     tweens: {
@@ -238,6 +244,7 @@ export const createMockBattleContext = (): IBattleContext => {
       onGraveyardClicked: vi.fn(),
       handleGlobalClick: vi.fn(),
       selectResponseActivationSource: vi.fn(),
+      cancelResponseAction: vi.fn(),
     },
     engine: {
       scene: { launch: vi.fn() } as unknown as Phaser.Scenes.ScenePlugin,
