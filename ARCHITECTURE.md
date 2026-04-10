@@ -4,48 +4,6 @@
 
 The project's goes beyond being a card roguelike game. The main goal is to implement a decoupled system focused on scalability, maintainability, and a clear separation of responsibilities through modularity.
 
-## System Architecture Map
-
-```mermaid
-flowchart TD
-    subgraph Engine [Phaser Game]
-        MS[MenuScene]
-        GS[GuideScene]
-        BS[BattleScene]
-    end
-
-    subgraph Core [Battle Context]
-        BS -->|Owns| GM[GameState]
-        BS -->|Owns| EM[EffectManager]
-        BS -->|Owns| CM[CombatManager]
-        BS -->|Owns| HM[HandManager]
-        BS -->|Owns| FM[FieldManager]
-        BS -->|Owns| IM[InputManager]
-        BS -->|Owns| UI[UIManager]
-        BS -->|Owns| AM[AIManager]
-    end
-
-    Player((Player)) -->|Clicks| IM
-    IM -->|Calls| BS
-
-    AM --> Strategy
-    AM --> Analyzer
-
-    %% O EventBus é transversal
-    subgraph Global [Cross-Cutting]
-        EB{EventBus}
-    end
-
-    GM -.->|Emits| EB
-    HM -.->|Emits| EB
-    CM -.->|Emits| EB
-    EM -.->|Emits| EB
-
-    EB -.->|Triggers| UI
-    EB -.->|Triggers| AM
-    EB -.->|Triggers| CM
-```
-
 ## 2. Layered Division
 
 ### Core Domain (Application State and Business Rules)
