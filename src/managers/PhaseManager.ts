@@ -35,26 +35,30 @@ export class PhaseManager implements IPhaseManager {
 
     switch (phase) {
       case "DRAW":
+        phaseButton.updatePhase(this.turn, "DRAW", PHASE.color);
+
         if (isPlayerTurn) {
-          phaseButton.setAlpha(1).updatePhase(this.turn, "DRAW", PHASE.color);
+          phaseButton.setAlpha(1);
           phaseButton.disableInteractive();
         } else {
           this.setOpponentState(phaseButton);
         }
         break;
-      case "MAIN":
-        if (isPlayerTurn) {
-          const buttonText =
-            currentTurn == 1
-              ? translations.battle_buttons.end_turn
-              : translations.battle_buttons.to_battle;
+      case "MAIN": {
+        const buttonText =
+          currentTurn == 1
+            ? translations.battle_buttons.end_turn
+            : translations.battle_buttons.to_battle;
+        phaseButton.updatePhase(this.turn, buttonText, PHASE.color);
 
+        if (isPlayerTurn) {
           phaseButton.setInteractive().setAlpha(1);
-          phaseButton.updatePhase(this.turn, buttonText, PHASE.color);
         } else {
           this.setOpponentState(phaseButton);
         }
         break;
+      }
+
       case "BATTLE":
         if (isPlayerTurn && !attackAnimation) {
           phaseButton

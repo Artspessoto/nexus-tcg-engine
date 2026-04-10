@@ -231,7 +231,6 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   private handleAITurnBasedAction(data: TurnStartedPayload) {
     const isFirstTurn = data.turnCount == 1;
     const side = data.side;
-    const drawnCardData = this.gameState.setDeckState("OPPONENT");
 
     if (!isFirstTurn) {
       const manaGain = 2;
@@ -243,6 +242,8 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     }
 
     if (side == "OPPONENT") {
+      const drawnCardData = this.gameState.setDeckState("OPPONENT");
+
       if (drawnCardData) {
         this.getHand(side).drawCard(
           this.getDeck("OPPONENT").position,
