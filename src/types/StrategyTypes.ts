@@ -21,18 +21,3 @@ export interface FieldSnapshot {
     protectionCards: Card[];
   };
 }
-
-export const AI_EVALUATION = {
-  BASE_MOVE: 10,
-  FIELD_EMPTY: 25,
-  FIELD_FULL: -20,
-  THREAT_DEFENSE_HIGH: 40,
-  THREAT_DEFENSE_LOW: 15,
-  THREAT_RISK_ATK: -25,
-  SYNERGY_BAIT: 20,
-  SYNERGY_ATK_MOD: 45,
-  SYNERGY_POS_CHANGE: 50,
-  KILL_POTENTIAL: 35,
-  MANA_WASTE_PENALTY: -25,
-  MANA_RESERVE_BONUS: 15,
-};

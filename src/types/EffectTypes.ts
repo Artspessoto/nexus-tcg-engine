@@ -2,7 +2,7 @@ import type { CardType } from "./CardTypes";
 
 export type EffectTargetSide = "OWNER" | "OPPONENT" | "BOTH";
 
-interface NumericEffect {
+export interface NumericEffect {
   type:
     | "BURN"
     | "HEAL"
