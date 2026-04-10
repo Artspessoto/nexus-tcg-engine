@@ -205,6 +205,14 @@ export class Card extends Phaser.GameObjects.Container {
     return this._isFaceDown;
   }
 
+  public get isAtkMode(): boolean {
+    return this.angle == 0;
+  }
+
+  public get isDefMode(): boolean {
+    return this.angle == 270 || this.angle == -90;
+  }
+
   public setHandVisuals() {
     const width = CARD_CONFIG.WIDTH;
     const height = CARD_CONFIG.HEIGHT;
