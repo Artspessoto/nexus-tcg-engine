@@ -1,5 +1,5 @@
 # Toon Castle: TCG Engine & Event-Driven Architecture
-### High-Performance Game Engine built with Phaser 3, TypeScript, and Vitest
+### High-Performance Game Engine Built with Phaser 3, TypeScript, and Vitest
 
 ## Getting Started
 
@@ -33,7 +33,7 @@ npm run dev
 npm run build
 ```
 
-*  **Testing:** Run unit tests via **Vitest**.
+*  **Testing (Vitest):**.
 ```bash
 npm run test # Watch mode 
 npm run test:ci # Single run 
@@ -43,10 +43,11 @@ npm run test:cov # Coverage report
 * **Linting & Formatting:** Keep the code clean and standardized.
 ```bash
 npm run lint # Check for errors 
+npm run lint:fix # Automatically fix lint issues
 npm run format # Fix formatting via Prettier
 ```
 
-*  **Type-Check:** Validate TypeScript without emitting files.
+*  **Type-Checking:** Validate TypeScript without emitting files.
 ```bash
 npm run type-check
 ```
@@ -55,6 +56,7 @@ npm run type-check
 For a deeper dive into the project, please refer to the following documents:
 -  **[Game Design & Rules](./GAME_DESIGN.md):** Detailed combat mechanics, card rarities, and floor scaling.
 -  **[Technical Architecture](./ARCHITECTURE.md):** Clean architecture, Design Patterns, and AI heuristics.
+-  **[Architecture Details](./ARCHITECTURE.md#system-architecture-map)**
 
 Inside the architecture guide, you will find:
 * **Layered Design:** Details on Domain (GameState), Managers, and Presentation layers.

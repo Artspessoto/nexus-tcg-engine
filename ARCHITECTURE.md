@@ -1,45 +1,101 @@
 # Architecture
 
 ## 1. Overview
-The project's goes beyond just a card roguelike game. The main goal is the implementation of a decoupled system, focused on scalability, maintenance, and a definitive separation of responsibilities (focusing on modularity).
+
+The project's goes beyond being a card roguelike game. The main goal is to implement a decoupled system focused on scalability, maintainability, and a clear separation of responsibilities through modularity.
+
+## System Architecture Map
+
+```mermaid
+flowchart TD
+    subgraph Engine [Phaser Game]
+        MS[MenuScene]
+        GS[GuideScene]
+        BS[BattleScene]
+    end
+
+    subgraph Core [Battle Context]
+        BS -->|Owns| GM[GameState]
+        BS -->|Owns| EM[EffectManager]
+        BS -->|Owns| CM[CombatManager]
+        BS -->|Owns| HM[HandManager]
+        BS -->|Owns| FM[FieldManager]
+        BS -->|Owns| IM[InputManager]
+        BS -->|Owns| UI[UIManager]
+        BS -->|Owns| AM[AIManager]
+    end
+
+    Player((Player)) -->|Clicks| IM
+    IM -->|Calls| BS
+
+    AM --> Strategy
+    AM --> Analyzer
+
+    %% O EventBus é transversal
+    subgraph Global [Cross-Cutting]
+        EB{EventBus}
+    end
+
+    GM -.->|Emits| EB
+    HM -.->|Emits| EB
+    CM -.->|Emits| EB
+    EM -.->|Emits| EB
+
+    EB -.->|Triggers| UI
+    EB -.->|Triggers| AM
+    EB -.->|Triggers| CM
+```
 
 ## 2. Layered Division
+
 ### Core Domain (Application State and Business Rules)
-It's represented by the GameState, the project's main source.
-- **Responsibility:** Manage the classic game states (life points, mana, turn count, turn's active player, current turn).
+
+It's represented by the `GameState`, the project's main source.
+
+- **Responsibility:** Manage the core game states (life points, mana, turn count, and the active player).
 - This layer wasn't designed to be tied to the framework (interface). If the graphics engine changes, the logic remains valid.
 
 ### Managers (Orchestrators)
+
 The Managers act as a service/use case layer. They're responsible for translating the player's or AI's will/intention into state changes and visual responses.
 
 **Example flow (playing a card):**
+
 - The `HandManager` validates the card's existence.
 - The `InputManager` captures and handles the user's interaction with the object (enabling interactions and drag events).
 - The `FieldManager` handles the positioning of the object in the battle zone (monster and support zones).
 
 ### **Scenes (Visual Presentation)**
+
 The scenes are the **Phaser** life cycle (the graphics engine/framework). The primary responsibility of each scene is managing the loading of assets (icons, background, frame) via preload, camera rendering, backgrounds, and the transition between each UI state (button click, card click, menus, battle).
 
 ### **Components (Objects)**
-Classes such as Card and ToonButton are visual components that are already "autonomous" in their rendering and animations, but they don't make decisions about the game. They respond to user actions/commands sent from the Managers.
+
+Classes such as `Card` and `ToonButton` are visual components that are already "autonomous" in their rendering and animations, but they don't make decisions about the game. They respond to user actions/commands sent from the Managers.
 
 ### **EventBus (Communication)**
-The EventBus was chosen as the communication tool within the project for acting as a central mediator, with the idea that each Manager communicates through this emission (`emit`) and subscription (`on`) without necessarily knowing each other.
+
+The EventBus was chosen as the communication tool within the project to act as a central mediator, with the idea that each Manager communicates through this emission (`emit`) and subscription (`on`) without necessarily knowing each other.
 
 **Example flow (player life change):** When the player's hit points change due to an attack, the `CombatManager` emits a `BATTLE_RESOLVED` event that the UIManager will process and update the player's hit points.
 
 ## 3. AI and Heuristics
+
 The project's AI architecture was designed to simulate an opponent with tactical knowledge adapted to the level chosen in the main menu. When in doubt, two thoughts occurred to me: how to assign values to each move and how to measure it by its own defined level? To solve the challenge of how to "measure the best move" a Value Heuristic system and the Strategy Pattern were implemented.
 
 ### **Evaluation and Decision**
+
 The idea is that the AI has 2 main criteria to define its actions:
+
 - **Analyzers (`FieldAnalyzer`, `EffectAnalyzer`):** They act as analysts for the NPC, translating what is happening in the game into data format so that the Strategy can use it for decision-making. Example: monster numerical advantage, strongest opponent monster, urgency to recover hit points.
 - **Strategies (`EasyStrategy`, `MediumStrategy`, `HardStrategy`):** This is the NPC's brain, where it will analyze the data passed by the Analyzers and decide the value and action based on the difficulty.
 
 ### **Value Heuristics**
-Every possible executable move (attack, move card to the field, activate effect) has its score defined by a score, where this value is based on the current context of the field.
+
+Every possible executable move (attack, move card to the field, activate effect) has a score assigned based on the current state of the field.
 
 Examples:
-- **Efficiency calculation:** The monster/warrior is not only viewed by its ATK value, but rather by its efficiency from: (ATK + DEF) / Mana cost.
-- **Validation of whether the AI remains at an advantage after a combat:** It evaluates the monsters on each side of the field and defines if it remains at an advantage after the combat (by the amount of monsters x player's monsters).
+
+- **Efficiency calculation:** The monster is not only viewed by its ATK value, but rather by its efficiency from: (ATK + DEF) / Mana cost.
+- **Validation of whether the AI remains at an advantage after a combat:** It evaluates the monsters on each side of the field and defines if it remains at an advantage after the combat (based on the number of monsters on each side of the field).
 - **Effect priority:** A Burn effect (which deals direct damage) receives a massive score if the EffectAnalyzer detects that the damage will be lethal, ensuring that it prioritizes finishing the duel.

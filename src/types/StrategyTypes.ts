@@ -22,7 +22,7 @@ export interface FieldSnapshot {
   };
 }
 
-export const AI_WEIGHTS = {
+export const AI_EVALUATION = {
   BASE_MOVE: 10,
   FIELD_EMPTY: 25,
   FIELD_FULL: -20,
