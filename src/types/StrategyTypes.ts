@@ -1,4 +1,5 @@
 import type { Card } from "../objects/Card";
+import type { CardEffect } from "./EffectTypes";
 
 export interface TacticalAdvantage {
   isThreatened: boolean; // does the player have an invincible monster on field?
@@ -13,6 +14,7 @@ export interface FieldSnapshot {
   playerMonsters: Card[];
   advantage: TacticalAdvantage;
   currentMana: number;
+  currentLP: number;
   npcHandCards: Card[];
   synergies: {
     hasKillTraps: boolean;
@@ -21,3 +23,10 @@ export interface FieldSnapshot {
     protectionCards: Card[];
   };
 }
+
+export type SupportScorer = (
+  effectValue: number,
+  effect: CardEffect,
+  snapshot: FieldSnapshot,
+  params?: { target?: Card | null }
+) => number
