@@ -56,9 +56,17 @@ npm run type-check
 For a deeper dive into the project, please refer to the following documents:
 -  **[Game Design & Rules](./GAME_DESIGN.md):** Detailed combat mechanics, card rarities, and floor scaling.
 -  **[Technical Architecture](./ARCHITECTURE.md):** Clean architecture, Design Patterns, and AI heuristics.
--  **[Architecture Details](./ARCHITECTURE.md#system-architecture-map)**
 
 Inside the architecture guide, you will find:
 * **Layered Design:** Details on Domain (GameState), Managers, and Presentation layers.
 * **Design Patterns:** How we applied Strategy, Observer, and Singleton patterns.
 * **AI Heuristics:** A deep dive into the weighted scoring system for NPC decision-making.
+
+## Credit and Assets
+
+### Software
+The core engine and logic are licensed under the [MIT License](./LICENSE).
+
+### Visual Assets
+- **Card Illustrations:** Generated via **Github Copilot**
+- **UI & Layout**: Designed and implemented using Phaser 3 components. 

@@ -1,8 +1,12 @@
 {
   "name": "toon_castle",
   "private": true,
-  "version": "0.0.5",
+  "version": "0.0.6",
   "type": "module",
+  "author": "Arthur Martins Lopes Spessoto <artspessoto@gmail.com>",
+  "license": "MIT",
+  "description": "Toon Castle is a strategic roguelike card game built with Phaser and TypeScript, featuring event-driven architecture and a weighted heuristc AI.",
+  "keywords": ["phaser3", "typescript", "event-driven", "vite"],
   "scripts": {
     "dev": "vite",
     "build": "rimraf dist && tsc && vite build",
