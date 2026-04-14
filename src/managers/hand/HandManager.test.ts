@@ -20,7 +20,7 @@ const MOCK_CARD_DATA: CardData = {
   height: 400,
 };
 
-vi.mock("../objects/Card", () => {
+vi.mock("../../objects/Card", () => {
   return {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Card: vi.fn().mockImplementation(function (..._args) {
