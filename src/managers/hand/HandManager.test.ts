@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { HandManager } from "./HandManager";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import type { GameSide } from "../types/GameTypes";
-import { createMockBattleContext, createMockCard } from "../utils/Mocks";
-import { EventBus } from "../events/EventBus";
-import { GameEvent } from "../events/GameEvents";
-import type { CardData } from "../types/CardTypes";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import type { GameSide } from "../../types/GameTypes";
+import { createMockBattleContext, createMockCard } from "../../utils/Mocks";
+import { EventBus } from "../../events/EventBus";
+import { GameEvent } from "../../events/GameEvents";
+import type { CardData } from "../../types/CardTypes";
 
 const MOCK_CARD_DATA: CardData = {
   id: "test-card",

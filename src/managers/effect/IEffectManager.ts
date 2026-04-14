@@ -1,6 +1,6 @@
-import { Card } from "../objects/Card";
-import type { CardEffect } from "../types/EffectTypes";
-import type { EffectInstructions, GameSide } from "../types/GameTypes";
+import { Card } from "../../objects/Card";
+import type { CardEffect } from "../../types/EffectTypes";
+import type { EffectInstructions, GameSide } from "../../types/GameTypes";
 
 export interface IEffectManager {
   isSelectingTarget: boolean;

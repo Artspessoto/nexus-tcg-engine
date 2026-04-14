@@ -1,19 +1,19 @@
-import type { IEffectManager } from "../interfaces/IEffectManager";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import type { Card } from "../objects/Card";
+import type { IEffectManager } from "../effect/IEffectManager";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import type { Card } from "../../objects/Card";
 import type {
   ActionEffect,
   CardEffect,
   EffectTypes,
-} from "../types/EffectTypes";
+} from "../../types/EffectTypes";
 import type {
   EffectInstructions,
   GameSide,
   PlacementMode,
-} from "../types/GameTypes";
-import { EventBus } from "../events/EventBus";
-import { GameEvent } from "../events/GameEvents";
-import { Logger } from "../utils/Logger";
+} from "../../types/GameTypes";
+import { EventBus } from "../../events/EventBus";
+import { GameEvent } from "../../events/GameEvents";
+import { Logger } from "../../utils/Logger";
 
 export class EffectManager implements IEffectManager {
   private context: IBattleContext;

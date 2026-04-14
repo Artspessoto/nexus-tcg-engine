@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { LanguageManager } from "./LanguageManager";
-import type { Lang } from "../types/GameTypes";
+import type { Lang } from "../../types/GameTypes";
 
 describe("LanguageManager", () => {
   beforeEach(() => {

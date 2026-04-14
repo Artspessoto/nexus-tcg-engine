@@ -1,8 +1,8 @@
-import type { IInputManager } from "../interfaces/IInputManager";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import type { Card } from "../objects/Card";
-import { THEME_CONFIG } from "../constants/ThemeConfig";
-import { Logger } from "../utils/Logger";
+import type { IInputManager } from "../input/IInputManager";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import type { Card } from "../../objects/Card";
+import { THEME_CONFIG } from "../../constants/ThemeConfig";
+import { Logger } from "../../utils/Logger";
 
 export class InputManager implements IInputManager {
   private context: IBattleContext;

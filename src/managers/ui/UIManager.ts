@@ -1,19 +1,19 @@
-import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
-import { THEME_CONFIG } from "../constants/ThemeConfig";
-import { EventBus } from "../events/EventBus";
-import { GameEvent } from "../events/GameEvents";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import type { IUIManager } from "../interfaces/IUIManager";
-import type { Card } from "../objects/Card";
-import { DecisionModal } from "../objects/DecisionModal";
-import { ToonButton } from "../objects/ToonButton";
+import { LAYOUT_CONFIG } from "../../constants/LayoutConfig";
+import { THEME_CONFIG } from "../../constants/ThemeConfig";
+import { EventBus } from "../../events/EventBus";
+import { GameEvent } from "../../events/GameEvents";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import type { IUIManager } from "./IUIManager";
+import type { Card } from "../../objects/Card";
+import { DecisionModal } from "../../objects/DecisionModal";
+import { ToonButton } from "../../objects/ToonButton";
 import type {
   GamePhase,
   GameSide,
   Notice,
   PlacementMode,
   TranslationStructure,
-} from "../types/GameTypes";
+} from "../../types/GameTypes";
 
 export class UIManager implements IUIManager {
   private context: IBattleContext;

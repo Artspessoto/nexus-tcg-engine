@@ -1,4 +1,4 @@
-import { Card } from "../objects/Card";
+import type { Card } from "../../objects/Card";
 
 export interface IInputManager {
   setupGlobalInputs(): void;

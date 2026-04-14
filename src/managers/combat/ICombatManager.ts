@@ -1,5 +1,5 @@
-import type { Card } from "../objects/Card";
-import type { GameSide } from "../types/GameTypes";
+import type { Card } from "../../objects/Card";
+import type { GameSide } from "../../types/GameTypes";
 
 export interface ICombatManager {
   isSelectingTarget: boolean;

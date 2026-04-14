@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { FieldManager } from "./FieldManager";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import type { Card } from "../objects/Card";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import type { Card } from "../../objects/Card";
 import {
   createMockBattleContext,
   createMockCard,
   createMockGameObject,
-} from "../utils/Mocks";
-import { EventBus } from "../events/EventBus";
-import { GameEvent } from "../events/GameEvents";
+} from "../../utils/Mocks";
+import { EventBus } from "../../events/EventBus";
+import { GameEvent } from "../../events/GameEvents";
 
 describe("FieldManager", () => {
   let fieldManager: FieldManager;

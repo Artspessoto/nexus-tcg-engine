@@ -1,5 +1,5 @@
-import type { Card } from "../objects/Card";
-import type { GameSide, PlacementMode } from "../types/GameTypes";
+import type { Card } from "../../objects/Card";
+import type { GameSide, PlacementMode } from "../../types/GameTypes";
 
 export interface IFieldPlayResult {
   valid: boolean;

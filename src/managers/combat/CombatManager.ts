@@ -1,11 +1,11 @@
-import { THEME_CONFIG } from "../constants/ThemeConfig";
-import { EventBus } from "../events/EventBus";
-import { GameEvent, type CardSentToGYPayload } from "../events/GameEvents";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import type { ICombatManager } from "../interfaces/ICombatManager";
-import type { Card } from "../objects/Card";
-import type { GameSide } from "../types/GameTypes";
-import { Logger } from "../utils/Logger";
+import { THEME_CONFIG } from "../../constants/ThemeConfig";
+import { EventBus } from "../../events/EventBus";
+import { GameEvent, type CardSentToGYPayload } from "../../events/GameEvents";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import type { ICombatManager } from "./ICombatManager";
+import type { Card } from "../../objects/Card";
+import type { GameSide } from "../../types/GameTypes";
+import { Logger } from "../../utils/Logger";
 
 export class CombatManager implements ICombatManager {
   private context: IBattleContext;

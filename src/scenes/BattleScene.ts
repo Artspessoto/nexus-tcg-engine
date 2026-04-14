@@ -1,7 +1,5 @@
 import { TRANSLATIONS } from "../constants/Translations";
 import { GameState } from "../domain/GameState";
-import { HandManager } from "../managers/HandManager";
-import { PhaseManager } from "../managers/PhaseManager";
 import { Card } from "../objects/Card";
 import { ToonButton } from "../objects/ToonButton";
 import type {
@@ -13,32 +11,34 @@ import type {
   PlacementMode,
   Slot,
 } from "../types/GameTypes";
-import { LanguageManager } from "../managers/LanguageManager";
-import { FieldManager } from "../managers/FieldManager";
-import { InputManager } from "../managers/InputManager";
-import { DeckManager } from "../managers/DeckManager";
-import { UIManager } from "../managers/UIManager";
-import { CombatManager } from "../managers/CombatManager";
-import { EffectManager } from "../managers/EffectManager";
+import { CombatManager } from "../managers/combat/CombatManager";
 import type { IBattleContext } from "../interfaces/IBattleContext";
-import type { ICombatManager } from "../interfaces/ICombatManager";
-import type { IDeckManager } from "../interfaces/IDeckManager";
-import type { IEffectManager } from "../interfaces/IEffectManager";
-import type { IFieldManager } from "../interfaces/IFieldManager";
-import type { IHandManager } from "../interfaces/IHandManager";
-import type { IInputManager } from "../interfaces/IInputManager";
-import type { IPhaseManager } from "../interfaces/IPhaseManager";
-import type { IUIManager } from "../interfaces/IUIManager";
+import type { IFieldManager } from "../managers/field/IFieldManager";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { EventBus } from "../events/EventBus";
 import { GameEvent, type TurnStartedPayload } from "../events/GameEvents";
-import type { IAIManager } from "../interfaces/IAIManager";
+import type { IAIManager } from "../managers/ai/IAIManager";
 import { AIManager } from "../managers/ai/AIManager";
 import { Logger } from "../utils/Logger";
 import { PLAYER_INITIAL_DECK } from "../constants/DeckConfig";
 import { DeckGenerator } from "../utils/DeckGenerator";
 import type { IGameState } from "../interfaces/IGameState";
+import type { ICombatManager } from "../managers/combat/ICombatManager";
+import { DeckManager } from "../managers/deck/DeckManager";
+import type { IDeckManager } from "../managers/deck/IDeckManager";
+import { EffectManager } from "../managers/effect/EffectManager";
+import type { IEffectManager } from "../managers/effect/IEffectManager";
+import { FieldManager } from "../managers/field/FieldManager";
+import { HandManager } from "../managers/hand/HandManager";
+import type { IHandManager } from "../managers/hand/IHandManager";
+import type { IInputManager } from "../managers/input/IInputManager";
+import { InputManager } from "../managers/input/InputManager";
+import { LanguageManager } from "../managers/language/LanguageManager";
+import type { IPhaseManager } from "../managers/phase/IPhaseManager";
+import { PhaseManager } from "../managers/phase/PhaseManager";
+import type { IUIManager } from "../managers/ui/IUIManager";
+import { UIManager } from "../managers/ui/UIManager";
 
 export class BattleScene extends Phaser.Scene implements IBattleContext {
   public engine = this;

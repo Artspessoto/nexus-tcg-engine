@@ -1,5 +1,5 @@
-import type { GameSide } from "../types/GameTypes";
-import type { IBattleContext } from "./IBattleContext";
+import type { GameSide } from "../../types/GameTypes";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
 
 export interface IDeckManager {
   readonly position: { x: number; y: number };

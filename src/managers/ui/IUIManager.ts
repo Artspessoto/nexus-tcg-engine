@@ -1,10 +1,10 @@
-import type { Card } from "../objects/Card";
+import type { Card } from "../../objects/Card";
 import type {
   Notice,
   GameSide,
   TranslationStructure,
   PlacementMode,
-} from "../types/GameTypes";
+} from "../../types/GameTypes";
 
 export interface IUIManager {
   setTranslations(translations: TranslationStructure): void;

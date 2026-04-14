@@ -1,10 +1,10 @@
-import { THEME_CONFIG } from "../constants/ThemeConfig";
-import { EventBus } from "../events/EventBus";
-import { GameEvent, type PhaseChangedPayload } from "../events/GameEvents";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import type { IPhaseManager } from "../interfaces/IPhaseManager";
-import type { ToonButton } from "../objects/ToonButton";
-import type { BattleTranslations, GamePhase } from "../types/GameTypes";
+import { THEME_CONFIG } from "../../constants/ThemeConfig";
+import { EventBus } from "../../events/EventBus";
+import { GameEvent, type PhaseChangedPayload } from "../../events/GameEvents";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import type { IPhaseManager } from "../phase/IPhaseManager";
+import type { ToonButton } from "../../objects/ToonButton";
+import type { BattleTranslations, GamePhase } from "../../types/GameTypes";
 
 export class PhaseManager implements IPhaseManager {
   private context: IBattleContext;

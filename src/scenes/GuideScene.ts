@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { ToonButton } from "../objects/ToonButton";
-import { LanguageManager } from "../managers/LanguageManager";
+import { LanguageManager } from "../managers/language/LanguageManager";
 import { TRANSLATIONS } from "../constants/Translations";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";

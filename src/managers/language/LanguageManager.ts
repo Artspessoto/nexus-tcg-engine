@@ -1,5 +1,5 @@
-import type { ILanguageManager } from "../interfaces/ILanguageManager";
-import type { Lang } from "../types/GameTypes";
+import type { ILanguageManager } from "./ILanguageManager";
+import type { Lang } from "../../types/GameTypes";
 
 export class LanguageManager implements ILanguageManager {
   private static instance: LanguageManager;

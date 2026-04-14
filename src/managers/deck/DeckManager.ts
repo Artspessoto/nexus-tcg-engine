@@ -1,10 +1,10 @@
-import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
-import { THEME_CONFIG } from "../constants/ThemeConfig";
-import { EventBus } from "../events/EventBus";
-import { GameEvent } from "../events/GameEvents";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import type { IDeckManager } from "../interfaces/IDeckManager";
-import type { GameSide } from "../types/GameTypes";
+import { LAYOUT_CONFIG } from "../../constants/LayoutConfig";
+import { THEME_CONFIG } from "../../constants/ThemeConfig";
+import { EventBus } from "../../events/EventBus";
+import { GameEvent } from "../../events/GameEvents";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import type { IDeckManager } from "../deck/IDeckManager";
+import type { GameSide } from "../../types/GameTypes";
 
 export class DeckManager implements IDeckManager {
   public readonly context: IBattleContext;

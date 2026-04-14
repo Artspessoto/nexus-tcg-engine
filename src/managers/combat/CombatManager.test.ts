@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CombatManager } from "./CombatManager";
-import { createMockBattleContext, createMockCard } from "../utils/Mocks";
-import { EventBus } from "../events/EventBus";
-import { GameEvent } from "../events/GameEvents";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import type { Card } from "../objects/Card";
-import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { createMockBattleContext, createMockCard } from "../../utils/Mocks";
+import { EventBus } from "../../events/EventBus";
+import { GameEvent } from "../../events/GameEvents";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import type { Card } from "../../objects/Card";
+import { THEME_CONFIG } from "../../constants/ThemeConfig";
 
 describe("CombatManager", () => {
   let mockContext: any;

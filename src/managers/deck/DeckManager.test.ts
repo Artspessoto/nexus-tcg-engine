@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
-import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { LAYOUT_CONFIG } from "../../constants/LayoutConfig";
+import { THEME_CONFIG } from "../../constants/ThemeConfig";
 import { DeckManager } from "./DeckManager";
-import { createMockBattleContext, createMockCard } from "../utils/Mocks";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import { EventBus } from "../events/EventBus";
-import { GameEvent } from "../events/GameEvents";
+import { createMockBattleContext, createMockCard } from "../../utils/Mocks";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import { EventBus } from "../../events/EventBus";
+import { GameEvent } from "../../events/GameEvents";
 
 describe("DeckManager", () => {
   let deckManager: DeckManager;

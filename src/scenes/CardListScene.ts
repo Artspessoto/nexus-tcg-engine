@@ -1,7 +1,7 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { TRANSLATIONS } from "../constants/Translations";
-import { LanguageManager } from "../managers/LanguageManager";
+import { LanguageManager } from "../managers/language/LanguageManager";
 import { Card } from "../objects/Card";
 import { ToonButton } from "../objects/ToonButton";
 import type { CardData } from "../types/CardTypes";

@@ -1,5 +1,5 @@
-import { Card } from "../objects/Card";
-import type { CardData } from "../types/CardTypes";
+import { Card } from "../../objects/Card";
+import type { CardData } from "../../types/CardTypes";
 
 export interface IHandManager {
   readonly hand: Card[];

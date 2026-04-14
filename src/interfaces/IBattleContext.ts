@@ -4,18 +4,18 @@ import type {
   PlacementMode,
   Slot,
 } from "../types/GameTypes";
-import type { IFieldManager } from "./IFieldManager";
+import type { IFieldManager } from "../managers/field/IFieldManager";
 import type { IGameState } from "./IGameState";
-import type { IUIManager } from "./IUIManager";
 import type { BattleTranslations } from "../types/GameTypes";
-import type { ICombatManager } from "./ICombatManager";
-import type { IHandManager } from "./IHandManager";
-import type { IInputManager } from "./IInputManager";
 import type { Card } from "../objects/Card";
-import type { IDeckManager } from "./IDeckManager";
 import type { ToonButton } from "../objects/ToonButton";
-import type { IEffectManager } from "./IEffectManager";
-import type { IAIManager } from "./IAIManager";
+import type { IAIManager } from "../managers/ai/IAIManager";
+import type { ICombatManager } from "../managers/combat/ICombatManager";
+import type { IDeckManager } from "../managers/deck/IDeckManager";
+import type { IEffectManager } from "../managers/effect/IEffectManager";
+import type { IHandManager } from "../managers/hand/IHandManager";
+import type { IInputManager } from "../managers/input/IInputManager";
+import type { IUIManager } from "../managers/ui/IUIManager";
 
 export interface IBattleContext {
   engine: Phaser.Scene;

@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { ToonButton } from "../objects/ToonButton";
-import { LanguageManager } from "../managers/LanguageManager";
+import { LanguageManager } from "../managers/language/LanguageManager";
 import { TRANSLATIONS } from "../constants/Translations";
 
 export class NameScene extends Phaser.Scene {

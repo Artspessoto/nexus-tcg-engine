@@ -1,15 +1,15 @@
 import Phaser from "phaser";
-import type { IBattleContext } from "../interfaces/IBattleContext";
-import { Card } from "../objects/Card";
-import { CARD_DATABASE } from "../constants/CardDatabase";
-import type { GameSide } from "../types/GameTypes";
-import type { IHandManager } from "../interfaces/IHandManager";
-import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
-import { THEME_CONFIG } from "../constants/ThemeConfig";
-import { EventBus } from "../events/EventBus";
-import { GameEvent, type CardPlayedPayload } from "../events/GameEvents";
-import { Logger } from "../utils/Logger";
-import type { CardData } from "../types/CardTypes";
+import type { IBattleContext } from "../../interfaces/IBattleContext";
+import { Card } from "../../objects/Card";
+import { CARD_DATABASE } from "../../constants/CardDatabase";
+import type { GameSide } from "../../types/GameTypes";
+import type { IHandManager } from "../hand/IHandManager";
+import { LAYOUT_CONFIG } from "../../constants/LayoutConfig";
+import { THEME_CONFIG } from "../../constants/ThemeConfig";
+import { EventBus } from "../../events/EventBus";
+import { GameEvent, type CardPlayedPayload } from "../../events/GameEvents";
+import { Logger } from "../../utils/Logger";
+import type { CardData } from "../../types/CardTypes";
 
 export class HandManager implements IHandManager {
   private context: IBattleContext;

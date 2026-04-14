@@ -1,4 +1,4 @@
-import type { Lang } from "../types/GameTypes";
+import type { Lang } from "../../types/GameTypes";
 
 export interface ILanguageManager {
   readonly currentLang: Lang;
