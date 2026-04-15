@@ -12,6 +12,7 @@ export interface FieldSnapshot {
   npcMonsters: Card[];
   npcSupports: Card[];
   playerMonsters: Card[];
+  playerSupports: Card[];
   advantage: TacticalAdvantage;
   currentMana: number;
   currentLP: number;
