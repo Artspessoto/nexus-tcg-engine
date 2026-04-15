@@ -85,6 +85,7 @@ export class MediumStrategy implements IAIStrategy {
     const npcMonsters = cardList(this.side, "monsterSlots");
     const npcSupports = cardList(this.side, "spellSlots");
     const playerMonsters = cardList("PLAYER", "monsterSlots");
+    const playerSupports = cardList("OPPONENT", "spellSlots");
 
     const allAvailableEffects = [
       ...npcHand,
@@ -96,6 +97,7 @@ export class MediumStrategy implements IAIStrategy {
       npcMonsters,
       npcSupports,
       playerMonsters,
+      playerSupports,
       advantage: this.calculateTacticalAdvantage(),
       currentMana: this.context.gameState.getMana(this.side),
       currentLP: this.context.gameState.getHP(this.side),

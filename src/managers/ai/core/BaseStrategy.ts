@@ -207,11 +207,13 @@ export abstract class BaseStrategy implements IAIStrategy {
     const npcMonsters = cardList(this.side, "monsterSlots");
     const npcSupports = cardList(this.side, "spellSlots");
     const playerMonsters = cardList("PLAYER", "monsterSlots");
+    const playerSupports = cardList("PLAYER", "spellSlots");
 
     return {
       npcMonsters,
       npcSupports,
       playerMonsters,
+      playerSupports,
       advantage: this.calculateTacticalAdvantage(),
       currentMana: this.context.gameState.getMana(this.side),
       currentLP: this.context.gameState.getHP(this.side),
@@ -220,7 +222,6 @@ export abstract class BaseStrategy implements IAIStrategy {
     };
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected calculateSynergies(_hand: Card[]) {
     return {
       hasKillTraps: false,
@@ -234,12 +235,14 @@ export abstract class BaseStrategy implements IAIStrategy {
     return new Promise((resolve) => this.context.time.delayedCall(ms, resolve));
   }
 
+  protected getFieldMoves(_snapshot: FieldSnapshot): Move[] {
+    return [];
+  }
+
   protected abstract getHandMoves(
     playableCards: Card[],
     snapshot: FieldSnapshot,
   ): Move[];
-
-  protected abstract getFieldMoves(snapshot: FieldSnapshot): Move[];
 
   protected abstract determineOptimalPlacementMode(
     monsterToPlay: Card,
