@@ -20,6 +20,10 @@ export abstract class BaseEvaluator implements ITacticalEvaluator {
         return this.evaluateSupportPlay(move.card, snapshot, move.params);
       case "ATTACK":
         return this.evaluateAttack(move.attacker, move.target);
+      case "ACTIVATE_EFFECT":
+        return this.evaluateEffectActivation(move.card, snapshot, move.target);
+      case "CHANGE_POS":
+        return this.evaluatePositionChange(move.card, snapshot)
       default:
         return 0;
     }
@@ -35,6 +39,21 @@ export abstract class BaseEvaluator implements ITacticalEvaluator {
     snapshot: FieldSnapshot,
   ): Card | null;
 
+  protected evaluateEffectActivation(
+    _card: Card,
+    _snapshot: FieldSnapshot,
+    _target?: Card | null,
+  ): number {
+    return 0;
+  }
+
+  protected evaluatePositionChange(
+    _card: Card,
+    _snapshot: FieldSnapshot,
+  ): number {
+    return 0;
+  }
+
   protected abstract evaluateMonsterPlay(
     card: Card,
     snapshot: FieldSnapshot,
@@ -45,7 +64,7 @@ export abstract class BaseEvaluator implements ITacticalEvaluator {
     snapshot: FieldSnapshot,
     params?: { target?: Card | null },
   ): number;
-  
+
   protected abstract evaluateAttack(
     attacker: Card,
     target?: Card | null,
