@@ -1,6 +1,6 @@
-import type { GameSide, Move } from "../types/GameTypes";
-import type { FieldSnapshot } from "../types/StrategyTypes";
-import type { IBattleContext } from "./IBattleContext";
+import type { GameSide, Move } from "../../../types/GameTypes";
+import type { FieldSnapshot } from "../../../types/StrategyTypes";
+import type { IBattleContext } from "../../../interfaces/IBattleContext";
 
 export interface IAIStrategy {
   readonly context: IBattleContext;
@@ -13,5 +13,4 @@ export interface IAIStrategy {
   evaluateMove(move: Move, data?: FieldSnapshot): number;
   executeMove(move: Move): Promise<void>;
   delay(ms: number): Promise<Phaser.Time.TimerEvent>;
-  //  TODO: move by card score
 }

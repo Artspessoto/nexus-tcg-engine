@@ -1,4 +1,4 @@
-import type { IAIStrategy } from "../../../interfaces/IAIStrategy";
+import type { IAIStrategy } from "../interfaces/IAIStrategy";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { GameSide, Move } from "../../../types/GameTypes";
 

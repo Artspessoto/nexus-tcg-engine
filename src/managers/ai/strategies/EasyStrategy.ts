@@ -1,5 +1,5 @@
 import { LAYOUT_CONFIG } from "../../../constants/LayoutConfig";
-import type { IAIStrategy } from "../../../interfaces/IAIStrategy";
+import type { IAIStrategy } from "../interfaces/IAIStrategy";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
 import type { BurnAnalysis } from "../../../types/AnalyzerTypes";

@@ -1,5 +1,5 @@
-import type { IAIManager } from "./IAIManager";
-import type { IAIStrategy } from "../../interfaces/IAIStrategy";
+import type { IAIManager } from "./interfaces/IAIManager";
+import type { IAIStrategy } from "./interfaces/IAIStrategy";
 import type { IBattleContext } from "../../interfaces/IBattleContext";
 import type { Difficulty } from "../../types/GameTypes";
 import { EasyStrategy } from "./strategies/EasyStrategy";

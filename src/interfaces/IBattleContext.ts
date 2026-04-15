@@ -9,7 +9,7 @@ import type { IGameState } from "./IGameState";
 import type { BattleTranslations } from "../types/GameTypes";
 import type { Card } from "../objects/Card";
 import type { ToonButton } from "../objects/ToonButton";
-import type { IAIManager } from "../managers/ai/IAIManager";
+import type { IAIManager } from "../managers/ai/interfaces/IAIManager";
 import type { ICombatManager } from "../managers/combat/ICombatManager";
 import type { IDeckManager } from "../managers/deck/IDeckManager";
 import type { IEffectManager } from "../managers/effect/IEffectManager";

@@ -18,7 +18,7 @@ import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { EventBus } from "../events/EventBus";
 import { GameEvent, type TurnStartedPayload } from "../events/GameEvents";
-import type { IAIManager } from "../managers/ai/IAIManager";
+import type { IAIManager } from "../managers/ai/interfaces/IAIManager";
 import { AIManager } from "../managers/ai/AIManager";
 import { Logger } from "../utils/Logger";
 import { PLAYER_INITIAL_DECK } from "../constants/DeckConfig";
