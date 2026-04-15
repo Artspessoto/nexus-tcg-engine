@@ -22,7 +22,6 @@ const MOCK_CARD_DATA: CardData = {
 
 vi.mock("../../objects/Card", () => {
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Card: vi.fn().mockImplementation(function (..._args) {
       return createMockCard();
     }),

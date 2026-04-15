@@ -5,7 +5,6 @@ vi.mock("phaser", () => {
   return {
     default: {
       Math: {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         Between: vi.fn((min: number, _max: number) => min),
       },
       Events: {
