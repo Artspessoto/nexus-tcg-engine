@@ -56,6 +56,7 @@ npm run type-check
 For a deeper dive into the project, please refer to the following documents:
 -  **[Game Design & Rules](./GAME_DESIGN.md):** Detailed combat mechanics, card rarities, and floor scaling.
 -  **[Technical Architecture](./ARCHITECTURE.md):** Clean architecture, Design Patterns, and AI heuristics.
+-  **[Architecture Details](./ARCHITECTURE.md#system-architecture-map)**
 
 Inside the architecture guide, you will find:
 * **Layered Design:** Details on Domain (GameState), Managers, and Presentation layers.

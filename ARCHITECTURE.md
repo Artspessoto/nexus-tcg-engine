@@ -4,6 +4,65 @@
 
 The project's goes beyond being a card roguelike game. The main goal is to implement a decoupled system focused on scalability, maintainability, and a clear separation of responsibilities through modularity.
 
+## System Architecture Map
+
+```mermaid
+graph TD
+    subgraph Engine["Engine (Phaser 3)"]
+        MS[MenuScene]
+        GS[GuideScene]
+        BS[BattleScene]
+    end
+
+    subgraph Core["Battle Context (State & Managers)"]
+        BS -->|Owns| GM[GameState]
+        BS -->|Owns| EM[EffectManager]
+        BS -->|Owns| CM[CombatManager]
+        BS -->|Owns| HM[HandManager]
+        BS -->|Owns| FM[FieldManager]
+        BS -->|Owns| IM[InputManager]
+        BS -->|Owns| UI[UIManager]
+        BS -->|Owns| AM[AIManager]
+    end
+
+    subgraph AI_Architecture["Brain (Modular AI)"]
+        AM --> STR[BaseStrategy]
+        STR -->|Refines| SNAP[FieldSnapshot]
+        STR --> EVAL[BaseEvaluator]
+        
+        subgraph Scorers["Domain Scorers (Math)"]
+            EVAL --> ACT[ActionScorer]
+            EVAL --> RES[ResourceScorer]
+            EVAL --> COM[CombatScorer]
+        end
+    end
+
+    subgraph Utils["Analyzers (Statics)"]
+        AN[Field & Effect Analyzers]
+    end
+
+    %% Input and Events flow
+    Player((Player)) -->|Clicks| IM
+    IM -->|Calls| BS
+    
+    %% Analyzers are used by AI and UI
+    STR -.-> AN
+    EVAL -.-> AN
+    UI -.-> AN
+
+    subgraph Global["Cross-Cutting (Events)"]
+        EB{EventBus}
+    end
+
+    GM -.->|Emits| EB
+    HM -.->|Emits| EB
+    CM -.->|Emits| EB
+    EM -.->|Emits| EB
+
+    EB -.->|Triggers| UI
+    EB -.->|Triggers| AM
+```
+
 ## 2. Layered Division
 
 ### Core Domain (Application State and Business Rules)
