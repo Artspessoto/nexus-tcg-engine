@@ -505,11 +505,13 @@ export class UIManager implements IUIManager {
 
     if (isPlayerCard) {
       if (myTurn) {
-        this.addPositionButtons(buttonArgs);
-        this.addAttackButton(buttonArgs);
+        if (currentPhase == "MAIN") {
+          this.addPositionButtons(buttonArgs);
+          this.addActivationButton(buttonArgs);
+        }
 
         if (currentPhase == "BATTLE") {
-          this.addActivationButton(buttonArgs);
+          this.addAttackButton(buttonArgs);
         }
       } else if (isResponseWindow) {
         this.addActivationButton(buttonArgs);
