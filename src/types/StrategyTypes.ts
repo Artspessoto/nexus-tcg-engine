@@ -17,17 +17,19 @@ export interface FieldSnapshot {
   currentMana: number;
   currentLP: number;
   npcHandCards: Card[];
-  synergies: {
-    hasKillTraps: boolean;
-    atkModifiers: Card[];
-    posModifiers: Card[];
-    protectionCards: Card[];
-  };
+  synergies: FieldSynergies;
+}
+
+export interface FieldSynergies {
+  hasKillTraps: boolean;
+  atkModifiers: Card[];
+  posModifiers: Card[];
+  protectionCards: Card[];
 }
 
 export type SupportScorer = (
   effectValue: number,
   effect: CardEffect,
   snapshot: FieldSnapshot,
-  params?: { target?: Card | null }
-) => number
+  params?: { target?: Card | null },
+) => number;

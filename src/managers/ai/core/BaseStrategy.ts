@@ -5,6 +5,7 @@ import type { Card } from "../../../objects/Card";
 import type { GameSide, Move } from "../../../types/GameTypes";
 import type {
   FieldSnapshot,
+  FieldSynergies,
   TacticalAdvantage,
 } from "../../../types/StrategyTypes";
 import { FieldAnalyzer } from "../analyzers/FieldAnalyzer";
@@ -218,11 +219,15 @@ export abstract class BaseStrategy implements IAIStrategy {
       currentMana: this.context.gameState.getMana(this.side),
       currentLP: this.context.gameState.getHP(this.side),
       npcHandCards: npcHand,
-      synergies: this.calculateSynergies(npcHand),
+      synergies: this.calculateSynergies(npcHand, npcMonsters, npcSupports),
     };
   }
 
-  protected calculateSynergies(_hand: Card[]) {
+  protected calculateSynergies(
+    _hand: Card[],
+    _npcMonsters: Card[],
+    _npcSupports: Card[],
+  ): FieldSynergies {
     return {
       hasKillTraps: false,
       atkModifiers: [],
