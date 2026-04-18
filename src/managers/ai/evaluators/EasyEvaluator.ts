@@ -1,19 +1,69 @@
 import {
+  AI_CONFIG,
   DEFENSIVE_EFFECTS,
   EFFECTS_REQUIRING_TARGET,
   OFFENSIVE_EFFECTS,
 } from "../../../constants/AIConfig";
-import { LAYOUT_CONFIG } from "../../../constants/LayoutConfig";
+import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
-import type { BurnAnalysis } from "../../../types/AnalyzerTypes";
-import type { CardEffect } from "../../../types/EffectTypes";
+import type {
+  ActionEffect,
+  CardEffect,
+  EffectTypes,
+  NumericEffect,
+} from "../../../types/EffectTypes";
 import type { Move } from "../../../types/GameTypes";
-import type { FieldSnapshot } from "../../../types/StrategyTypes";
+import type {
+  FieldSnapshot,
+  SupportScorer,
+} from "../../../types/StrategyTypes";
 import { EffectAnalyzer } from "../analyzers/EffectAnalyzer";
 import { FieldAnalyzer } from "../analyzers/FieldAnalyzer";
 import { BaseEvaluator } from "../core/BaseEvaluator";
+import { EasyActionScorer } from "../scorers/easy/EasyActionScorer";
+import { EasyCombatScorer } from "../scorers/easy/EasyCombatScorer";
+import { ResourceScorer } from "../scorers/ResourceScorer";
 
 export class EasyEvaluator extends BaseEvaluator {
+  private actionScorer: EasyActionScorer;
+  private resourceScorer: ResourceScorer;
+  private combatScorer: EasyCombatScorer;
+
+  private readonly supportScorers: Partial<Record<EffectTypes, SupportScorer>>;
+
+  constructor(context: IBattleContext) {
+    super(context);
+
+    this.actionScorer = new EasyActionScorer(context);
+    this.resourceScorer = new ResourceScorer(context);
+    this.combatScorer = new EasyCombatScorer(context);
+
+    this.supportScorers = {
+      BURN: (val) => this.resourceScorer.scoreBurnEffect(val),
+      HEAL: () => this.resourceScorer.scoreHealEffect(),
+      DRAW_CARD: () => this.resourceScorer.scoreDrawEffect(),
+      GAIN_MANA: (val) => this.resourceScorer.scoreManaEffect(val),
+
+      DESTROY: (_, eff) =>
+        this.actionScorer.scoreDestroyEffect(eff as ActionEffect),
+      REVIVE: (_, eff, snap) =>
+        this.actionScorer.scoreReviveEffect(eff as ActionEffect, snap),
+      BOUNCE: (_, __, snap, p) =>
+        this.actionScorer.scoreBounceEffect(snap, p?.target),
+
+      CHANGE_POS: (_, __, snap, p) =>
+        this.combatScorer.scoreChangePosEffect(snap, p?.target),
+      BOOST_ATK: (_, eff, snap, p) =>
+        this.combatScorer.scoreAtkShift(eff as NumericEffect, snap, p?.target),
+      NERF_ATK: (_, eff, snap, p) =>
+        this.combatScorer.scoreAtkShift(eff as NumericEffect, snap, p?.target),
+      BOOST_DEF: (_, eff, snap, p) =>
+        this.combatScorer.scoreDefShift(eff as NumericEffect, snap, p?.target),
+      NERF_DEF: (_, eff, snap, p) =>
+        this.combatScorer.scoreDefShift(eff as NumericEffect, snap, p?.target),
+    };
+  }
+
   public override evaluateMove(move: Move, snapshot: FieldSnapshot): number {
     let score = super.evaluateMove(move, snapshot);
 
@@ -135,98 +185,19 @@ export class EasyEvaluator extends BaseEvaluator {
     snapshot: FieldSnapshot,
     params?: { target?: Card | null },
   ): number {
-    const { currentMana } = snapshot;
     const effect = card.getCardData().effects;
     if (!effect) return 0;
 
-    if (EFFECTS_REQUIRING_TARGET.includes(effect.type) && !params?.target) return 0;
+    if (EFFECTS_REQUIRING_TARGET.includes(effect.type) && !params?.target)
+      return 0;
 
-    let baseScore = 0;
     const effectValue = effect.value || 0;
-    const totalLP = LAYOUT_CONFIG.GAME_STATE.BASE_LP;
 
-    switch (effect.type) {
-      case "BURN": {
-        const burn: BurnAnalysis = EffectAnalyzer.analyzeBurnImpact(
-          this.context,
-          effect.value,
-        );
-        if (burn.isLethal) return 9999;
-        baseScore +=
-          EffectAnalyzer.getRelativeImpact(effectValue, totalLP) * 1000;
+    const scorer = this.supportScorers[effect.type];
 
-        if (burn.damagePotential > totalLP * 0.5) baseScore += 30;
-        break;
-      }
-      case "HEAL": {
-        const healPriority = EffectAnalyzer.analyzeHealUrgency(this.context);
-        baseScore +=
-          EffectAnalyzer.getRelativeImpact(healPriority, totalLP) * 200;
-        break;
-      }
-      case "BOOST_ATK": {
-        const buff = EffectAnalyzer.analyzeCombatStatShiftPotential(
-          this.context,
-          effectValue,
-          "atk",
-          true,
-          currentMana,
-          "STRONGEST",
-        );
-        if (buff.isGameChanger) baseScore += 150;
-        baseScore += buff.targetValue * 2;
-        break;
-      }
-      case "DRAW_CARD": {
-        const neededCards = EffectAnalyzer.analyzeCardUrgency(this.context);
-        baseScore += neededCards * 25;
-        break;
-      }
-      case "DESTROY": {
-        if (
-          effect.targetType == "MONSTER" ||
-          effect.targetType == "EFFECT_MONSTER"
-        ) {
-          const destructionValue =
-            EffectAnalyzer.analyzeMonsterDestructionValue(this.context);
-          baseScore += destructionValue * 1.5;
-        } else {
-          baseScore += 20;
-        }
-
-        break;
-      }
-      case "BOUNCE": {
-        // const bounce: BounceAnalysis = EffectAnalyzer.analyzeBouncePotential(this.context);
-        // medium strategy => baseScore += bounce.targetAtk * 0.05 + bounce.manaCost * 20;
-        baseScore += 10;
-        break;
-      }
-      case "REVIVE": {
-        const emptySlots = this.context.field.monsterSlots.OPPONENT.filter(
-          (m) => m === null,
-        ).length;
-
-        if (!emptySlots) return -500;
-
-        const targetType = effect.targetType;
-        const bestCard = EffectAnalyzer.analyzeRevivePotential(
-          this.context,
-          effect.targetSide || "OWNER",
-          targetType,
-        );
-
-        if (bestCard) {
-          const reviveValuation = bestCard.getCardData().atk || 0;
-          baseScore += reviveValuation * 1.2;
-        } else {
-          baseScore = -500;
-        }
-        break;
-      }
-    }
-
-    return baseScore;
+    return scorer
+      ? scorer(effectValue, effect, snapshot, params)
+      : AI_CONFIG.SCORES.BASE_MOVE;
   }
 
   protected override evaluateAttack(
