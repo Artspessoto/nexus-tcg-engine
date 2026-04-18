@@ -1,5 +1,6 @@
 import {
   DEFENSIVE_EFFECTS,
+  EFFECTS_REQUIRING_TARGET,
   OFFENSIVE_EFFECTS,
 } from "../../../constants/AIConfig";
 import { LAYOUT_CONFIG } from "../../../constants/LayoutConfig";
@@ -138,16 +139,7 @@ export class EasyEvaluator extends BaseEvaluator {
     const effect = card.getCardData().effects;
     if (!effect) return 0;
 
-    const needTarget = [
-      "DESTROY",
-      "BOUNCE",
-      "NERF_ATK",
-      "BOOST_ATK",
-      "REVIVE",
-      "CHANGE_POS",
-    ];
-
-    if (needTarget.includes(effect.type) && !params?.target) return 0;
+    if (EFFECTS_REQUIRING_TARGET.includes(effect.type) && !params?.target) return 0;
 
     let baseScore = 0;
     const effectValue = effect.value || 0;
