@@ -1,5 +1,7 @@
 import type { EffectTypes } from "../types/EffectTypes";
 
+export const ASSUMED_DEF_WHEN_IS_FACEDOWN = 30;
+
 export const AI_CONFIG = {
   SCORES: {
     BASE_MOVE: 10,
