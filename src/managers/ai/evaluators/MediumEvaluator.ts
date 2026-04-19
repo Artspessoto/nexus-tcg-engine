@@ -1,5 +1,6 @@
 import {
   AI_CONFIG,
+  ASSUMED_DEF_WHEN_IS_FACEDOWN,
   DEFENSIVE_EFFECTS,
   EFFECTS_REQUIRING_TARGET,
   OFFENSIVE_EFFECTS,
@@ -97,8 +98,7 @@ export class MediumEvaluator extends BaseEvaluator {
     effect: CardEffect,
     snapshot: FieldSnapshot,
   ): Card | null {
-    const { playerMonsters, npcMonsters, advantage } = snapshot;
-    const playerSupports = this.context.field.spellSlots.PLAYER;
+    const { playerMonsters, playerSupports, npcMonsters, advantage } = snapshot;
 
     if (playerMonsters.length == 0) return null;
 
@@ -120,15 +120,14 @@ export class MediumEvaluator extends BaseEvaluator {
     );
     const npcMaxAtk = npcBestMonster?.getCardData().atk || 0;
     const effectValue = effect.value || 0;
-    const assumedDefWhenIsFaceDown = 30;
 
     // enemy danger
     const sortedEnemies = [...playerMonsters].sort((a, b) => {
       const valA = a.isFaceDown
-        ? assumedDefWhenIsFaceDown
+        ? ASSUMED_DEF_WHEN_IS_FACEDOWN
         : a.getCardData().atk || 0;
       const valB = b.isFaceDown
-        ? assumedDefWhenIsFaceDown
+        ? ASSUMED_DEF_WHEN_IS_FACEDOWN
         : b.getCardData().atk || 0;
 
       return valB - valA;
@@ -161,7 +160,7 @@ export class MediumEvaluator extends BaseEvaluator {
       let targetPowerStat: number;
 
       if (target.isFaceDown) {
-        targetPowerStat = assumedDefWhenIsFaceDown;
+        targetPowerStat = ASSUMED_DEF_WHEN_IS_FACEDOWN;
       } else {
         const isDef = target.isDefMode;
         targetPowerStat = isDef
@@ -212,7 +211,7 @@ export class MediumEvaluator extends BaseEvaluator {
     const powerValue =
       monsterStat == "ATK" ? cardData.atk || 0 : cardData.def || 0;
 
-    let actionScore = 10 + powerValue;
+    let actionScore = 15 + powerValue;
 
     actionScore += this.evaluateFieldUrgency(snapshot);
     actionScore += this.evaluateManaEfficiency(cardData, snapshot, actionScore);
@@ -245,7 +244,7 @@ export class MediumEvaluator extends BaseEvaluator {
     const ratio = data.manaCost / currentMana;
     let value = 0;
 
-    if (ratio > 0.7 && currentScore < 50) value -= 25;
+    if (ratio > 0.8 && currentScore < 40) value -= 10;
     if (currentMana - data.manaCost >= 2 && synergies.hasKillTraps) value += 15;
 
     return value;
@@ -351,13 +350,18 @@ export class MediumEvaluator extends BaseEvaluator {
   }
 
   protected evaluateAttack(attacker: Card, target?: Card | null): number {
+    //TODO: improve tactical evaluation
+    //direct attack
     if (!target) return AI_CONFIG.SCORES.GAME_CHANGER;
 
     const attackerValue = attacker.getCardData().atk || 0;
     const targetData = target.getCardData();
 
-    const targetValue =
-      (target.isAtkMode ? targetData.atk : targetData.def) ?? 0;
+    const targetDef = target.isFaceDown
+      ? ASSUMED_DEF_WHEN_IS_FACEDOWN
+      : (targetData.def ?? 0);
+
+    const targetValue = (target.isAtkMode ? targetData.atk : targetDef) ?? 0;
 
     if (attackerValue > targetValue) return 200;
 
