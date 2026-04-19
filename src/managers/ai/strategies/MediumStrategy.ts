@@ -108,55 +108,123 @@ export class MediumStrategy extends BaseStrategy {
     const fieldMonsters = FieldAnalyzer.getValidFieldCards(
       snapshot.npcMonsters,
     );
-    // const fieldSupports = FieldAnalyzer.getValidFieldCards(
-    //   this.context.field.spellSlots.OPPONENT,
-    // );
+    const fieldSupports = FieldAnalyzer.getValidFieldCards(
+      snapshot.npcSupports,
+    );
 
     const moves: Move[] = [];
 
+    //position change
     for (const monster of fieldMonsters) {
-      const hasAdvantage = FieldAnalyzer.getSimpleFieldSideAdvantage(
-        this.context,
-      );
-      const isFaceDown = monster.isFaceDown;
-      const isAtkMode = monster.isAtkMode;
-      const currentTurn = this.context.gameState.currentTurn;
-      const hasWaited = currentTurn > monster.setTurn;
+      this.addPositionChangeMoves(monster, moves);
+    }
 
-      const canChangePos =
-        hasWaited && !monster.hasChangedPosition && !monster.hasAttacked;
+    //active monster effect
+    for (const monster of fieldMonsters) {
+      this.addActivationMonsterEffectMoves(monster, snapshot, moves);
+    }
 
-      if (!canChangePos) {
-        continue;
-      }
-
-      if (hasAdvantage < 0 && isAtkMode) {
-        moves.push({
-          type: "CHANGE_POS",
-          card: monster,
-          newMode: "DEF",
-          isFlip: false,
-        });
-      } else if (isFaceDown) {
-        moves.push({
-          type: "CHANGE_POS",
-          card: monster,
-          newMode: "FACE_UP",
-          isFlip: true,
-        });
-      }
+    //active spells or trap effects
+    for (const supports of fieldSupports) {
+      this.addActivationSupportMoves(supports, snapshot, moves);
     }
 
     return moves;
+  }
+
+  private addActivationSupportMoves(
+    support: Card,
+    snapshot: FieldSnapshot,
+    moves: Move[],
+  ) {
+    const effect = support.getCardData().effects;
+
+    if (!support.isFaceDown || !effect) return;
+
+    const target = this.evaluator.getBestTarget(effect, snapshot);
+
+    if (EFFECTS_REQUIRING_TARGET.includes(effect.type) && !target) return;
+
+    moves.push({
+      type: "ACTIVATE_EFFECT",
+      card: support,
+      target,
+    });
+  }
+
+  private addActivationMonsterEffectMoves(
+    monster: Card,
+    snapshot: FieldSnapshot,
+    moves: Move[],
+  ): void {
+    const effect = monster.getCardData().effects;
+
+    if (!monster.isFaceDown || !effect) return;
+
+    const target = this.evaluator.getBestTarget(effect, snapshot);
+
+    if (EFFECTS_REQUIRING_TARGET.includes(effect.type) && !target) return;
+
+    moves.push({
+      type: "ACTIVATE_EFFECT",
+      card: monster,
+      target,
+    });
+  }
+
+  private addPositionChangeMoves(monster: Card, moves: Move[]): void {
+    const hasAdvantage = FieldAnalyzer.getSimpleFieldSideAdvantage(
+      this.context,
+    );
+    const isFaceDown = monster.isFaceDown;
+    const isAtkMode = monster.isAtkMode;
+    const currentTurn = this.context.gameState.currentTurn;
+    const hasWaited = currentTurn > monster.setTurn;
+
+    const canChangePos =
+      hasWaited && !monster.hasChangedPosition && !monster.hasAttacked;
+
+    if (!canChangePos) return;
+
+    if (hasAdvantage < 0 && isAtkMode) {
+      moves.push({
+        type: "CHANGE_POS",
+        card: monster,
+        newMode: "DEF",
+        isFlip: false,
+      });
+    } else if (isFaceDown) {
+      moves.push({
+        type: "CHANGE_POS",
+        card: monster,
+        newMode: "FACE_UP",
+        isFlip: true,
+      });
+    }
   }
 
   protected override determineOptimalPlacementMode(
     monsterToPlay: Card,
     data: FieldSnapshot,
   ): "ATK" | "DEF" {
-    const { advantage, currentMana } = data;
+    const { advantage, currentMana, playerMonsters } = data;
     const monsterData = monsterToPlay.getCardData();
+    const atk = monsterData.atk || 0;
     const remainingMana = currentMana - monsterData.manaCost;
+
+    const strongestEnemy = FieldAnalyzer.getStrongestMonsterTarget(
+      playerMonsters,
+      "ATK",
+    );
+    if (strongestEnemy) {
+      const enemyValue = strongestEnemy.isAtkMode
+        ? strongestEnemy.getCardData().atk || 0
+        : !strongestEnemy.isFaceDown
+          ? (strongestEnemy.getCardData().def ?? 0)
+          : 30;
+
+      if (atk > enemyValue) return "ATK";
+    }
 
     if (this.canSwingGameWithBuff(remainingMana)) return "ATK";
 
