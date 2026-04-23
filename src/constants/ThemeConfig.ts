@@ -53,7 +53,7 @@ export const THEME_CONFIG = {
         letterSpacing: 2,
       },
       MODAL_CONTENT: {
-        fontSize: "1.4rem",
+        fontSize: "22px",
         color: "#fff",
         align: "center",
       },

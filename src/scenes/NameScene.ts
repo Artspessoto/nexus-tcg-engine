@@ -48,7 +48,7 @@ export class NameScene extends Phaser.Scene {
       x: 640,
       y: 560,
       text: text.back,
-      fontSize: "1.5rem",
+      fontSize: "22px",
       textColor: "#fff",
       color: 0x1a1a1a,
       hoverColor: 0x333333,

@@ -80,7 +80,8 @@ export class ToonButton extends Phaser.GameObjects.Container {
     if (this.config.icon) {
       this.iconImage = this.scene.add.image(0, 0, this.config.icon);
 
-      const iconScale = (this.config.height * 0.8) / this.iconImage.height;
+      const imgHeight = this.iconImage.height || 32;
+      const iconScale = (this.config.height * 0.8) / imgHeight;
       this.iconImage.setScale(iconScale);
 
       this.add(this.iconImage);
