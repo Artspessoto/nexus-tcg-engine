@@ -349,8 +349,7 @@ export class MediumEvaluator extends BaseEvaluator {
       : AI_CONFIG.SCORES.BASE_MOVE;
   }
 
-  protected evaluateAttack(attacker: Card, target?: Card | null): number {
-    //TODO: improve tactical evaluation
+  protected evaluateAttack(attacker: Card, snapshot: FieldSnapshot, target?: Card | null): number {
     //direct attack
     if (!target) return AI_CONFIG.SCORES.GAME_CHANGER;
 
@@ -363,8 +362,50 @@ export class MediumEvaluator extends BaseEvaluator {
 
     const targetValue = (target.isAtkMode ? targetData.atk : targetDef) ?? 0;
 
-    if (attackerValue > targetValue) return 200;
+    if (target.isFaceDown) {
+      const isWeakestAttacker = snapshot.npcMonsters.every(m => (m.getCardData().atk || 0) >= attackerValue);
 
-    return -50;
+      if (snapshot.npcMonsters.length > 1) {
+        //use the weakest monster to test enemy def
+        if (isWeakestAttacker) return 120;
+        //attack with strongest monster is a high risk (target with effect or high defense) 
+        else return -30;
+      } else {
+        //if npc has a unique monster in field, safe attack priority
+        if (attackerValue < ASSUMED_DEF_WHEN_IS_FACEDOWN + 15) {
+          return -20
+        }
+      }
+    }
+
+    const hasUnknownThreats = snapshot.playerSupports.length > 0;
+    const trapFear = hasUnknownThreats && attackerValue >= 55 ? -40 : 0;
+
+    //NPC monster with advantage against the player's monster (atk > atk || atk > def) and prevents overkill
+    if (attackerValue > targetValue) {
+      let score = 200;
+
+      const overKillLimit = 40;
+      if (attackerValue - targetValue > overKillLimit) {
+        score -= 50;
+      }
+
+      return score + trapFear;
+    }
+
+    //equal 1x1 
+    else if (attackerValue == targetValue) {
+      const finalPrediction = FieldAnalyzer.continueWithAdvantageAfterCombatTrade(this.context, target.isDefMode);
+
+      if (finalPrediction.hasAdvantage) {
+        return 40
+      } else if (finalPrediction.hasDisadvantage) {
+        return -70
+      } else {
+        return -25
+      }
+    }
+
+    return -100;
   }
 }
