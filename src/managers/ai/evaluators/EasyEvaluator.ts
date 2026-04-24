@@ -202,9 +202,10 @@ export class EasyEvaluator extends BaseEvaluator {
 
   protected override evaluateAttack(
     attacker: Card,
+    _snapshot: FieldSnapshot,
     target?: Card | null,
   ): number {
-    if (!target) return 150;
+    if (!target) return AI_CONFIG.SCORES.GAME_CHANGER;
 
     const attackerAtk = attacker.getCardData().atk || 0;
     const targetData = target.getCardData();
@@ -226,20 +227,6 @@ export class EasyEvaluator extends BaseEvaluator {
     // equal 1x1
     else if (attackerAtk == targetValue) {
       return 60;
-      //predicition implements into medium strategy
-      // const finalPrediction =
-      //   FieldAnalyzer.continueWithAdvantageAfterCombatTrade(
-      //     this.context,
-      //     isDefenseMode,
-      //   );
-
-      // if (finalPrediction.hasDisadvantage) {
-      //   baseScore -= 70;
-      // } else if (finalPrediction.hasAdvantage) {
-      //   baseScore += 40;
-      // } else {
-      //   baseScore -= 20;
-      // }
     }
 
     return -50;

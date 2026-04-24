@@ -19,7 +19,7 @@ export abstract class BaseEvaluator implements ITacticalEvaluator {
       case "PLAY_SPELL":
         return this.evaluateSupportPlay(move.card, snapshot, move.params);
       case "ATTACK":
-        return this.evaluateAttack(move.attacker, move.target);
+        return this.evaluateAttack(move.attacker, snapshot, move.target);
       case "ACTIVATE_EFFECT":
         return this.evaluateEffectActivation(move.card, snapshot, move.target);
       case "CHANGE_POS":
@@ -67,6 +67,7 @@ export abstract class BaseEvaluator implements ITacticalEvaluator {
 
   protected abstract evaluateAttack(
     attacker: Card,
+    snapshot: FieldSnapshot,
     target?: Card | null,
   ): number;
 

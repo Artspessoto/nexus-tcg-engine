@@ -103,7 +103,7 @@ export class MenuScene extends Phaser.Scene {
       x: SCREEN.CENTER_X,
       y: MENU.ACTIONS.GUIDE_Y,
       text: strings.guide,
-      fontSize: "1.2rem",
+      fontSize: "22px",
       ...COMPONENTS.BUTTONS.SECONDARY,
     });
 
