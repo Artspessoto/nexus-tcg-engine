@@ -103,14 +103,17 @@ export class MediumEvaluator extends BaseEvaluator {
     if (playerMonsters.length == 0) return null;
 
     if (
-      effect.type == "DESTROY" &&
+      (effect.type == "DESTROY" || effect.type == "BOUNCE") &&
       (effect.targetType == "SPELL" || effect.targetType == "TRAP")
     ) {
       const validOptions = playerSupports.filter(
         (s) => s !== null && s.getType() == effect.targetType,
-      )[0];
+      );
 
-      return validOptions || null;
+      if (validOptions.length == 0) return null;
+
+      //priorize face down cards
+      return validOptions.sort((a, b) => (b.isFaceDown ? 1 : 0) - (a.isFaceDown ? 1 : 0))[0];
     }
 
     //npc best attacker
@@ -132,6 +135,10 @@ export class MediumEvaluator extends BaseEvaluator {
 
       return valB - valA;
     });
+
+    if ((effect.type == "DESTROY" || effect.type == "BOUNCE") && effect.targetType?.includes("MONSTER")) {
+      return sortedEnemies[0] || null;
+    }
 
     if (effect.type == "CHANGE_POS") {
       for (const target of sortedEnemies) {
@@ -211,10 +218,9 @@ export class MediumEvaluator extends BaseEvaluator {
     const powerValue =
       monsterStat == "ATK" ? cardData.atk || 0 : cardData.def || 0;
 
-    let actionScore = 15 + powerValue;
+    let actionScore = 15 + (powerValue * 0.6);
 
     actionScore += this.evaluateFieldUrgency(snapshot);
-    actionScore += this.evaluateManaEfficiency(cardData, snapshot, actionScore);
     actionScore += this.evaluateTacticalSynergy(card, snapshot, monsterStat);
     actionScore += this.evaluateThreatResponse(card, snapshot, monsterStat);
 
@@ -228,9 +234,18 @@ export class MediumEvaluator extends BaseEvaluator {
         strongestEnemy &&
         cardData.atk! > (strongestEnemy.getCardData().atk || 0)
       ) {
-        actionScore += 35;
+        const overPower = cardData.atk ?? 0 - (strongestEnemy.getCardData().atk || 0);
+
+        //treatment to prevent overkill play
+        if (overPower > 30) {
+          actionScore += 15
+        } else {
+          actionScore += 35;
+        }
       }
     }
+
+    actionScore += this.evaluateManaEfficiency(cardData, snapshot, actionScore);
 
     return actionScore;
   }
@@ -240,11 +255,26 @@ export class MediumEvaluator extends BaseEvaluator {
     snapshot: FieldSnapshot,
     currentScore: number,
   ): number {
-    const { currentMana, synergies } = snapshot;
+    const { currentMana, synergies, advantage } = snapshot;
     const ratio = data.manaCost / currentMana;
     let value = 0;
 
-    if (ratio > 0.8 && currentScore < 40) value -= 10;
+    //reactive priority: if AI is not under threat, save mana resources
+    if (!advantage.isThreatened) {
+
+      //if card cost more than half mana available and own field is safe 
+      if (ratio >= 0.5) {
+        value -= 45;
+      }
+
+      //if is winning, save mana resources for other turns
+      if (advantage.isWinning) {
+        value -= 20;
+      } else {
+        if (ratio > 0.8 && currentScore < 40) value -= 10;
+      }
+    }
+
     if (currentMana - data.manaCost >= 2 && synergies.hasKillTraps) value += 15;
 
     return value;
@@ -264,7 +294,7 @@ export class MediumEvaluator extends BaseEvaluator {
     snapshot: FieldSnapshot,
     mode: "ATK" | "DEF",
   ): number {
-    const { advantage } = snapshot;
+    const { advantage, playerMonsters } = snapshot;
     const cardData = card.getCardData();
 
     if (!advantage.isThreatened) return 0;
@@ -272,6 +302,14 @@ export class MediumEvaluator extends BaseEvaluator {
     if (mode === "DEF") {
       const threatPower = Math.abs(advantage.defensiveGap);
       return cardData.def! > threatPower ? 40 : 15;
+    }
+
+    //if mode is "ATK" verify if AI monster can destroy threat
+    const strongestEnemy = FieldAnalyzer.getStrongestMonsterTarget(playerMonsters, "ATK");
+    const enemyAtk = strongestEnemy?.getCardData().atk || 0;
+
+    if ((cardData.atk ?? 0) > enemyAtk) {
+      return 50;
     }
 
     return -25;
