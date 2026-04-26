@@ -1,4 +1,4 @@
-import { EFFECTS_REQUIRING_TARGET } from "../../../constants/AIConfig";
+import { ASSUMED_DEF_WHEN_IS_FACEDOWN, EFFECTS_REQUIRING_TARGET } from "../../../constants/AIConfig";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
 import type { Move } from "../../../types/GameTypes";
@@ -216,12 +216,13 @@ export class MediumStrategy extends BaseStrategy {
       playerMonsters,
       "ATK",
     );
-    if (strongestEnemy) {
+
+    if (!strongestEnemy) {
+      if (atk > ASSUMED_DEF_WHEN_IS_FACEDOWN) return "ATK";
+    } else {
       const enemyValue = strongestEnemy.isAtkMode
         ? strongestEnemy.getCardData().atk || 0
-        : !strongestEnemy.isFaceDown
-          ? (strongestEnemy.getCardData().def ?? 0)
-          : 30;
+        : (strongestEnemy.getCardData().def ?? 0)
 
       if (atk > enemyValue) return "ATK";
     }
