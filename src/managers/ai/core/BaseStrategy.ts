@@ -18,7 +18,7 @@ export abstract class BaseStrategy implements IAIStrategy {
   constructor(
     public readonly context: IBattleContext,
     protected readonly evaluator: ITacticalEvaluator,
-  ) {}
+  ) { }
 
   public async playMainPhase(): Promise<void> {
     let safetyBreak = 0;
@@ -29,6 +29,7 @@ export abstract class BaseStrategy implements IAIStrategy {
 
       if (
         !betterChoice ||
+        betterChoice.type == "PASS" ||
         this.evaluator.shouldStopMainPhase(betterChoice, snapshot)
       ) {
         break;
