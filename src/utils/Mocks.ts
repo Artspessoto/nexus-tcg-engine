@@ -284,6 +284,7 @@ export const createMockBattleContext = (): IBattleContext => {
       }),
     } as unknown as Phaser.Time.Clock,
     phaseButton: {} as unknown as ToonButton,
+    playerDisplayName: "PLAYER",
     selectedCard: null,
     getDeck: vi.fn(),
     handlePlayerCard: vi.fn(),
