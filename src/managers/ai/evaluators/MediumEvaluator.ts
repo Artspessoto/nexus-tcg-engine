@@ -113,7 +113,9 @@ export class MediumEvaluator extends BaseEvaluator {
       if (validOptions.length == 0) return null;
 
       //priorize face down cards
-      return validOptions.sort((a, b) => (b.isFaceDown ? 1 : 0) - (a.isFaceDown ? 1 : 0))[0];
+      return validOptions.sort(
+        (a, b) => (b.isFaceDown ? 1 : 0) - (a.isFaceDown ? 1 : 0),
+      )[0];
     }
 
     //npc best attacker
@@ -136,7 +138,10 @@ export class MediumEvaluator extends BaseEvaluator {
       return valB - valA;
     });
 
-    if ((effect.type == "DESTROY" || effect.type == "BOUNCE") && effect.targetType?.includes("MONSTER")) {
+    if (
+      (effect.type == "DESTROY" || effect.type == "BOUNCE") &&
+      effect.targetType?.includes("MONSTER")
+    ) {
       return sortedEnemies[0] || null;
     }
 
@@ -218,7 +223,7 @@ export class MediumEvaluator extends BaseEvaluator {
     const powerValue =
       monsterStat == "ATK" ? cardData.atk || 0 : cardData.def || 0;
 
-    let actionScore = 15 + (powerValue * 0.6);
+    let actionScore = 15 + powerValue * 0.6;
 
     actionScore += this.evaluateFieldUrgency(snapshot);
     actionScore += this.evaluateTacticalSynergy(card, snapshot, monsterStat);
@@ -234,11 +239,12 @@ export class MediumEvaluator extends BaseEvaluator {
         strongestEnemy &&
         cardData.atk! > (strongestEnemy.getCardData().atk || 0)
       ) {
-        const overPower = (cardData.atk || 0) - (strongestEnemy.getCardData().atk || 0);
+        const overPower =
+          (cardData.atk || 0) - (strongestEnemy.getCardData().atk || 0);
 
         //treatment to prevent overkill play
         if (overPower > 30) {
-          actionScore += 15
+          actionScore += 15;
         } else {
           actionScore += 35;
         }
@@ -263,8 +269,7 @@ export class MediumEvaluator extends BaseEvaluator {
 
     //reactive priority: if AI is not under threat, save mana resources
     if (isSafe) {
-
-      //if card cost more than half mana available and own field is safe 
+      //if card cost more than half mana available and own field is safe
       if (ratio >= 0.5) {
         value -= 45;
       }
@@ -312,7 +317,10 @@ export class MediumEvaluator extends BaseEvaluator {
     }
 
     //if mode is "ATK" verify if AI monster can destroy threat
-    const strongestEnemy = FieldAnalyzer.getStrongestMonsterTarget(playerMonsters, "ATK");
+    const strongestEnemy = FieldAnalyzer.getStrongestMonsterTarget(
+      playerMonsters,
+      "ATK",
+    );
     const enemyAtk = strongestEnemy?.getCardData().atk || 0;
 
     if ((cardData.atk ?? 0) > enemyAtk) {
@@ -394,7 +402,11 @@ export class MediumEvaluator extends BaseEvaluator {
       : AI_CONFIG.SCORES.BASE_MOVE;
   }
 
-  protected evaluateAttack(attacker: Card, snapshot: FieldSnapshot, target?: Card | null): number {
+  protected evaluateAttack(
+    attacker: Card,
+    snapshot: FieldSnapshot,
+    target?: Card | null,
+  ): number {
     //direct attack
     if (!target) return AI_CONFIG.SCORES.GAME_CHANGER;
 
@@ -408,17 +420,19 @@ export class MediumEvaluator extends BaseEvaluator {
     const targetValue = (target.isAtkMode ? targetData.atk : targetDef) ?? 0;
 
     if (target.isFaceDown) {
-      const isWeakestAttacker = snapshot.npcMonsters.every(m => (m.getCardData().atk || 0) >= attackerValue);
+      const isWeakestAttacker = snapshot.npcMonsters.every(
+        (m) => (m.getCardData().atk || 0) >= attackerValue,
+      );
 
       if (snapshot.npcMonsters.length > 1) {
         //use the weakest monster to test enemy def
         if (isWeakestAttacker) return 120;
-        //attack with strongest monster is a high risk (target with effect or high defense) 
+        //attack with strongest monster is a high risk (target with effect or high defense)
         else return -30;
       } else {
         //if npc has a unique monster in field, safe attack priority
         if (attackerValue < ASSUMED_DEF_WHEN_IS_FACEDOWN + 15) {
-          return -20
+          return -20;
         }
       }
     }
@@ -438,16 +452,20 @@ export class MediumEvaluator extends BaseEvaluator {
       return score + trapFear;
     }
 
-    //equal 1x1 
+    //equal 1x1
     else if (attackerValue == targetValue) {
-      const finalPrediction = FieldAnalyzer.continueWithAdvantageAfterCombatTrade(this.context, target.isDefMode);
+      const finalPrediction =
+        FieldAnalyzer.continueWithAdvantageAfterCombatTrade(
+          this.context,
+          target.isDefMode,
+        );
 
       if (finalPrediction.hasAdvantage) {
-        return 40
+        return 40;
       } else if (finalPrediction.hasDisadvantage) {
-        return -70
+        return -70;
       } else {
-        return -25
+        return -25;
       }
     }
 

@@ -1,4 +1,7 @@
-import { ASSUMED_DEF_WHEN_IS_FACEDOWN, EFFECTS_REQUIRING_TARGET } from "../../../constants/AIConfig";
+import {
+  ASSUMED_DEF_WHEN_IS_FACEDOWN,
+  EFFECTS_REQUIRING_TARGET,
+} from "../../../constants/AIConfig";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
 import type { Move } from "../../../types/GameTypes";
@@ -173,7 +176,12 @@ export class MediumStrategy extends BaseStrategy {
     });
   }
 
-  private addPositionChangeMoves(monster: Card, snapshot: FieldSnapshot, moves: Move[]): void {
+  private addPositionChangeMoves(
+    monster: Card,
+    snapshot: FieldSnapshot,
+    moves: Move[],
+  ): void {
+    const { playerMonsters, synergies, currentMana } = snapshot;
     const isFaceDown = monster.isFaceDown;
     const isAtkMode = monster.isAtkMode;
     const currentTurn = this.context.gameState.currentTurn;
@@ -184,28 +192,41 @@ export class MediumStrategy extends BaseStrategy {
 
     if (!canChangePos) return;
 
-    if (isFaceDown) {
-      moves.push({
-        type: "CHANGE_POS",
-        card: monster,
-        newMode: "FACE_UP",
-        isFlip: true,
-      });
-    }
+    const strongestEnemy = FieldAnalyzer.getStrongestMonsterTarget(
+      playerMonsters,
+      "ATK",
+    );
+    const enemyAtk = strongestEnemy?.getCardData().atk || 0;
+    const enemyDef = strongestEnemy?.getCardData().def || 0;
+    const myAtk = monster.getCardData().atk || 0;
+
+    //has lettal trap
+    const isBaiting = synergies.hasKillTraps;
+    //buff game change
+    const canTrickToWin = this.hasCombatTrickGameChanger(currentMana, snapshot);
+    //change pos trap/spell
+    const canExposeDef = synergies.posModifiers.length > 0 && myAtk > enemyDef;
 
     if (isAtkMode) {
-      const strongestEnemy = FieldAnalyzer.getStrongestMonsterTarget(snapshot.playerMonsters);
-
-      const enemyAtk = strongestEnemy?.getCardData().atk || 0;
-      const myAtk = monster.getCardData().atk || 0;
-
-      if (enemyAtk > myAtk) {
+      if (enemyAtk > myAtk && !isBaiting && !canTrickToWin && !canExposeDef) {
         moves.push({
           type: "CHANGE_POS",
           card: monster,
           newMode: "DEF",
-          isFlip: false
-        })
+          isFlip: false,
+        });
+      }
+    } else {
+      const canAttack =
+        myAtk > enemyAtk || canTrickToWin || canExposeDef || isBaiting;
+
+      if (canAttack) {
+        moves.push({
+          type: "CHANGE_POS",
+          card: monster,
+          newMode: isFaceDown ? "FACE_UP" : "ATK",
+          isFlip: isFaceDown,
+        });
       }
     }
   }
@@ -229,12 +250,12 @@ export class MediumStrategy extends BaseStrategy {
     } else {
       const enemyValue = strongestEnemy.isAtkMode
         ? strongestEnemy.getCardData().atk || 0
-        : (strongestEnemy.getCardData().def ?? 0)
+        : (strongestEnemy.getCardData().def ?? 0);
 
       if (atk > enemyValue) return "ATK";
     }
 
-    if (this.canSwingGameWithBuff(remainingMana)) return "ATK";
+    if (this.hasCombatTrickGameChanger(remainingMana, data)) return "ATK";
 
     if (synergies.hasKillTraps) return "ATK";
 
@@ -245,27 +266,41 @@ export class MediumStrategy extends BaseStrategy {
     return "DEF";
   }
 
-  private canSwingGameWithBuff(remainingMana: number): boolean {
+  private hasCombatTrickGameChanger(
+    remainingMana: number,
+    snapshot: FieldSnapshot,
+  ): boolean {
+    const { atkModifiers } = snapshot.synergies;
     const hand = this.context.getHand(this.side).hand;
-    const buff = hand.find(
-      (card) =>
-        card.getType() === "SPELL" &&
-        card.getCardData().effects?.type === "BOOST_ATK" &&
-        card.getCardData().manaCost <= remainingMana,
-    );
 
-    if (!buff) return false;
+    for (const modifierCard of atkModifiers) {
+      const isFromHand = hand.includes(modifierCard);
+      const cost = modifierCard.getCardData().manaCost;
 
-    const buffValue = buff.getCardData().effects?.value || 0;
-    const potential = EffectAnalyzer.analyzeCombatStatShiftPotential(
-      this.context,
-      buffValue,
-      "atk",
-      true,
-      remainingMana,
-      "ALL",
-    );
+      if (isFromHand && cost > remainingMana) continue;
 
-    return potential.isGameChanger;
+      const effect = modifierCard.getCardData().effects;
+      if (!effect) continue;
+
+      const isBuff = effect.type == "BOOST_ATK";
+      const effectValue = effect.value || 0;
+
+      const availableManaForMonster = remainingMana - (isFromHand ? cost : 0);
+
+      const potencial = EffectAnalyzer.analyzeCombatStatShiftPotential(
+        this.context,
+        effectValue,
+        "atk",
+        isBuff,
+        availableManaForMonster,
+        "ALL",
+      );
+
+      if (potencial.isGameChanger) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }
