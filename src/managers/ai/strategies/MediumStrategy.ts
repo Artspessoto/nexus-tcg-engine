@@ -33,7 +33,7 @@ export class MediumStrategy extends BaseStrategy {
       hasKillTraps: [...hand, ...npcSupports].some(
         (c) =>
           c.getType() == "TRAP" &&
-          hand.includes(c) &&
+          (c.isFaceDown || hand.includes(c)) &&
           ["DESTROY", "BOUNCE"].includes(c.getCardData().effects?.type || ""),
       ),
       atkModifiers: allAvailableEffects.filter((c) =>

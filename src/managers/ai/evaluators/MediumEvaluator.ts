@@ -471,4 +471,20 @@ export class MediumEvaluator extends BaseEvaluator {
 
     return -100;
   }
+
+  protected override evaluateEffectActivation(
+    card: Card,
+    snapshot: FieldSnapshot,
+    target?: Card | null,
+  ): number {
+    return this.evaluateSupportPlay(card, snapshot, { target });
+  }
+
+  protected override evaluatePositionChange(
+    card: Card,
+    _snapshot: FieldSnapshot,
+  ): number {
+    if (card.isAtkMode) return 45;
+    return 85;
+  }
 }
