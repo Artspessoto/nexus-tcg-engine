@@ -27,9 +27,10 @@ export class MediumStrategy extends BaseStrategy {
       ...npcSupports,
     ].filter((c) => c.getCardData().effects);
     return {
-      hasKillTraps: hand.some(
+      hasKillTraps: [...hand, ...npcSupports].some(
         (c) =>
           c.getType() == "TRAP" &&
+          hand.includes(c) &&
           ["DESTROY", "BOUNCE"].includes(c.getCardData().effects?.type || ""),
       ),
       atkModifiers: allAvailableEffects.filter((c) =>
@@ -116,7 +117,7 @@ export class MediumStrategy extends BaseStrategy {
 
     //position change
     for (const monster of fieldMonsters) {
-      this.addPositionChangeMoves(monster, moves);
+      this.addPositionChangeMoves(monster, snapshot, moves);
     }
 
     //active monster effect
@@ -172,10 +173,7 @@ export class MediumStrategy extends BaseStrategy {
     });
   }
 
-  private addPositionChangeMoves(monster: Card, moves: Move[]): void {
-    const hasAdvantage = FieldAnalyzer.getSimpleFieldSideAdvantage(
-      this.context,
-    );
+  private addPositionChangeMoves(monster: Card, snapshot: FieldSnapshot, moves: Move[]): void {
     const isFaceDown = monster.isFaceDown;
     const isAtkMode = monster.isAtkMode;
     const currentTurn = this.context.gameState.currentTurn;
@@ -186,14 +184,7 @@ export class MediumStrategy extends BaseStrategy {
 
     if (!canChangePos) return;
 
-    if (hasAdvantage < 0 && isAtkMode) {
-      moves.push({
-        type: "CHANGE_POS",
-        card: monster,
-        newMode: "DEF",
-        isFlip: false,
-      });
-    } else if (isFaceDown) {
+    if (isFaceDown) {
       moves.push({
         type: "CHANGE_POS",
         card: monster,
@@ -201,13 +192,29 @@ export class MediumStrategy extends BaseStrategy {
         isFlip: true,
       });
     }
+
+    if (isAtkMode) {
+      const strongestEnemy = FieldAnalyzer.getStrongestMonsterTarget(snapshot.playerMonsters);
+
+      const enemyAtk = strongestEnemy?.getCardData().atk || 0;
+      const myAtk = monster.getCardData().atk || 0;
+
+      if (enemyAtk > myAtk) {
+        moves.push({
+          type: "CHANGE_POS",
+          card: monster,
+          newMode: "DEF",
+          isFlip: false
+        })
+      }
+    }
   }
 
   protected override determineOptimalPlacementMode(
     monsterToPlay: Card,
     data: FieldSnapshot,
   ): "ATK" | "DEF" {
-    const { advantage, currentMana, playerMonsters } = data;
+    const { advantage, currentMana, playerMonsters, synergies } = data;
     const monsterData = monsterToPlay.getCardData();
     const atk = monsterData.atk || 0;
     const remainingMana = currentMana - monsterData.manaCost;
@@ -228,6 +235,8 @@ export class MediumStrategy extends BaseStrategy {
     }
 
     if (this.canSwingGameWithBuff(remainingMana)) return "ATK";
+
+    if (synergies.hasKillTraps) return "ATK";
 
     if (advantage.isThreatened) return "DEF";
 
