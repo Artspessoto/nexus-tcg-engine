@@ -234,7 +234,7 @@ export class MediumEvaluator extends BaseEvaluator {
         strongestEnemy &&
         cardData.atk! > (strongestEnemy.getCardData().atk || 0)
       ) {
-        const overPower = cardData.atk ?? 0 - (strongestEnemy.getCardData().atk || 0);
+        const overPower = (cardData.atk || 0) - (strongestEnemy.getCardData().atk || 0);
 
         //treatment to prevent overkill play
         if (overPower > 30) {
@@ -259,8 +259,10 @@ export class MediumEvaluator extends BaseEvaluator {
     const ratio = data.manaCost / currentMana;
     let value = 0;
 
+    const isSafe = !advantage.isThreatened || synergies.hasKillTraps;
+
     //reactive priority: if AI is not under threat, save mana resources
-    if (!advantage.isThreatened) {
+    if (isSafe) {
 
       //if card cost more than half mana available and own field is safe 
       if (ratio >= 0.5) {
@@ -294,14 +296,19 @@ export class MediumEvaluator extends BaseEvaluator {
     snapshot: FieldSnapshot,
     mode: "ATK" | "DEF",
   ): number {
-    const { advantage, playerMonsters } = snapshot;
+    const { advantage, playerMonsters, npcMonsters } = snapshot;
     const cardData = card.getCardData();
 
     if (!advantage.isThreatened) return 0;
 
     if (mode === "DEF") {
       const threatPower = Math.abs(advantage.defensiveGap);
-      return cardData.def! > threatPower ? 40 : 15;
+      const isSolidDefense = cardData.def! > threatPower;
+
+      if (isSolidDefense) return 40;
+
+      const hasDefense = npcMonsters.length > 0;
+      return hasDefense ? -15 : 15;
     }
 
     //if mode is "ATK" verify if AI monster can destroy threat
