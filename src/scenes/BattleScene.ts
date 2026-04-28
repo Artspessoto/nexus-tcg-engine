@@ -58,10 +58,11 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public npcAction!: IAIManager;
 
   public phaseButton!: ToonButton;
+  public playerDisplayName!: string;
+
   private isChangingPhase: boolean = false;
   public selectedCard: Card | null = null;
   private overlayLayer!: Phaser.GameObjects.Container;
-  private playerDisplayName!: string;
   private gameDifficulty: Difficulty = "EASY";
 
   constructor() {

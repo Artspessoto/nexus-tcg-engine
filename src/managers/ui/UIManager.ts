@@ -366,6 +366,8 @@ export class UIManager implements IUIManager {
   private createLPBar(x: number, y: number, initialHP: number) {
     const { HEIGHT, RADIUS, WIDTH } = LAYOUT_CONFIG.UI.LP_BAR;
     const { COLORS } = THEME_CONFIG;
+    const playerName =
+      this.side == "PLAYER" ? this.context.playerDisplayName : "CPU";
 
     const container = this.context.add.container(x, y);
     const bg = this.context.add.graphics();
@@ -384,8 +386,17 @@ export class UIManager implements IUIManager {
 
     container.add(bg);
 
+    const nameText = this.context.add
+      .text(20, 8, playerName, {
+        fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
+        fontSize: "16px",
+        color: "#EAEAEA",
+      })
+      .setOrigin(0.0)
+    container.add(nameText);
+
     const labelLP = this.context.add
-      .text(20, 18, "LP", {
+      .text(20, 45, "LP", {
         fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
         fontSize: "18px",
         color: COLORS.GOLD_GLOW,
@@ -400,7 +411,7 @@ export class UIManager implements IUIManager {
     };
 
     this.hpText = this.context.add
-      .text(60, 30, `${initialHP}`, textStyle)
+      .text(55, 45, `${initialHP}`, textStyle)
       .setOrigin(0, 0.5)
       .setShadow(2, 2, "#000000", 4, true, false);
 

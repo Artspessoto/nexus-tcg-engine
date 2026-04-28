@@ -88,7 +88,7 @@ export const LAYOUT_CONFIG = {
     },
     LP_BAR: {
       WIDTH: 180,
-      HEIGHT: 60,
+      HEIGHT: 75,
       RADIUS: 12,
       X: 30,
       Y_PLAYER: 630,

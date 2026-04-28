@@ -58,5 +58,6 @@ export interface IBattleContext {
   translationText: BattleTranslations;
   currentPhase: GamePhase;
   phaseButton: ToonButton;
+  playerDisplayName: string;
   selectedCard: Card | null;
 }
