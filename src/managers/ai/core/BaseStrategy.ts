@@ -18,7 +18,7 @@ export abstract class BaseStrategy implements IAIStrategy {
   constructor(
     public readonly context: IBattleContext,
     protected readonly evaluator: ITacticalEvaluator,
-  ) { }
+  ) {}
 
   public async playMainPhase(): Promise<void> {
     let safetyBreak = 0;
@@ -155,7 +155,8 @@ export abstract class BaseStrategy implements IAIStrategy {
     const moves: Move[] = [];
 
     attackers.forEach((attacker) => {
-      if (attacker.isFaceDown || attacker.hasAttacked) return;
+      if (attacker.isFaceDown || attacker.hasAttacked || attacker.isDefMode)
+        return;
       if (targets.length > 0) {
         targets.forEach((target) =>
           moves.push({ type: "ATTACK", attacker, target }),
