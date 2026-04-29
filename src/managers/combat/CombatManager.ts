@@ -127,24 +127,34 @@ export class CombatManager implements ICombatManager {
   private async triggerActivation(side: GameSide): Promise<void> {
     if (!this.currentAttacker) return;
 
-    const checkResponse = await this.checkOpponentResponse(side);
+    let triggerCard: Card | null = null;
 
-    if (checkResponse) {
-      const triggerCard =
-        await this.context.effects.selectResponseActivationSource();
+    if (side == "PLAYER") {
+      const checkResponse = await this.checkOpponentResponse();
 
-      if (!triggerCard) {
-        await this.delay(1000);
+      if (checkResponse)
+        triggerCard =
+          await this.context.effects.selectResponseActivationSource();
+    } else {
+      triggerCard = await this.context.npcAction.getCombatResponse(
+        this.currentAttacker,
+      );
+
+      if (triggerCard) {
+        await this.delay(800);
+        await this.context.cardActivation(triggerCard, side, {
+          target: this.currentAttacker,
+        });
       }
+    }
 
-      if (!this.currentAttacker || !this.currentAttacker.active) {
-        Logger.debug(
-          "COMBAT",
-          "Attack canceled. The attacking monster/warrior was negated/destroyed by the effect",
-        );
-        this.cancelTarget();
-        return;
-      }
+    if (!this.currentAttacker || !this.currentAttacker.active) {
+      Logger.debug(
+        "COMBAT",
+        "Attack canceled. The attacking monster/warrior was negated/destroyed by the effect",
+      );
+      this.cancelTarget();
+      return;
     }
   }
 
@@ -383,14 +393,8 @@ export class CombatManager implements ICombatManager {
     });
   }
 
-  private async checkOpponentResponse(
-    defenderSide: GameSide,
-  ): Promise<boolean> {
-    if (defenderSide === "OPPONENT") {
-      // TODO: npc response with trap or effect monster
-      return false;
-    }
-
+  private async checkOpponentResponse(): Promise<boolean> {
+    const defenderSide: GameSide = "PLAYER";
     const monsters = this.context.field.monsterSlots[defenderSide];
     const spells = this.context.field.spellSlots[defenderSide];
 
@@ -401,13 +405,7 @@ export class CombatManager implements ICombatManager {
 
     if (!hasEffectMonster && !hasTrap) return false;
 
-    if (defenderSide == "PLAYER") {
-      return await this.context.getUI("PLAYER").showTrapResponseAction();
-    } else {
-      //TODO: npc response
-    }
-
-    return false;
+    return await this.context.getUI("PLAYER").showTrapResponseAction();
   }
 
   private delay(ms: number) {
