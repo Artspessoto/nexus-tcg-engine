@@ -19,7 +19,7 @@ export type Slot = {
 };
 
 export type EffectInstructions = {
-  target?: Card | null;
+  target: Card | null;
   mode?: PlacementMode;
 };
 
@@ -32,7 +32,7 @@ export type Move =
       mode: "FACE_UP" | "SET";
       params?: EffectInstructions;
     }
-  | { type: "ACTIVATE_EFFECT"; card: Card; target?: Card | null }
+  | { type: "ACTIVATE_EFFECT"; card: Card; target: Card | null }
   | { type: "CHANGE_POS"; card: Card; newMode: PlacementMode, isFlip: boolean }
-  | { type: "ATTACK"; attacker: Card; target?: Card | null }
+  | { type: "ATTACK"; attacker: Card; target: Card | null }
   | { type: "PASS" };

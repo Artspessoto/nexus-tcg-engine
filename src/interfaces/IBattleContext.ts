@@ -45,7 +45,7 @@ export interface IBattleContext {
   cardActivation(
     card: Card,
     side: GameSide,
-    instructions?: { target?: Card | null },
+    instructions?: { target: Card | null },
   ): Promise<void>;
   onAttackDeclared(attacker: Card, target?: Card | null): Promise<void>;
   clearAllMenus(): void;

@@ -454,6 +454,11 @@ export class MediumEvaluator extends BaseEvaluator {
 
     //equal 1x1
     else if (attackerValue == targetValue) {
+      //prevent unnecessary attack
+      if (target.isDefMode) {
+        return -50;
+      }
+
       const finalPrediction =
         FieldAnalyzer.continueWithAdvantageAfterCombatTrade(
           this.context,
