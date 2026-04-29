@@ -256,6 +256,7 @@ export const createMockBattleContext = (): IBattleContext => {
     },
     npcAction: {
       executeTurn: vi.fn(),
+      getCombatResponse: vi.fn(),
     },
     field: {
       monsterSlots: {
