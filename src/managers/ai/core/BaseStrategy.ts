@@ -1,3 +1,4 @@
+import { OFFENSIVE_EFFECTS } from "../../../constants/AIConfig";
 import { EventBus } from "../../../events/EventBus";
 import { GameEvent } from "../../../events/GameEvents";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
@@ -162,13 +163,13 @@ export abstract class BaseStrategy implements IAIStrategy {
           moves.push({ type: "ATTACK", attacker, target }),
         );
       } else {
-        moves.push({ type: "ATTACK", attacker });
+        moves.push({ type: "ATTACK", attacker, target: null });
       }
     });
     return moves;
   }
 
-  public async getCombatResponse(attacker: Card): Promise<Card | null> {
+  public async getCombatResponse(attacker: Card): Promise<Move | null> {
     const snapshot = this.createFieldSnapshot();
     const moves: Move[] = [];
     const currentTurn = this.context.gameState.currentTurn;
@@ -186,10 +187,20 @@ export abstract class BaseStrategy implements IAIStrategy {
       if (support.getType() == "TRAP" && currentTurn === support.setTurn)
         continue;
 
+      let chosenTarget: Card | null = null;
+
+      const isOffensive = OFFENSIVE_EFFECTS.includes(effect.type);
+
+      if (isOffensive) {
+        chosenTarget = attacker;
+      } else {
+        chosenTarget = this.evaluator.getBestTarget(effect, snapshot);
+      }
+
       moves.push({
         type: "ACTIVATE_EFFECT",
         card: support,
-        target: attacker,
+        target: chosenTarget,
       });
     }
 
@@ -204,13 +215,13 @@ export abstract class BaseStrategy implements IAIStrategy {
 
     const bestReaction = scored[0];
 
-    //if trap have utility return card
+    //if trap have utility return action move
     if (
       bestReaction &&
       bestReaction.score > 20 &&
       bestReaction.move.type == "ACTIVATE_EFFECT"
     ) {
-      return bestReaction.move.card;
+      return bestReaction.move;
     }
 
     return null;

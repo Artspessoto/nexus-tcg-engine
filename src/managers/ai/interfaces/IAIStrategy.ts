@@ -11,7 +11,7 @@ export interface IAIStrategy {
   generateMoves(data?: FieldSnapshot): Move[];
   mainPhaseAvailableMoves(data?: FieldSnapshot): Move[];
   battlePhaseAvailableMoves(): Move[];
-  getCombatResponse(attacker: Card): Promise<Card | null>;
+  getCombatResponse(attacker: Card): Promise<Move | null>;
   evaluateMove(move: Move, data?: FieldSnapshot): number;
   executeMove(move: Move): Promise<void>;
   delay(ms: number): Promise<Phaser.Time.TimerEvent>;

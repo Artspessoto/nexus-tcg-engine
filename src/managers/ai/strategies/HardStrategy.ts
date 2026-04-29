@@ -11,7 +11,7 @@ export class HardStrategy implements IAIStrategy {
     this.context = context;
   }
 
-  public async getCombatResponse(_attacker: Card): Promise<Card | null> {
+  public async getCombatResponse(_attacker: Card): Promise<Move | null> {
     throw new Error("Method not implemented.");
   }
   public async playMainPhase(): Promise<void> {}

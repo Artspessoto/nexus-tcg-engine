@@ -1,7 +1,7 @@
 import type { IAIManager } from "./interfaces/IAIManager";
 import type { IAIStrategy } from "./interfaces/IAIStrategy";
 import type { IBattleContext } from "../../interfaces/IBattleContext";
-import type { Difficulty } from "../../types/GameTypes";
+import type { Difficulty, Move } from "../../types/GameTypes";
 import { EasyStrategy } from "./strategies/EasyStrategy";
 import { HardStrategy } from "./strategies/HardStrategy";
 import { MediumStrategy } from "./strategies/MediumStrategy";
@@ -40,7 +40,7 @@ export class AIManager implements IAIManager {
     this.context.setPhase("CHANGE_TURN");
   }
 
-  public async getCombatResponse(attacker: Card): Promise<Card | null> {
+  public async getCombatResponse(attacker: Card): Promise<Move | null> {
     return await this.strategy.getCombatResponse(attacker);
   }
 

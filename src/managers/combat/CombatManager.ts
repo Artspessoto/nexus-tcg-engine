@@ -128,6 +128,7 @@ export class CombatManager implements ICombatManager {
     if (!this.currentAttacker) return;
 
     let triggerCard: Card | null = null;
+    let effectTarget: Card | null = null;
 
     if (side == "PLAYER") {
       const checkResponse = await this.checkOpponentResponse();
@@ -136,14 +137,19 @@ export class CombatManager implements ICombatManager {
         triggerCard =
           await this.context.effects.selectResponseActivationSource();
     } else {
-      triggerCard = await this.context.npcAction.getCombatResponse(
+      const npcMove = await this.context.npcAction.getCombatResponse(
         this.currentAttacker,
       );
+
+      if(npcMove && npcMove.type == "ACTIVATE_EFFECT"){
+        triggerCard = npcMove.card;
+        effectTarget = npcMove.target; //AI target to apply response effect
+      }
 
       if (triggerCard) {
         await this.delay(800);
         await this.context.cardActivation(triggerCard, side, {
-          target: this.currentAttacker,
+          target: effectTarget,
         });
       }
     }
