@@ -4,12 +4,16 @@ import { CARD_CONFIG } from "../constants/CardConfig";
 import type { CardLocation, CardData, CardType } from "../types/CardTypes";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 
 export class Card extends Phaser.GameObjects.Container {
   public location: CardLocation = "DECK"; //card initial location
   public readonly originalOwner: GameSide; //real owner of card
   public owner: GameSide; //card controller
   public hasAttacked: boolean = false;
+  public setTurn: number = -1;
+  public hasChangedPosition: boolean = false;
+
   private frame!: Phaser.GameObjects.Image;
   private cardImage?: Phaser.GameObjects.Image;
   private nameText!: Phaser.GameObjects.Text;
@@ -17,12 +21,15 @@ export class Card extends Phaser.GameObjects.Container {
   private descText!: Phaser.GameObjects.Text;
   private atkText?: Phaser.GameObjects.Text;
   private defText?: Phaser.GameObjects.Text;
+
+  private fieldStatsBadge?: Phaser.GameObjects.Container;
+  private fieldAtkText?: Phaser.GameObjects.Text;
+  private fieldDefText?: Phaser.GameObjects.Text;
+
   private _isFaceDown: boolean = false;
   private baseData: CardData;
   private currentData: CardData;
   public cardType: CardType;
-  public setTurn: number = -1;
-  public hasChangedPosition: boolean = false;
 
   public visualElements!: Phaser.GameObjects.Container;
 
@@ -172,6 +179,8 @@ export class Card extends Phaser.GameObjects.Container {
         .setOrigin(0.5);
 
       this.visualElements.add([this.atkText, this.defText]);
+
+      this.createFieldBadgeStats(data);
     }
   }
 
@@ -199,6 +208,10 @@ export class Card extends Phaser.GameObjects.Container {
     this.frame.setDisplaySize(FIELD_W, FIELD_H);
 
     this.setSize(FIELD_W, FIELD_H);
+
+    if (!this._isFaceDown && this.fieldStatsBadge) {
+      this.fieldStatsBadge.setVisible(true);
+    }
   }
 
   public get isFaceDown(): boolean {
@@ -220,6 +233,8 @@ export class Card extends Phaser.GameObjects.Container {
     this.frame.setDisplaySize(width, height);
 
     this.setSize(width, height);
+
+    if (this.fieldStatsBadge) this.fieldStatsBadge.setVisible(false);
   }
 
   public setFaceDown() {
@@ -234,6 +249,8 @@ export class Card extends Phaser.GameObjects.Container {
     if (this.atkText) this.atkText.setVisible(false);
     if (this.defText) this.defText.setVisible(false);
 
+    if (this.fieldStatsBadge) this.fieldStatsBadge.setVisible(false);
+
     this.setFieldVisuals();
   }
 
@@ -246,6 +263,14 @@ export class Card extends Phaser.GameObjects.Container {
     this.nameText.setVisible(true);
     this.manaText.setVisible(true);
     this.descText.setVisible(true);
+
+    if (this.atkText) this.atkText.setVisible(true);
+    if (this.defText) this.defText.setVisible(true);
+
+    if (this.location == "FIELD" && this.fieldStatsBadge) {
+      this.fieldStatsBadge.setVisible(true);
+      this.refreshPositionHighlight();
+    }
   }
 
   public setLocation(newLocation: CardLocation, currentTurn?: number) {
@@ -298,6 +323,73 @@ export class Card extends Phaser.GameObjects.Container {
     return this;
   }
 
+  private createFieldBadgeStats(data: CardData) {
+    const { FONTS } = THEME_CONFIG;
+    const { GOLD_GLOW } = THEME_CONFIG.COLORS;
+    this.fieldStatsBadge = this.scene.add.container(0, 160);
+
+    this.fieldAtkText = this.scene.add
+      .text(-85, 0, `ATK ${data.atk || 0}`, {
+        fontFamily: FONTS.FAMILY_DISPLAY,
+        fontSize: "38px",
+        color: this.isAtkMode ? GOLD_GLOW : "#EAEAEA",
+        stroke: "#000000",
+        strokeThickness: 10,
+        shadow: {
+          offsetX: 0,
+          offsetY: 4,
+          color: "#000000",
+          blur: 4,
+          fill: true,
+        },
+      })
+      .setOrigin(0.5, 0.5);
+
+    this.fieldDefText = this.scene.add
+      .text(85, 0, `DEF ${data.def || 0}`, {
+        fontFamily: "Arial Black",
+        fontSize: "38px",
+        color: this.isDefMode ? GOLD_GLOW : "#EAEAEA",
+        stroke: "#000000",
+        strokeThickness: 10,
+        shadow: {
+          offsetX: 0,
+          offsetY: 4,
+          color: "#000000",
+          blur: 4,
+          fill: true,
+        },
+      })
+      .setOrigin(0.5, 0.5);
+
+    this.fieldStatsBadge.add([this.fieldAtkText, this.fieldDefText]);
+
+    //start invisible just enable in field
+    this.fieldStatsBadge.setVisible(false);
+
+    this.visualElements.add(this.fieldStatsBadge);
+  }
+
+  public refreshPositionHighlight() {
+    if (!this.fieldAtkText || !this.fieldDefText) return;
+
+    const { GOLD_GLOW } = THEME_CONFIG.COLORS;
+    const NEUTRAL_COLOR = "#EAEAEA";
+
+    const isAtkUpdated =
+      (this.currentData.atk || 0) !== (this.baseData.atk || 0);
+    const isDefUpdated =
+      (this.currentData.def || 0) !== (this.baseData.def || 0);
+
+    if (!isAtkUpdated) {
+      this.fieldAtkText.setColor(this.isAtkMode ? GOLD_GLOW : NEUTRAL_COLOR);
+    }
+
+    if (!isDefUpdated) {
+      this.fieldDefText.setColor(this.isDefMode ? GOLD_GLOW : NEUTRAL_COLOR);
+    }
+  }
+
   public resetStats() {
     this.currentData = { ...this.baseData };
 
@@ -307,6 +399,8 @@ export class Card extends Phaser.GameObjects.Container {
 
       this.atkText.setColor(CARD_CONFIG.STYLES.STATS.color);
       this.defText.setColor(CARD_CONFIG.STYLES.STATS.color);
+
+      this.refreshPositionHighlight();
     }
   }
 
@@ -318,10 +412,18 @@ export class Card extends Phaser.GameObjects.Container {
 
   public updateStat(newValue: number, statType: "atk" | "def") {
     const text = statType == "atk" ? this.atkText : this.defText;
+    const badgeText = statType == "atk" ? this.fieldAtkText : this.fieldDefText;
     const baseValue =
       text == this.atkText ? this.baseData.atk : this.baseData.def;
 
     this.currentData[statType] = newValue;
+
+    if (this.fieldAtkText && statType == "atk") {
+      this.fieldAtkText.setText(`ATK: ${newValue}`);
+    }
+    if (this.fieldDefText && statType == "def") {
+      this.fieldDefText.setText(`DEF: ${newValue}`);
+    }
 
     if (baseValue == undefined || !text) return;
 
@@ -334,10 +436,20 @@ export class Card extends Phaser.GameObjects.Container {
 
     if (isBuff) {
       text.setColor("#4dff4d"); //buff
+      if (badgeText) badgeText.setColor("#4dff4d");
     } else if (isNerf) {
       text.setColor("#ff4d4d"); //nerf
+      if (badgeText) badgeText.setColor("#ff4d4d");
     } else {
       text.setColor("#FFD966"); //original
+
+      if (badgeText) {
+        const isCurrentMode =
+          statType == "atk" ? this.isAtkMode : this.isDefMode;
+        badgeText.setColor(
+          isCurrentMode ? THEME_CONFIG.COLORS.GOLD_GLOW : "#EAEAEA",
+        );
+      }
     }
 
     EventBus.emit(GameEvent.CARD_STATS_CHANGED, {
@@ -365,9 +477,10 @@ export class Card extends Phaser.GameObjects.Container {
     });
 
     if (!this.isFaceDown) {
+      const targetToApply = badgeText ? [text, badgeText] : [text];
       this.scene.tweens.add({
-        targets: this.atkText,
-        scale: 1.8,
+        targets: targetToApply,
+        scale: 1.2,
         duration: 200,
         yoyo: true,
         ease: "Quad.easeOut",
@@ -386,6 +499,8 @@ export class Card extends Phaser.GameObjects.Container {
       ease: "Back.easeOut",
       onStart: () => this.setFaceUp(),
       onComplete: () => {
+        this.refreshPositionHighlight();
+
         this.scene.tweens.add({
           targets: this,
           scale: 0.32, // back to original scale
@@ -410,6 +525,8 @@ export class Card extends Phaser.GameObjects.Container {
       duration: 250,
       ease: "Power2",
       onComplete: () => {
+        this.refreshPositionHighlight();
+
         this.scene.tweens.add({
           targets: this,
           scale: 0.32,
