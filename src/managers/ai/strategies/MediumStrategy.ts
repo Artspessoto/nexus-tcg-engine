@@ -145,6 +145,12 @@ export class MediumStrategy extends BaseStrategy {
 
     if (!support.isFaceDown || !effect) return;
 
+    const isTrapCard = support.getType() == "TRAP";
+    const currentTurn = this.context.gameState.currentTurn;
+    const hasWaited = currentTurn > support.setTurn;
+
+    if (isTrapCard && !hasWaited) return;
+
     const target = this.evaluator.getBestTarget(effect, snapshot);
 
     if (EFFECTS_REQUIRING_TARGET.includes(effect.type) && !target) return;
@@ -162,8 +168,10 @@ export class MediumStrategy extends BaseStrategy {
     moves: Move[],
   ): void {
     const effect = monster.getCardData().effects;
+    const currentTurn = this.context.gameState.currentTurn;
+    const hasWaited = currentTurn > monster.setTurn;
 
-    if (!monster.isFaceDown || !effect) return;
+    if (!monster.isFaceDown || !effect || !hasWaited) return;
 
     const target = this.evaluator.getBestTarget(effect, snapshot);
 
