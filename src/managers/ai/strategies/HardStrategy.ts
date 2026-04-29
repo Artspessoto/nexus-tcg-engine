@@ -1,6 +1,7 @@
 import type { IAIStrategy } from "../interfaces/IAIStrategy";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { GameSide, Move } from "../../../types/GameTypes";
+import type { Card } from "../../../objects/Card";
 
 export class HardStrategy implements IAIStrategy {
   public readonly context: IBattleContext;
@@ -8,6 +9,10 @@ export class HardStrategy implements IAIStrategy {
 
   constructor(context: IBattleContext) {
     this.context = context;
+  }
+
+  public async getCombatResponse(_attacker: Card): Promise<Card | null> {
+    throw new Error("Method not implemented.");
   }
   public async playMainPhase(): Promise<void> {}
 

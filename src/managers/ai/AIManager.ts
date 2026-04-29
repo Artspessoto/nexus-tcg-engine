@@ -5,6 +5,7 @@ import type { Difficulty } from "../../types/GameTypes";
 import { EasyStrategy } from "./strategies/EasyStrategy";
 import { HardStrategy } from "./strategies/HardStrategy";
 import { MediumStrategy } from "./strategies/MediumStrategy";
+import type { Card } from "../../objects/Card";
 
 export class AIManager implements IAIManager {
   private strategy!: IAIStrategy;
@@ -37,6 +38,10 @@ export class AIManager implements IAIManager {
     }
 
     this.context.setPhase("CHANGE_TURN");
+  }
+
+  public async getCombatResponse(attacker: Card): Promise<Card | null> {
+    return await this.strategy.getCombatResponse(attacker);
   }
 
   private delay(ms: number) {

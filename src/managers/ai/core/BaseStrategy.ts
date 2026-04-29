@@ -168,6 +168,54 @@ export abstract class BaseStrategy implements IAIStrategy {
     return moves;
   }
 
+  public async getCombatResponse(attacker: Card): Promise<Card | null> {
+    const snapshot = this.createFieldSnapshot();
+    const moves: Move[] = [];
+    const currentTurn = this.context.gameState.currentTurn;
+
+    const validSupports = FieldAnalyzer.getValidFieldCards(
+      snapshot.npcSupports,
+    );
+
+    for (const support of validSupports) {
+      if (!support.isFaceDown) continue;
+
+      const effect = support.getCardData().effects;
+      if (!effect) continue;
+
+      if (support.getType() == "TRAP" && currentTurn === support.setTurn)
+        continue;
+
+      moves.push({
+        type: "ACTIVATE_EFFECT",
+        card: support,
+        target: attacker,
+      });
+    }
+
+    if (moves.length == 0) return null;
+
+    const scored = moves
+      .map((move) => ({
+        move,
+        score: this.evaluator.evaluateMove(move, snapshot),
+      }))
+      .sort((a, b) => b.score - a.score);
+
+    const bestReaction = scored[0];
+
+    //if trap have utility return card
+    if (
+      bestReaction &&
+      bestReaction.score > 20 &&
+      bestReaction.move.type == "ACTIVATE_EFFECT"
+    ) {
+      return bestReaction.move.card;
+    }
+
+    return null;
+  }
+
   public evaluateMove(move: Move, data: FieldSnapshot): number {
     return this.evaluator.evaluateMove(move, data);
   }
