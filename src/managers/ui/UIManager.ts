@@ -392,7 +392,7 @@ export class UIManager implements IUIManager {
         fontSize: "16px",
         color: "#EAEAEA",
       })
-      .setOrigin(0.0)
+      .setOrigin(0.0);
     container.add(nameText);
 
     const labelLP = this.context.add
@@ -614,29 +614,27 @@ export class UIManager implements IUIManager {
   }
 
   private addActivationButton({ card, buttons, x, y }: ButtonParams) {
+    if (card.owner !== "PLAYER") return;
+
     const battleTexts = this.translations["battle_scene"];
     const buttonTexts = battleTexts.battle_buttons;
 
     const currentTurn = this.context.gameState.currentTurn;
     const hasWaited = currentTurn > card.setTurn;
+    const cardType = card.getType();
 
-    const isTrap = card.getType() == "TRAP";
-    const isEffectMonster = card.getType() == "EFFECT_MONSTER";
+    let canActivate = false;
 
-    if (card.owner == "PLAYER") {
-      if (isTrap && card.isFaceDown && hasWaited) {
-        this.pushActiveButton(buttons, x, y, buttonTexts.active, card);
-        return;
-      }
+    if (cardType == "TRAP") {
+      canActivate = card.isFaceDown && hasWaited;
+    } else if (cardType == "EFFECT_MONSTER") {
+      canActivate = hasWaited;
+    } else if (cardType == "SPELL") {
+      canActivate = true;
+    }
 
-      if (isEffectMonster) {
-        const canActivateFaceUp = !card.isFaceDown && hasWaited;
-        const canActivateDown = card.isFaceDown && hasWaited;
-
-        if (canActivateFaceUp || canActivateDown) {
-          this.pushActiveButton(buttons, x, y, buttonTexts.active, card);
-        }
-      }
+    if (canActivate) {
+      this.pushActiveButton(buttons, x, y, buttonTexts.active, card);
     }
   }
 
@@ -647,8 +645,12 @@ export class UIManager implements IUIManager {
     label: string,
     card: Card,
   ) {
+    //right button verify
+    const offsetY = buttons.length > 0 ? 85 : 35;
+    const offsetX = buttons.length > 0 ? 0 : 70;
+
     buttons.push(
-      this.createMenuButton(label, x + 70, y - 35, async () => {
+      this.createMenuButton(label, x + offsetX, y - offsetY, async () => {
         await this.context.cardActivation(card, this.side);
 
         EventBus.emit(GameEvent.ACTION_FINALIZED, { card });
