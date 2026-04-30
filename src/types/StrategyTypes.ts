@@ -11,8 +11,10 @@ export interface TacticalAdvantage {
 export interface FieldSnapshot {
   npcMonsters: Card[];
   npcSupports: Card[];
+  npcGraveyard: Card[];
   playerMonsters: Card[];
   playerSupports: Card[];
+  playerGraveyard: Card[];
   advantage: TacticalAdvantage;
   currentMana: number;
   currentLP: number;

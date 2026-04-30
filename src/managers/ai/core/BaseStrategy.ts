@@ -263,19 +263,24 @@ export abstract class BaseStrategy implements IAIStrategy {
     const npcHand = this.context.getHand(this.side).hand;
     const cardList = (
       side: GameSide,
-      slotType: "monsterSlots" | "spellSlots",
+      slotType: "monsterSlots" | "spellSlots" | "graveyardSlot",
     ) => FieldAnalyzer.getValidFieldCards(this.context.field[slotType][side]);
 
     const npcMonsters = cardList(this.side, "monsterSlots");
     const npcSupports = cardList(this.side, "spellSlots");
+    const npcGraveyard = cardList(this.side, "graveyardSlot");
+
     const playerMonsters = cardList("PLAYER", "monsterSlots");
     const playerSupports = cardList("PLAYER", "spellSlots");
+    const playerGraveyard = cardList("PLAYER", "graveyardSlot");
 
     return {
       npcMonsters,
       npcSupports,
+      npcGraveyard,
       playerMonsters,
       playerSupports,
+      playerGraveyard,
       advantage: this.calculateTacticalAdvantage(),
       currentMana: this.context.gameState.getMana(this.side),
       currentLP: this.context.gameState.getHP(this.side),
