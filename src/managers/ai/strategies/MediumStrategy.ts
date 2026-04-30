@@ -9,6 +9,7 @@ import type {
   FieldSnapshot,
   FieldSynergies,
 } from "../../../types/StrategyTypes";
+import { Logger } from "../../../utils/Logger";
 import { EffectAnalyzer } from "../analyzers/EffectAnalyzer";
 import { FieldAnalyzer } from "../analyzers/FieldAnalyzer";
 import { BaseStrategy } from "../core/BaseStrategy";
@@ -49,6 +50,9 @@ export class MediumStrategy extends BaseStrategy {
   }
 
   protected getHandMoves(playableCards: Card[], snapshot: FieldSnapshot) {
+    const hand = this.context.getHand(this.side).hand;
+    const npcHandCards = hand.map((card) => card.getCardData().nameKey);
+    Logger.debug("AI", "NPC Cards", npcHandCards);
     const moves: Move[] = [];
 
     //monster options
@@ -196,7 +200,10 @@ export class MediumStrategy extends BaseStrategy {
     const hasWaited = currentTurn > monster.setTurn;
 
     const canChangePos =
-      hasWaited && !monster.hasChangedPosition && !monster.hasAttacked;
+      hasWaited &&
+      !monster.hasChangedPosition &&
+      !monster.hasAttacked &&
+      monster.location == "FIELD";
 
     if (!canChangePos) return;
 
