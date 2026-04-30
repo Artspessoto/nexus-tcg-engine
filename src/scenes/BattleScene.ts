@@ -462,6 +462,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       };
 
       card.activate();
+      card.fieldStatsBadge?.setVisible(false);
 
       //creating a temporary point to store position data
       const tempPoint = new Phaser.Math.Vector2();
@@ -540,6 +541,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
                 duration: ANIMATIONS.DURATIONS.ACTIVATION,
                 ease: ANIMATIONS.EASING.POWER_OUT,
                 onComplete: () => {
+                  card.fieldStatsBadge?.setVisible(true);
                   this.currentHand.showHand();
                   resolve();
                 },

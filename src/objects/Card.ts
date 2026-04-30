@@ -21,8 +21,8 @@ export class Card extends Phaser.GameObjects.Container {
   private descText!: Phaser.GameObjects.Text;
   private atkText?: Phaser.GameObjects.Text;
   private defText?: Phaser.GameObjects.Text;
-
-  private fieldStatsBadge?: Phaser.GameObjects.Container;
+  
+  public fieldStatsBadge?: Phaser.GameObjects.Container;
   private fieldAtkText?: Phaser.GameObjects.Text;
   private fieldDefText?: Phaser.GameObjects.Text;
 
