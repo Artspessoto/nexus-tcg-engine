@@ -48,7 +48,11 @@ export class MediumEvaluator extends BaseEvaluator {
       DESTROY: (_, eff) =>
         this.actionScorer.scoreDestroyEffect(eff as ActionEffect),
       REVIVE: (_, eff, snap) =>
-        this.actionScorer.scoreReviveEffect(eff as ActionEffect, snap),
+        this.actionScorer.scoreReviveEffect(
+          eff as ActionEffect,
+          snap,
+          (supportCard: Card) => this.evaluateSupportPlay(supportCard, snap),
+        ),
       BOUNCE: (_, __, snap, p) =>
         this.actionScorer.scoreBounceEffect(snap, p?.target),
 
@@ -201,18 +205,32 @@ export class MediumEvaluator extends BaseEvaluator {
     const targetType = effect.targetType;
     const advantage = snapshot.advantage;
 
-    let stat: "ATK" | "DEF" = "DEF";
-
-    if (advantage.isWinning && !advantage.isThreatened) stat = "ATK";
-
-    return (
-      EffectAnalyzer.analyzeRevivePotential(
-        this.context,
-        effect.targetSide || "OWNER",
-        targetType,
-        stat,
-      ) || null
+    const validTargets = EffectAnalyzer.analyzeRevivePotential(
+      this.context,
+      effect.targetSide || "OWNER",
+      targetType,
     );
+
+    if (!validTargets) return null;
+
+    if (targetType?.includes("MONSTER")) {
+      return EffectAnalyzer.getBestMonsterToRevive(validTargets, advantage);
+    } else {
+      let bestTarget: Card | null = null;
+      let bestScore = -99999;
+
+      for (const support of validTargets) {
+        if(support.getType().includes("MONSTER")) continue; 
+        const score = this.evaluateSupportPlay(support, snapshot);
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestTarget = support;
+        }
+      }
+
+      return bestScore > 0 ? bestTarget : null;
+    }
   }
 
   protected evaluateMonsterPlay(card: Card, snapshot: FieldSnapshot): number {

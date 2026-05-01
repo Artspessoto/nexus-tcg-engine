@@ -29,23 +29,61 @@ export class ActionScorer extends BaseScorer {
   public scoreReviveEffect(
     effect: ActionEffect,
     snapshot: FieldSnapshot,
+    simulateEffect: (card: Card) => number,
   ): number {
-    //field fully
-    if (snapshot.npcMonsters.length === 3) return 0;
+    const { npcGraveyard, npcMonsters, npcSupports, advantage } = snapshot;
 
-    const potential = EffectAnalyzer.analyzeRevivePotential(
+    //field fully
+    if (npcGraveyard.length === 0) return -500;
+
+    const validTargets = EffectAnalyzer.analyzeRevivePotential(
       this.context,
       effect.targetSide,
       effect.targetType,
-      "ATK",
     );
 
-    if (!potential) return -500;
+    if (!validTargets) return -500;
 
-    let score = 40 + (potential.getCardData().atk || 0);
-    if (snapshot.npcMonsters.length === 0) score += AI_CONFIG.FIELD.EMPTY_BONUS;
+    if (effect.targetType?.includes("MONSTER")) {
+      if (npcMonsters.length === 3) return -500;
 
-    return score;
+      const bestMonster = EffectAnalyzer.getBestMonsterToRevive(
+        validTargets,
+        advantage,
+      );
+
+      if (!bestMonster) return -500;
+
+      const isAgressive = advantage.isWinning && !advantage.isThreatened;
+      const powerValue = isAgressive
+        ? bestMonster.getCardData().atk || 0
+        : bestMonster.getCardData().def || 0;
+
+      let score = 40 + powerValue;
+      if (npcMonsters.length === 0) score += AI_CONFIG.FIELD.EMPTY_BONUS;
+      return score;
+    } else {
+      if (npcSupports.length == 3) return -500;
+
+      let bestSupportScore = -500;
+
+      for (const support of validTargets) {
+        if (support.getType().includes("MONSTER")) continue;
+
+        const supportEffect = support.getCardData().effects;
+        if (!supportEffect) continue;
+
+        const simulateScore = simulateEffect(support);
+
+        if (simulateScore > bestSupportScore) {
+          bestSupportScore = simulateScore;
+        }
+      }
+
+      if (bestSupportScore <= 0) return -500;
+
+      return bestSupportScore + 30;
+    }
   }
 
   public scoreBounceEffect(

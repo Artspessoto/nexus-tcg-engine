@@ -218,7 +218,7 @@ export class FieldAnalyzer {
     return npcCount - playerCount;
   }
 
-  public static getGraveyardMonsters(context: IBattleContext, side: GameSide) {
+  public static getGraveyardCards(context: IBattleContext, side: GameSide) {
     return this.getValidFieldCards(context.field.graveyardSlot[side]);
   }
 

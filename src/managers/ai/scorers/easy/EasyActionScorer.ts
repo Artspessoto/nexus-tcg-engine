@@ -3,6 +3,7 @@ import type { BounceAnalysis } from "../../../../types/AnalyzerTypes";
 import type { ActionEffect } from "../../../../types/EffectTypes";
 import type { FieldSnapshot } from "../../../../types/StrategyTypes";
 import { EffectAnalyzer } from "../../analyzers/EffectAnalyzer";
+import { FieldAnalyzer } from "../../analyzers/FieldAnalyzer";
 import { ActionScorer } from "../ActionScorer";
 
 export class EasyActionScorer extends ActionScorer {
@@ -34,22 +35,52 @@ export class EasyActionScorer extends ActionScorer {
   public override scoreReviveEffect(
     effect: ActionEffect,
     snapshot: FieldSnapshot,
+    simulateEffect: (card: Card) => number,
   ): number {
-    const slots = snapshot.npcMonsters.length;
+    const { npcGraveyard, npcMonsters, npcSupports } = snapshot;
+    if (npcGraveyard.length == 0) return -500;
 
-    if (slots === 3) return -500;
-
-    const targetType = effect.targetType;
-    const bestCard = EffectAnalyzer.analyzeRevivePotential(
+    const { targetSide, targetType } = effect;
+    const validTargets = EffectAnalyzer.analyzeRevivePotential(
       this.context,
-      effect.targetSide || "OWNER",
+      targetSide,
       targetType,
     );
 
-    if (!bestCard) {
-      return -500;
-    }
+    if (!validTargets) return -500;
 
-    return (bestCard.getCardData().atk || 0) * 1.2;
+    if (effect.targetType?.includes("MONSTER")) {
+      if (npcMonsters.length == 3) return -500;
+
+      const bestMonster = FieldAnalyzer.getStrongestMonsterTarget(
+        validTargets,
+        "ATK",
+      );
+
+      if (!bestMonster) return -500;
+
+      return (bestMonster.getCardData().atk || 0) * 1.2;
+    } else {
+      if (npcSupports.length == 3) return -500;
+
+      let bestSupportScore = -500;
+
+      for (const support of validTargets) {
+        if (support.getType().includes("MONSTER")) continue;
+
+        const supportEffect = support.getCardData().effects;
+        if (!supportEffect) continue;
+
+        const simulateScore = simulateEffect(support);
+
+        if (simulateScore > bestSupportScore) {
+          bestSupportScore = simulateScore;
+        }
+      }
+
+      if (bestSupportScore <= 0) return -500;
+
+      return bestSupportScore + 30;
+    }
   }
 }

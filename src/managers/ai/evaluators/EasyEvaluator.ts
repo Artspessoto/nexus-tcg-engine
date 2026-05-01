@@ -47,7 +47,11 @@ export class EasyEvaluator extends BaseEvaluator {
       DESTROY: (_, eff) =>
         this.actionScorer.scoreDestroyEffect(eff as ActionEffect),
       REVIVE: (_, eff, snap) =>
-        this.actionScorer.scoreReviveEffect(eff as ActionEffect, snap),
+        this.actionScorer.scoreReviveEffect(
+          eff as ActionEffect,
+          snap,
+          (support: Card) => this.evaluateSupportPlay(support, snap),
+        ),
       BOUNCE: (_, __, snap, p) =>
         this.actionScorer.scoreBounceEffect(snap, p?.target),
 
@@ -117,15 +121,34 @@ export class EasyEvaluator extends BaseEvaluator {
     }
 
     if (effect.type == "REVIVE") {
-      const targetType = effect.targetType;
+      const { targetType, targetSide } = effect;
 
-      return (
-        EffectAnalyzer.analyzeRevivePotential(
-          this.context,
-          effect.targetSide || "OWNER",
-          targetType,
-        ) || null
+      const validTargets = EffectAnalyzer.analyzeRevivePotential(
+        this.context,
+        targetSide || "OWNER",
+        targetType,
       );
+
+      if (!validTargets) return null;
+
+      if (targetType?.includes("MONSTER")) {
+        return FieldAnalyzer.getStrongestMonsterTarget(validTargets, "ATK");
+      } else {
+        let bestTarget: Card | null = null;
+        let bestScore = -99999;
+
+        for (const support of validTargets) {
+          if (support.getType().includes("MONSTER")) continue;
+          const score = this.evaluateSupportPlay(support, snapshot);
+
+          if (score > bestScore) {
+            bestScore = score;
+            bestTarget = support;
+          }
+        }
+
+        return bestScore > 0 ? bestTarget : null;
+      }
     }
 
     return null;

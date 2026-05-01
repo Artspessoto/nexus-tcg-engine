@@ -8,6 +8,7 @@ import type {
   ChangePosAnalysis,
 } from "../../../types/AnalyzerTypes";
 import type { EffectTargetSide } from "../../../types/EffectTypes";
+import type { TacticalAdvantage } from "../../../types/StrategyTypes";
 import { FieldAnalyzer } from "./FieldAnalyzer";
 
 export class EffectAnalyzer {
@@ -67,15 +68,11 @@ export class EffectAnalyzer {
     context: IBattleContext,
     targetSide: EffectTargetSide,
     targetType?: string,
-    stat: "ATK" | "DEF" = "ATK",
-  ): Card | null {
-    const npcGraveyard = FieldAnalyzer.getGraveyardMonsters(
-      context,
-      "OPPONENT",
-    );
+  ): Card[] | null {
+    const npcGraveyard = FieldAnalyzer.getGraveyardCards(context, "OPPONENT");
     const playerGraveyard =
       targetSide === "BOTH"
-        ? FieldAnalyzer.getGraveyardMonsters(context, "PLAYER")
+        ? FieldAnalyzer.getGraveyardCards(context, "PLAYER")
         : [];
 
     let availableCards = [...npcGraveyard, ...playerGraveyard];
@@ -88,15 +85,7 @@ export class EffectAnalyzer {
 
     if (availableCards.length == 0) return null;
 
-    if (stat == "ATK") {
-      return availableCards.sort(
-        (a, b) => (b.getCardData().atk || 0) - (a.getCardData().atk || 0),
-      )[0];
-    } else {
-      return availableCards.sort(
-        (a, b) => (b.getCardData().def || 0) - (a.getCardData().def || 0),
-      )[0];
-    }
+    return availableCards;
   }
 
   //burn priority (increases as the player's life decreases)
@@ -232,6 +221,22 @@ export class EffectAnalyzer {
       isCurrentAtkMode: target.angle == 0 || target.angle == 360,
       statGap: Math.abs(atk - def),
     };
+  }
+
+  public static getBestMonsterToRevive(
+    validTargets: Card[],
+    advantage: TacticalAdvantage,
+  ): Card | null {
+    const monsters = validTargets.filter((c) =>
+      c.getType().includes("MONSTER"),
+    );
+
+    if (monsters.length === 0) return null;
+
+    const isAggressive = advantage.isWinning && !advantage.isThreatened;
+    const statToPrioritize = isAggressive ? "ATK" : "DEF";
+
+    return FieldAnalyzer.getStrongestMonsterTarget(monsters, statToPrioritize);
   }
 
   //TODO: protect and negate priority
