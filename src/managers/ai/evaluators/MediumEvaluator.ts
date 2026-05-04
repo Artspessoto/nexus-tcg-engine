@@ -5,6 +5,7 @@ import {
   EFFECTS_REQUIRING_TARGET,
   OFFENSIVE_EFFECTS,
 } from "../../../constants/AIConfig";
+import { LAYOUT_CONFIG } from "../../../constants/LayoutConfig";
 import type { IBattleContext } from "../../../interfaces/IBattleContext";
 import type { Card } from "../../../objects/Card";
 import type { CardData } from "../../../types/CardTypes";
@@ -220,7 +221,7 @@ export class MediumEvaluator extends BaseEvaluator {
       let bestScore = -99999;
 
       for (const support of validTargets) {
-        if(support.getType().includes("MONSTER")) continue; 
+        if (support.getType().includes("MONSTER")) continue;
         const score = this.evaluateSupportPlay(support, snapshot);
 
         if (score > bestScore) {
@@ -243,7 +244,8 @@ export class MediumEvaluator extends BaseEvaluator {
 
     let actionScore = 15 + powerValue * 0.6;
 
-    actionScore += this.evaluateFieldUrgency(snapshot);
+    actionScore += this.evaluateSlotManagement(card, snapshot);
+
     actionScore += this.evaluateTacticalSynergy(card, snapshot, monsterStat);
     actionScore += this.evaluateThreatResponse(card, snapshot, monsterStat);
 
@@ -305,13 +307,44 @@ export class MediumEvaluator extends BaseEvaluator {
     return value;
   }
 
-  private evaluateFieldUrgency(snapshot: FieldSnapshot): number {
-    const { npcMonsters } = snapshot;
+  private evaluateSlotManagement(
+    cardToPlay: Card,
+    snapshot: FieldSnapshot,
+  ): number {
+    const { npcMonsters, currentLP: npcLP, advantage } = snapshot;
+    const playerLP = this.context.gameState.getHP("PLAYER");
+    const cardAtk = cardToPlay.getCardData().atk || 0;
+    const criticalLP = LAYOUT_CONFIG.GAME_STATE.BASE_LP / 3;
 
+    //if all slots are available (encourages to play)
     if (npcMonsters.length == 0) return 25;
-    if (npcMonsters.length == 3) return -20;
 
-    return 0;
+    if (npcMonsters.length == 3) return -50;
+
+    //last slot available
+    const isBoardLocking = npcMonsters.length === 2;
+
+    //lethal analysis
+    if (playerLP <= criticalLP) return isBoardLocking ? 20 : 10;
+
+    const isWeakCard = cardAtk < 38;
+
+    //if AI is winning and try play weak card (prevents this case)
+    if (advantage.isWinning && isWeakCard) {
+      //prevent fill the last slot with weak card
+      if (isBoardLocking) return -80;
+
+      //if is second or first monster, medium penality
+      return -30;
+    }
+
+    //defense urgency (AI with low LP or is under threat)
+    if (advantage.isThreatened || npcLP <= criticalLP) {
+      return isWeakCard && isBoardLocking ? -15 : 15;
+    }
+
+    //default management to prevents all monster slots from being filled
+    return isBoardLocking && isWeakCard ? -50 : 0;
   }
 
   private evaluateThreatResponse(
