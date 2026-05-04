@@ -141,7 +141,7 @@ export class CombatManager implements ICombatManager {
         this.currentAttacker,
       );
 
-      if(npcMove && npcMove.type == "ACTIVATE_EFFECT"){
+      if (npcMove && npcMove.type == "ACTIVATE_EFFECT") {
         triggerCard = npcMove.card;
         effectTarget = npcMove.target; //AI target to apply response effect
       }
@@ -362,6 +362,8 @@ export class CombatManager implements ICombatManager {
         duration: DURATIONS.NORMAL,
         onComplete: () => {
           card.setFaceUp();
+          this.applyTint(card, null);
+          
           this.context.field.moveToGraveyard(card);
           card.setAlpha(1);
         },

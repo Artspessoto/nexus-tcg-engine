@@ -403,6 +403,13 @@ export class Card extends Phaser.GameObjects.Container {
 
       this.refreshPositionHighlight();
     }
+
+    if (this.frame) this.frame.clearTint();
+
+    if (this.visualElements)
+      this.visualElements.iterate((child: Phaser.GameObjects.Sprite) => {
+        if (child.clearTint) child.clearTint();
+      });
   }
 
   public activate() {
