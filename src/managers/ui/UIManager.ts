@@ -628,7 +628,7 @@ export class UIManager implements IUIManager {
     if (cardType == "TRAP") {
       canActivate = card.isFaceDown && hasWaited;
     } else if (cardType == "EFFECT_MONSTER") {
-      canActivate = hasWaited;
+      canActivate = hasWaited && !card.hasActivatedEffect;
     } else if (cardType == "SPELL") {
       canActivate = true;
     }

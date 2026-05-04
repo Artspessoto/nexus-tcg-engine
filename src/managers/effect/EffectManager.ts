@@ -238,6 +238,11 @@ export class EffectManager implements IEffectManager {
 
     if (!handler) return;
 
+    if (sourceCard.getType() == "EFFECT_MONSTER") {
+      if (sourceCard.hasActivatedEffect) return;
+      sourceCard.hasActivatedEffect = true;
+    }
+
     await handler(effect, side, sourceCard, AIInstructions);
   }
 
@@ -399,6 +404,7 @@ export class EffectManager implements IEffectManager {
     this.context.field.releaseSlot(target, target.owner);
     target.resetStats();
     target.setLocation("HAND");
+    target.hasActivatedEffect = false;
     hand.addCardBack(target);
   }
 

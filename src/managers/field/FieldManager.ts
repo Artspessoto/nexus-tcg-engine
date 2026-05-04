@@ -3,10 +3,7 @@ import { THEME_CONFIG } from "../../constants/ThemeConfig";
 import { EventBus } from "../../events/EventBus";
 import { GameEvent, type PhaseChangedPayload } from "../../events/GameEvents";
 import type { IBattleContext } from "../../interfaces/IBattleContext";
-import type {
-  IFieldManager,
-  IFieldPlayResult,
-} from "../field/IFieldManager";
+import type { IFieldManager, IFieldPlayResult } from "../field/IFieldManager";
 import type { Card } from "../../objects/Card";
 import type { GameSide, PlacementMode } from "../../types/GameTypes";
 
@@ -277,6 +274,7 @@ export class FieldManager implements IFieldManager {
     this.graveyardSlot[realSide].unshift(card);
     card.resetStats();
     card.setLocation("GRAVEYARD");
+    card.hasActivatedEffect = false;
 
     EventBus.emit(GameEvent.CARD_SENT_TO_GRAVEYARD, {
       card,

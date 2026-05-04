@@ -175,7 +175,13 @@ export class MediumStrategy extends BaseStrategy {
     const currentTurn = this.context.gameState.currentTurn;
     const hasWaited = currentTurn > monster.setTurn;
 
-    if (!monster.isFaceDown || !effect || !hasWaited) return;
+    if (
+      !monster.isFaceDown ||
+      !effect ||
+      !hasWaited ||
+      monster.hasActivatedEffect
+    )
+      return;
 
     const target = this.evaluator.getBestTarget(effect, snapshot);
 

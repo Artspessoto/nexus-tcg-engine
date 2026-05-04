@@ -10,7 +10,8 @@ export class Card extends Phaser.GameObjects.Container {
   public location: CardLocation = "DECK"; //card initial location
   public readonly originalOwner: GameSide; //real owner of card
   public owner: GameSide; //card controller
-  public hasAttacked: boolean = false;
+  public hasAttacked: boolean = false; //attack controller
+  public hasActivatedEffect: boolean = false; //effect controller
   public setTurn: number = -1;
   public hasChangedPosition: boolean = false;
 
@@ -21,7 +22,7 @@ export class Card extends Phaser.GameObjects.Container {
   private descText!: Phaser.GameObjects.Text;
   private atkText?: Phaser.GameObjects.Text;
   private defText?: Phaser.GameObjects.Text;
-  
+
   public fieldStatsBadge?: Phaser.GameObjects.Container;
   private fieldAtkText?: Phaser.GameObjects.Text;
   private fieldDefText?: Phaser.GameObjects.Text;

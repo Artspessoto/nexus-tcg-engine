@@ -181,6 +181,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     nameKey: "Aprendiz de Mago",
     descriptionKey:
       "Diz a lenda que ele ainda está aprendendo a não explodir coisas.",
+    effects: { type: "DRAW_CARD", targetSide: "OWNER", value: 1 },
     manaCost: 1,
     atk: 35,
     def: 60,
@@ -194,6 +195,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     type: "EFFECT_MONSTER",
     nameKey: "Bandido arqueiro",
     descriptionKey: "Diz a lenda que ele se inspira em algum 'Wood'.",
+    effects: { type: "BURN", targetSide: "OPPONENT", value: 10 },
     manaCost: 1,
     atk: 52,
     def: 20,
