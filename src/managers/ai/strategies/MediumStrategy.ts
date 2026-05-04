@@ -176,7 +176,7 @@ export class MediumStrategy extends BaseStrategy {
     const hasWaited = currentTurn > monster.setTurn;
 
     if (
-      !monster.isFaceDown ||
+      // !monster.isFaceDown ||
       !effect ||
       !hasWaited ||
       monster.hasActivatedEffect
