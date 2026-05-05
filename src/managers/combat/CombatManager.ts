@@ -363,7 +363,7 @@ export class CombatManager implements ICombatManager {
         onComplete: () => {
           card.setFaceUp();
           this.applyTint(card, null);
-          
+
           this.context.field.moveToGraveyard(card);
           card.setAlpha(1);
         },
@@ -406,12 +406,12 @@ export class CombatManager implements ICombatManager {
     const monsters = this.context.field.monsterSlots[defenderSide];
     const spells = this.context.field.spellSlots[defenderSide];
 
-    const hasEffectMonster = monsters.some(
-      (c) => c?.getType() === "EFFECT_MONSTER",
+    const hasValidEffectMonster = monsters.some(
+      (c) => c?.getType() === "EFFECT_MONSTER" && !c.hasActivatedEffect,
     );
     const hasTrap = spells.some((c) => c?.getType() === "TRAP");
 
-    if (!hasEffectMonster && !hasTrap) return false;
+    if (!hasValidEffectMonster && !hasTrap) return false;
 
     return await this.context.getUI("PLAYER").showTrapResponseAction();
   }
