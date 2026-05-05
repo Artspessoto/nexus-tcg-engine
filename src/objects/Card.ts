@@ -302,6 +302,25 @@ export class Card extends Phaser.GameObjects.Container {
 
     this.frame.setTexture("battle_ui", this.getFrameKey(data.type));
 
+    if (this.cardImage) {
+      //TODO: data.imageKey.trim() !== "" in validation
+      if (data.imageKey) {
+        const textureKey = data.atlasKey || data.imageKey;
+        const frameKey = data.atlasKey ? data.imageKey : undefined;
+        this.cardImage.setTexture(textureKey, frameKey);
+        this.cardImage.setVisible(true);
+
+        const width = data.width ?? CARD_CONFIG.WIDTH;
+        const targetWidth = width * 0.85;
+
+        if (this.cardImage.width > 0) {
+          this.cardImage.setScale(targetWidth / this.cardImage.width);
+        }
+      } else {
+        this.cardImage.setVisible(false);
+      }
+    }
+
     this.nameText.setText(data.nameKey.toUpperCase());
     this.descText.setText(data.descriptionKey || "");
     this.manaText.setText(data.manaCost.toString());
