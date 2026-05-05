@@ -423,6 +423,13 @@ export class Card extends Phaser.GameObjects.Container {
       this.refreshPositionHighlight();
     }
 
+    if (this.fieldAtkText && this.fieldDefText) {
+      this.fieldAtkText.setText(`ATK: ${this.baseData.atk || 0}`);
+      this.fieldDefText.setText(`DEF: ${this.baseData.def || 0}`);
+    }
+
+    this.refreshPositionHighlight();
+
     if (this.frame) this.frame.clearTint();
 
     if (this.visualElements)
