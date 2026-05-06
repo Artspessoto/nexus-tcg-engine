@@ -1,31 +1,38 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
-import { Card } from "../objects/Card";
-import { ToonButton } from "../objects/ToonButton";
+import { Card } from "./Card";
+import { ToonButton } from "./ToonButton";
 import type { CardData, CardLocation } from "../types/CardTypes";
 import type { GameSide } from "../types/GameTypes";
 
-export class CardDetailScene extends Phaser.Scene {
+interface CardDetailsData {
+  cardData: CardData;
+  owner: GameSide;
+  originalOwner: GameSide;
+  location: CardLocation;
+}
+
+export class CardDetailsModal extends Phaser.GameObjects.Container {
   private cardData!: CardData;
   private owner!: GameSide;
   private originalOwner!: GameSide;
 
-  constructor() {
-    super({ key: "CardDetailScene" });
-  }
+  constructor(scene: Phaser.Scene, data: CardDetailsData) {
+    super(scene, 0, 0);
 
-  init(data: {
-    cardData: CardData;
-    owner: GameSide;
-    originalOwner: GameSide;
-    location: CardLocation;
-  }) {
     this.cardData = data.cardData;
     this.owner = data.owner;
     this.originalOwner = data.originalOwner;
+
+    this.setDepth(THEME_CONFIG.DEPTHS.BANNERS || 15000);
+
+    this.buildModal();
+
+    scene.add.existing(this);
   }
 
-  create() {
+  private buildModal() {
+    const scene = this.scene;
     const { SCREEN, MODAL } = LAYOUT_CONFIG;
     const { COLORS, FONTS } = THEME_CONFIG;
     const { DETAIL } = MODAL;
@@ -42,7 +49,7 @@ export class CardDetailScene extends Phaser.Scene {
       typeColors[this.cardData.type] ||
       Phaser.Display.Color.HexStringToColor(COLORS.GOLD_GLOW).color;
 
-    this.add
+    const overlay = this.scene.add
       .rectangle(
         SCREEN.CENTER_X,
         SCREEN.CENTER_Y,
@@ -53,7 +60,7 @@ export class CardDetailScene extends Phaser.Scene {
       )
       .setInteractive();
 
-    const panel = this.add.graphics();
+    const panel = this.scene.add.graphics();
     panel.fillStyle(COLORS.PANEL_BG, 0.95);
     panel.lineStyle(4, borderColor, 1);
 
@@ -62,7 +69,7 @@ export class CardDetailScene extends Phaser.Scene {
     panel.strokeRoundedRect(startX, startY, DETAIL.WIDTH, DETAIL.HEIGHT, 20);
 
     const displayCard = new Card(
-      this,
+      scene,
       startX + DETAIL.CARD_X_OFFSET,
       SCREEN.CENTER_Y,
       this.cardData,
@@ -77,35 +84,44 @@ export class CardDetailScene extends Phaser.Scene {
     const textStartX = startX + DETAIL.TEXT_X_OFFSET;
     const textWidth = DETAIL.WIDTH - DETAIL.TEXT_X_OFFSET - 40; // text width
 
-    // Título
-    this.add.text(
+    const titleText = this.scene.add.text(
       textStartX,
       startY + DETAIL.TEXT_START_Y,
       this.cardData.nameKey.toUpperCase(),
       FONTS.STYLES.CARD_NAME,
     );
 
-    this.add.text(textStartX, startY + 110, `[ ${this.cardData.type} ]`, {
-      fontSize: "18px",
-      color: `#${borderColor.toString(16)}`,
-      fontStyle: "bold",
-    });
+    const typeText = this.scene.add.text(
+      textStartX,
+      startY + 110,
+      `[ ${this.cardData.type} ]`,
+      {
+        fontSize: "18px",
+        color: `#${borderColor.toString(16)}`,
+        fontStyle: "bold",
+      },
+    );
 
-    this.add.text(textStartX, startY + 160, this.cardData.descriptionKey, {
-      fontSize: "18px",
-      color: "#DDDDDD",
-      wordWrap: { width: textWidth },
-      lineSpacing: 8,
-    });
+    const descText = this.scene.add.text(
+      textStartX,
+      startY + 160,
+      this.cardData.descriptionKey,
+      {
+        fontSize: "18px",
+        color: "#DDDDDD",
+        wordWrap: { width: textWidth },
+        lineSpacing: 8,
+      },
+    );
 
-    this.add.text(textStartX, startY + 350, '"Só o básico..."', {
-      fontSize: "18px",
-      fontStyle: "italic",
-      color: "#888888",
-      wordWrap: { width: textWidth },
-    });
+    // this.scene.add.text(textStartX, startY + 350, '"Só o básico..."', {
+    //   fontSize: "18px",
+    //   fontStyle: "italic",
+    //   color: "#888888",
+    //   wordWrap: { width: textWidth },
+    // });
 
-    new ToonButton(this, {
+    const closeBtn = new ToonButton(scene, {
       x: startX + DETAIL.WIDTH - 30,
       y: startY + 30,
       text: "X",
@@ -115,9 +131,28 @@ export class CardDetailScene extends Phaser.Scene {
       alpha: 0,
       fontSize: "20px",
     }).on("pointerdown", () => this.closeModal());
+
+    this.add([
+      overlay,
+      panel,
+      displayCard,
+      titleText,
+      typeText,
+      descText,
+      closeBtn,
+    ]);
   }
 
   private closeModal() {
-    this.scene.stop();
+    const { DURATIONS, EASING } = THEME_CONFIG.ANIMATIONS;
+    this.scene.tweens.add({
+      targets: this,
+      alpha: 0,
+      duration: DURATIONS.UI_POP,
+      ease: EASING.QUART_OUT,
+      onComplete: () => {
+        this.destroy();
+      },
+    });
   }
 }

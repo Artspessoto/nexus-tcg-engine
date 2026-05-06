@@ -4,7 +4,6 @@ import { NameScene } from "./scenes/NameScene";
 import "./styles/ui.css";
 import { GuideScene } from "./scenes/GuideScene";
 import { BattleScene } from "./scenes/BattleScene";
-import { CardDetailScene } from "./scenes/CardDetailScene";
 import { CardListScene } from "./scenes/CardListScene";
 import { LAYOUT_CONFIG } from "./constants/LayoutConfig";
 
@@ -38,7 +37,6 @@ const config: Phaser.Types.Core.GameConfig = {
     NameScene,
     GuideScene,
     BattleScene,
-    CardDetailScene,
     CardListScene,
   ],
 };

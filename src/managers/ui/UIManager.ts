@@ -14,6 +14,7 @@ import type {
   PlacementMode,
   TranslationStructure,
 } from "../../types/GameTypes";
+import { CardDetailsModal } from "../../objects/CardDetailsModal";
 
 export class UIManager implements IUIManager {
   private context: IBattleContext;
@@ -667,7 +668,7 @@ export class UIManager implements IUIManager {
       buttons.push(
         this.createMenuButton(buttonTexts.details, x - 70, y - 35, () => {
           this.context.getHand("PLAYER").showHand();
-          this.context.engine.scene.launch("CardDetailScene", {
+          new CardDetailsModal(this.context.engine, {
             cardData: card.getCardData(),
             owner: card.owner,
             originalOwner: card.originalOwner,
