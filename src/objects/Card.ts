@@ -145,10 +145,23 @@ export class Card extends Phaser.GameObjects.Container {
   }
 
   private setTexts(data: CardData) {
-    const { NAME, MANA, DESC } = CARD_CONFIG.POSITIONS;
+    const { SUPPORTS, DEFAULT } = CARD_CONFIG.POSITIONS;
+    let manaPosition: { x: number; y: number };
+
+    switch (data.type) {
+      case "SPELL":
+        manaPosition = SUPPORTS.MANA.SPELL;
+        break;
+      case "TRAP":
+        manaPosition = SUPPORTS.MANA.TRAP;
+        break;
+      default:
+        manaPosition = DEFAULT.MANA;
+        break;
+    }
 
     this.nameText = this.scene.add
-      .text(NAME.x, NAME.y, data.nameKey.toUpperCase(), {
+      .text(DEFAULT.NAME.x, DEFAULT.NAME.y, data.nameKey.toUpperCase(), {
         ...CARD_CONFIG.STYLES.NAME,
         align: "center",
         fixedWidth: 160,
@@ -156,11 +169,16 @@ export class Card extends Phaser.GameObjects.Container {
       .setOrigin(0.5);
 
     this.manaText = this.scene.add
-      .text(MANA.x, MANA.y, data.manaCost.toString(), CARD_CONFIG.STYLES.STATS)
+      .text(
+        manaPosition.x,
+        manaPosition.y,
+        data.manaCost.toString(),
+        CARD_CONFIG.STYLES.STATS,
+      )
       .setOrigin(0.5);
 
     this.descText = this.scene.add
-      .text(DESC.x, DESC.y, data.descriptionKey || "...", {
+      .text(DEFAULT.DESC.x, DEFAULT.DESC.y, data.descriptionKey || "...", {
         ...CARD_CONFIG.STYLES.DESC,
       })
       .setOrigin(0.5);
@@ -170,7 +188,7 @@ export class Card extends Phaser.GameObjects.Container {
 
   private setStats(data: CardData) {
     if (data.type === "MONSTER" || data.type === "EFFECT_MONSTER") {
-      const { ATK, DEF } = CARD_CONFIG.POSITIONS;
+      const { ATK, DEF } = CARD_CONFIG.POSITIONS.DEFAULT;
 
       this.atkText = this.scene.add
         .text(ATK.x, ATK.y, `${data.atk || 0}`, CARD_CONFIG.STYLES.STATS)

@@ -87,7 +87,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
   BOOST_ATK: {
     id: "BOOST_ATK",
     type: "SPELL",
-    nameKey: "Fúria",
+    nameKey: "Fúria Implacável",
     descriptionKey: "Aumente o ataque do monstro em 15 pontos.",
     effects: { type: "BOOST_ATK", value: 15, targetSide: "BOTH" },
     manaCost: 1,
