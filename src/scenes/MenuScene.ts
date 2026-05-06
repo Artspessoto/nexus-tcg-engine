@@ -61,7 +61,8 @@ export class MenuScene extends Phaser.Scene {
     const diffs: { id: Difficulty; label: string; color: string }[] = [
       { id: "EASY", label: strings.easy, color: "#00ff00" },
       { id: "MEDIUM", label: strings.medium, color: "#ffff00" },
-      { id: "HARD", label: strings.hard, color: "#ff0000" },
+      // TODO: implement 100% hard difficulty
+      // { id: "HARD", label: strings.hard, color: "#ff0000" },
     ];
 
     const totalWidth = (diffs.length - 1) * MENU.DIFF_BUTTONS.SPACING;

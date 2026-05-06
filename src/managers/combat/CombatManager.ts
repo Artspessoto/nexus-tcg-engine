@@ -162,6 +162,10 @@ export class CombatManager implements ICombatManager {
       this.cancelTarget();
       return;
     }
+
+    if (triggerCard) {
+      await this.delay(1500);
+    }
   }
 
   public cancelTarget() {
