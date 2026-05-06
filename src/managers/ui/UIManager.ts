@@ -542,7 +542,7 @@ export class UIManager implements IUIManager {
 
     this.selectionButtons.push(
       this.createMenuButton(buttonTexts.details, x + 70, y - 35, () => {
-        this.context.engine.scene.launch("CardListScene", graveyardCards);
+        this.context.engine.scene.launch("GraveyardScene", graveyardCards);
       }),
     );
   }

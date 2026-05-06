@@ -4,8 +4,9 @@ import { NameScene } from "./scenes/NameScene";
 import "./styles/ui.css";
 import { GuideScene } from "./scenes/GuideScene";
 import { BattleScene } from "./scenes/BattleScene";
-import { CardListScene } from "./scenes/CardListScene";
+import { GraveyardScene } from "./scenes/GraveyardScene";
 import { LAYOUT_CONFIG } from "./constants/LayoutConfig";
+import { DeckPreviewScene } from "./scenes/DeckPreviewScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -37,7 +38,8 @@ const config: Phaser.Types.Core.GameConfig = {
     NameScene,
     GuideScene,
     BattleScene,
-    CardListScene,
+    GraveyardScene,
+    DeckPreviewScene,
   ],
 };
 

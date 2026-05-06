@@ -336,7 +336,7 @@ export class EffectManager implements IEffectManager {
     this.pendingEffect = effect;
     this.pendingSource = source;
 
-    this.context.engine.scene.launch("CardListScene", {
+    this.context.engine.scene.launch("GraveyardScene", {
       cards: validCards,
       isSelectionMode: true,
       onSelect: (selectedCard: Card) => {

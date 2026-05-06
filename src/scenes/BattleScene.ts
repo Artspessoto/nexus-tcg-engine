@@ -21,7 +21,6 @@ import { GameEvent, type TurnStartedPayload } from "../events/GameEvents";
 import type { IAIManager } from "../managers/ai/interfaces/IAIManager";
 import { AIManager } from "../managers/ai/AIManager";
 import { Logger } from "../utils/Logger";
-import { PLAYER_INITIAL_DECK } from "../constants/DeckConfig";
 import { DeckGenerator } from "../utils/DeckGenerator";
 import type { IGameState } from "../interfaces/IGameState";
 import type { ICombatManager } from "../managers/combat/ICombatManager";
@@ -39,6 +38,12 @@ import type { IPhaseManager } from "../managers/phase/IPhaseManager";
 import { PhaseManager } from "../managers/phase/PhaseManager";
 import type { IUIManager } from "../managers/ui/IUIManager";
 import { UIManager } from "../managers/ui/UIManager";
+
+export interface BattleSceneConfig {
+  playerName: string;
+  playerDeckIds: string[];
+  difficulty: Difficulty;
+}
 
 export class BattleScene extends Phaser.Scene implements IBattleContext {
   public engine = this;
@@ -69,9 +74,9 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     super("BattleScene");
   }
 
-  init(data: { playerName: string; difficulty: Difficulty }) {
-    this.playerDisplayName = data.playerName || "PLAYER 1";
-    this.gameDifficulty = data.difficulty;
+  init(config: BattleSceneConfig) {
+    this.playerDisplayName = config.playerName || "PLAYER 1";
+    this.gameDifficulty = config.difficulty;
 
     this.gameState = new GameState();
     this.phaseManager = new PhaseManager(this);
@@ -89,7 +94,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.playerDeck = new DeckManager(this, "PLAYER");
     this.opponentDeck = new DeckManager(this, "OPPONENT");
 
-    const playerDeckIds = Phaser.Utils.Array.Shuffle([...PLAYER_INITIAL_DECK]);
+    const playerDeckIds = Phaser.Utils.Array.Shuffle([...config.playerDeckIds]);
     const NPCDeckIds = DeckGenerator.generateNPCDeck(this.gameDifficulty);
 
     this.gameState.setPlayerName(this.playerDisplayName);
