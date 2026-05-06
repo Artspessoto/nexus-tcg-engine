@@ -20,5 +20,6 @@ export interface IGameState {
   setDragging(value: boolean): void;
   setDeckState(side: GameSide): CardData | null;
   getDeckCount(side: GameSide): number;
-  initializeDecks(playerDeck: string[], opponentDeck: string[]): void;
+  getDeckDataList(side: GameSide): CardData[];
+  initializeDecks(playerDeck?: string[], opponentDeck?: string[]): void;
 }

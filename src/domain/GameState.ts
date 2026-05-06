@@ -35,9 +35,9 @@ export class GameState {
     return this._isDragging;
   }
 
-  public initializeDecks(playerDeck: string[], opponentDeck: string[]): void {
-    this._playerDeck = playerDeck;
-    this._opponentDeck = opponentDeck;
+  public initializeDecks(playerDeck?: string[], opponentDeck?: string[]): void {
+    this._playerDeck = playerDeck || [];
+    this._opponentDeck = opponentDeck || [];
   }
 
   public getHP(side: GameSide): number {
@@ -83,6 +83,15 @@ export class GameState {
     return side == "PLAYER"
       ? this._playerDeck.length
       : this._opponentDeck.length;
+  }
+
+  public getDeckDataList(side: GameSide): CardData[] {
+    const deckIds = side === "PLAYER" ? this._playerDeck : this._opponentDeck;
+
+    const cardDataArray = deckIds.map((id) => CARD_DATABASE[id]);
+
+    //cardDataArray.sort();
+    return cardDataArray.sort((a, b) => a.nameKey.localeCompare(b.nameKey));
   }
 
   public nextTurn() {

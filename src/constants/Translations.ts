@@ -27,7 +27,8 @@ export const TRANSLATIONS = {
     name_scene: {
       title: "Digite seu nome",
       confirm: "CONFIRMAR",
-      back: "VOLTAR AO MENU",
+      back_to_menu: "VOLTAR AO MENU",
+      back: "VOLTAR"
     },
     battle_scene: {
       opponent: "OPONENTE",
@@ -106,7 +107,8 @@ export const TRANSLATIONS = {
     name_scene: {
       title: "Enter your name",
       confirm: "CONFIRM",
-      back: "BACK TO MENU",
+      back_to_menu: "BACK TO MENU",
+      back: "BACK"
     },
     battle_scene: {
       opponent: "OPPONENT",
