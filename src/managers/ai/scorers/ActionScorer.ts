@@ -1,4 +1,7 @@
-import { AI_CONFIG } from "../../../constants/AIConfig";
+import {
+  AI_CONFIG,
+  ASSUMED_DEF_WHEN_IS_FACEDOWN,
+} from "../../../constants/AIConfig";
 import type { ActionEffect } from "../../../types/EffectTypes";
 import type { FieldSnapshot } from "../../../types/StrategyTypes";
 import type { Card } from "../../../objects/Card";
@@ -7,13 +10,37 @@ import { FieldAnalyzer } from "../analyzers/FieldAnalyzer";
 import { BaseScorer } from "../core/BaseScorer";
 
 export class ActionScorer extends BaseScorer {
-  public scoreDestroyEffect(effect: ActionEffect): number {
+  public scoreDestroyEffect(
+    effect: ActionEffect,
+    target?: Card | null,
+  ): number {
     if (effect.targetType?.includes("MONSTER")) {
       const dangerousOnes = FieldAnalyzer.getInvincibleMonsters(
         this.context,
         this.playerSide,
       );
-      return dangerousOnes.length * AI_CONFIG.TACTICS.KILL_POTENTIAL;
+
+      if (target) {
+        const isTargetInvincible = dangerousOnes.includes(target);
+
+        const targetPower = target.isAtkMode
+          ? target.getCardData().atk || 0
+          : target.isFaceDown
+            ? ASSUMED_DEF_WHEN_IS_FACEDOWN
+            : target.getCardData().def || 0;
+
+        if (isTargetInvincible) {
+          return AI_CONFIG.TACTICS.KILL_POTENTIAL + targetPower * 0.8;
+        }
+
+        return 20 + targetPower * 0.5;
+      }
+
+      if (dangerousOnes.length > 0) {
+        return 60 + dangerousOnes.length * 10;
+      }
+
+      return 45;
     }
 
     if (effect.targetType === "SPELL" || effect.targetType === "TRAP") {

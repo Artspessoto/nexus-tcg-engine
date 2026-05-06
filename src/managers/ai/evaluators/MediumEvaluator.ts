@@ -46,8 +46,8 @@ export class MediumEvaluator extends BaseEvaluator {
       DRAW_CARD: () => this.resourceScorer.scoreDrawEffect(),
       GAIN_MANA: (val) => this.resourceScorer.scoreManaEffect(val),
 
-      DESTROY: (_, eff) =>
-        this.actionScorer.scoreDestroyEffect(eff as ActionEffect),
+      DESTROY: (_, eff, _snap, p) =>
+        this.actionScorer.scoreDestroyEffect(eff as ActionEffect, p?.target),
       REVIVE: (_, eff, snap) =>
         this.actionScorer.scoreReviveEffect(
           eff as ActionEffect,
@@ -508,6 +508,10 @@ export class MediumEvaluator extends BaseEvaluator {
       //prevent unnecessary attack
       if (target.isDefMode) {
         return -50;
+      }
+
+      if (snapshot.synergies.hasKillTraps) {
+        return -80;
       }
 
       const finalPrediction =

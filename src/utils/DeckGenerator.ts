@@ -35,7 +35,8 @@ export class DeckGenerator {
         targetMonsterCount = Phaser.Math.Between(12, 14);
         break;
       case "MEDIUM":
-        targetMonsterCount = Phaser.Math.Between(11, 12);
+        // targetMonsterCount = Phaser.Math.Between(11, 12);
+        targetMonsterCount = Phaser.Math.Between(7, 8);
         break;
       case "HARD":
         targetMonsterCount = 10;
