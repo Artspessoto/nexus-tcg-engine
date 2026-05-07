@@ -28,7 +28,18 @@ export const TRANSLATIONS = {
       title: "Digite seu nome",
       confirm: "CONFIRMAR",
       back_to_menu: "VOLTAR AO MENU",
-      back: "VOLTAR"
+      back: "VOLTAR",
+    },
+    deck_preview: {
+      start_duel: "INICIAR DUELO",
+      labels: {
+        all: "TODOS",
+        mana: "MANA",
+        monster: "MONSTRO",
+        effect_monster: "MONSTRO EFEITO",
+        spells: "MAGIAS",
+        traps: "ARMADILHAS",
+      },
     },
     battle_scene: {
       opponent: "OPONENTE",
@@ -49,7 +60,7 @@ export const TRANSLATIONS = {
         set: "BAIXAR",
         attack: "ATACAR",
         change_pos: "MUDAR POS.",
-        flip: "VIRAR"
+        flip: "VIRAR",
       },
       card_types: {
         MONSTER: "MONSTRO",
@@ -75,7 +86,7 @@ export const TRANSLATIONS = {
           "Um ataque foi declarado. Deseja ativar um card ou efeito?",
         confirm_btn: "ATIVAR",
         cancel_btn: "NÃO",
-        select_valid_response: "SELECIONE UM CARD OU EFEITO PARA ATIVAR"
+        select_valid_response: "SELECIONE UM CARD OU EFEITO PARA ATIVAR",
       },
     },
   },
@@ -108,7 +119,18 @@ export const TRANSLATIONS = {
       title: "Enter your name",
       confirm: "CONFIRM",
       back_to_menu: "BACK TO MENU",
-      back: "BACK"
+      back: "BACK",
+    },
+    deck_preview: {
+      start_duel: "START DUEL",
+      labels: {
+        all: "ALL",
+        mana: "MANA",
+        monster: "MONSTER",
+        effect_monster: "EFFECT M.",
+        spells: "SPELLS",
+        traps: "TRAPS",
+      },
     },
     battle_scene: {
       opponent: "OPPONENT",
@@ -129,7 +151,7 @@ export const TRANSLATIONS = {
         set: "SET",
         attack: "ATTACK",
         change_pos: "CHANGE POS.",
-        flip: "FLIP"
+        flip: "FLIP",
       },
       card_types: {
         MONSTER: "MONSTER",
@@ -155,7 +177,7 @@ export const TRANSLATIONS = {
           "An attack has been declared. Would you like to activate a card or effect?",
         confirm_btn: "ACTIVATE",
         cancel_btn: "NO",
-        select_valid_response: "SELECT A CARD OR EFFECT TO ACTIVATE"
+        select_valid_response: "SELECT A CARD OR EFFECT TO ACTIVATE",
       },
     },
   },

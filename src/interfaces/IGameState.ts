@@ -6,6 +6,7 @@ export interface IGameState {
   readonly currentPhase: GamePhase;
   readonly currentTurn: number;
   readonly isDragging: boolean;
+  readonly playerDeck: string[];
 
   getHP(side: GameSide): number;
   getMana(side: GameSide): number;
@@ -20,6 +21,5 @@ export interface IGameState {
   setDragging(value: boolean): void;
   setDeckState(side: GameSide): CardData | null;
   getDeckCount(side: GameSide): number;
-  getDeckDataList(side: GameSide): CardData[];
   initializeDecks(playerDeck?: string[], opponentDeck?: string[]): void;
 }
