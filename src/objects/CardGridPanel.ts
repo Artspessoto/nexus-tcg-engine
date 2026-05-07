@@ -18,6 +18,7 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
   private detailDescText!: Phaser.GameObjects.Text;
   private selectionHighlight!: Phaser.GameObjects.Graphics;
   private panelConfig!: CardGridPanelConfig;
+  private cardScale: number = 0.28;
 
   constructor(
     scene: Phaser.Scene,
@@ -112,7 +113,7 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
         cardData,
         owner,
         originalOwner,
-      ).setScale(0.3);
+      ).setScale(this.cardScale);
 
       cardItem.on("pointerdown", () => {
         this.updateDetailView(cardData);
@@ -207,8 +208,8 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
 
     this.selectionHighlight.lineStyle(4, borderConvert, 1);
 
-    const w = 320 * 0.3; //w = 96px
-    const h = 430 * 0.3; //h * card scale = 129px
+    const w = 320 * this.cardScale; //w = 89,60px
+    const h = 430 * this.cardScale; //h * card scale = 120,4px
 
     this.selectionHighlight.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 10);
     this.selectionHighlight.fillStyle(borderConvert, 0.2);
