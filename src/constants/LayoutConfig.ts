@@ -116,7 +116,7 @@ export const LAYOUT_CONFIG = {
       GRID_WIDTH: 500,
       DETAIL_WIDTH: 300,
       COLS: 4,
-      CELL_HEIGHT: 135,
+      CELL_HEIGHT: 125,
       TEXT_Y_START: 380,
     },
   },
