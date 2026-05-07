@@ -97,10 +97,17 @@ export class DeckPreviewScene extends Phaser.Scene {
   create() {
     const lang = LanguageManager.getInstance().currentLang;
     const { back } = TRANSLATIONS[lang].name_scene;
-    const { start_duel, labels } = TRANSLATIONS[lang].deck_preview;
+    const { start_duel, labels, title, subtitle, cards } =
+      TRANSLATIONS[lang].deck_preview;
 
     const { SCREEN } = LAYOUT_CONFIG;
     const { COLORS, FONTS, COMPONENTS } = THEME_CONFIG;
+
+    const panelWidth = 1120;
+    const panelHeight = 550;
+
+    const startX = (SCREEN.WIDTH - panelWidth) / 2;
+    const startY = 80;
 
     this.cameras.main.fadeIn(500, 0, 0, 0);
 
@@ -118,18 +125,30 @@ export class DeckPreviewScene extends Phaser.Scene {
     );
 
     this.add
-      .text(SCREEN.CENTER_X, 30, `${this.playerName} DECK`, {
+      .text(SCREEN.CENTER_X, 25, title, {
         fontFamily: FONTS.FAMILY_DISPLAY,
         fontSize: "32px",
         color: COLORS.GOLD_GLOW,
       })
       .setOrigin(0.5);
 
-    const panelWidth = 1120;
-    const panelHeight = 580;
+    this.add
+      .text(SCREEN.CENTER_X, 60, subtitle.replace("{name}", this.playerName), {
+        fontFamily: FONTS.FAMILY_PRIMARY,
+        fontSize: "16px",
+        color: "#CCCCCC",
+        fontStyle: "italic",
+      })
+      .setOrigin(0.5);
 
-    const startX = (SCREEN.WIDTH - panelWidth) / 2;
-    const startY = 60;
+    this.add
+      .text(startX, 25, `${this.gameState.getDeckCount("PLAYER")} ${cards}`, {
+        fontFamily: "Arial",
+        fontSize: "18px",
+        color: "#FFFFFF",
+        fontStyle: "bold",
+      })
+      .setOrigin(0, 0.5);
 
     const deckPanel = new CardGridPanel(this, startX, startY, {
       cards: this.playerDeckData,
@@ -158,16 +177,33 @@ export class DeckPreviewScene extends Phaser.Scene {
     });
 
     readyBtn.on("pointerdown", () => {
-      this.scene.start("BattleScene", {
-        playerName: this.playerName,
-        difficulty: this.difficulty,
-        playerDeckIds: this.playerDeckIds,
-      });
+      this.callNextScene();
     });
 
     backBtn.on("pointerdown", () => {
       this.scene.start("NameScene", {
         difficulty: this.difficulty,
+      });
+    });
+
+    this.input.keyboard?.on("keydown-ENTER", () => {
+      this.callNextScene();
+    });
+
+    this.input.keyboard?.on("keydown-ESC", () => {
+      this.scene.start("NameScene", {
+        difficulty: this.difficulty,
+      });
+    });
+  }
+
+  private callNextScene() {
+    this.cameras.main.fadeOut(500, 0, 0, 0);
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+      this.scene.start("BattleScene", {
+        playerName: this.playerName,
+        difficulty: this.difficulty,
+        playerDeckIds: this.playerDeckIds,
       });
     });
   }
