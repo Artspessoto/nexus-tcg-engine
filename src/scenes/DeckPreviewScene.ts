@@ -1,3 +1,4 @@
+import { CARD_DATABASE } from "../constants/CardDatabase";
 import { PLAYER_INITIAL_DECK } from "../constants/DeckConfig";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
@@ -15,6 +16,23 @@ export interface DeckPreviewConfig {
   difficulty: Difficulty;
 }
 
+export type FilterOption =
+  | "ALL"
+  | "MANA"
+  | "ATK"
+  | "DEF"
+  | "TYPE_MONSTER"
+  | "TYPE_EFFECT"
+  | "TYPE_SPELL"
+  | "TYPE_TRAP";
+
+export const OrderByOption = ["MANA", "ATK", "DEF", "ALL"];
+
+export interface FilterConfig {
+  label: string;
+  type: FilterOption;
+}
+
 export class DeckPreviewScene extends Phaser.Scene {
   private gameState!: IGameState;
   private playerName!: string;
@@ -23,8 +41,46 @@ export class DeckPreviewScene extends Phaser.Scene {
   private playerDeckIds!: string[];
   private playerDeckData!: CardData[];
 
+  private currentFilter: FilterOption = "ALL";
+  private currentSort: "ASC" | "DESC" = "DESC";
+
+  private filterHanders: Record<FilterOption, (data: CardData[]) => CardData[]>;
+
   constructor() {
     super({ key: "DeckPreviewScene" });
+
+    const sortAlpha = (data: CardData[]) =>
+      data.sort((a, b) =>
+        this.currentSort == "DESC"
+          ? a.nameKey.localeCompare(b.nameKey)
+          : b.nameKey.localeCompare(a.nameKey),
+      );
+
+    this.filterHanders = {
+      ALL: (data) => sortAlpha(data),
+      MANA: (data) =>
+        data.sort((a, b) =>
+          this.currentSort == "DESC"
+            ? b.manaCost - a.manaCost
+            : a.manaCost - b.manaCost,
+        ),
+      ATK: (data) =>
+        data.sort((a, b) =>
+          this.currentSort == "DESC"
+            ? (b.atk || 0) - (a.atk || 0)
+            : (a.atk || 0) - (b.atk || 0),
+        ),
+      DEF: (data) =>
+        data.sort((a, b) =>
+          this.currentSort == "DESC"
+            ? (b.def || 0) - (a.def || 0)
+            : (a.def || 0) - (b.def || 0),
+        ),
+      TYPE_MONSTER: (data) => data.filter((c) => c.type === "MONSTER"),
+      TYPE_EFFECT: (data) => data.filter((c) => c.type === "EFFECT_MONSTER"),
+      TYPE_SPELL: (data) => data.filter((c) => c.type === "SPELL"),
+      TYPE_TRAP: (data) => data.filter((c) => c.type === "TRAP"),
+    };
   }
 
   init(config: DeckPreviewConfig) {
@@ -35,12 +91,13 @@ export class DeckPreviewScene extends Phaser.Scene {
     this.playerDeckIds = [...PLAYER_INITIAL_DECK];
     this.gameState.initializeDecks(this.playerDeckIds);
 
-    this.playerDeckData = this.gameState.getDeckDataList("PLAYER");
+    this.playerDeckData = this.getFilteredDeckDataList();
   }
 
   create() {
     const lang = LanguageManager.getInstance().currentLang;
-    const text = TRANSLATIONS[lang].name_scene;
+    const { back } = TRANSLATIONS[lang].name_scene;
+    const { start_duel, labels } = TRANSLATIONS[lang].deck_preview;
 
     const { SCREEN } = LAYOUT_CONFIG;
     const { COLORS, FONTS, COMPONENTS } = THEME_CONFIG;
@@ -74,22 +131,21 @@ export class DeckPreviewScene extends Phaser.Scene {
     const startX = (SCREEN.WIDTH - panelWidth) / 2;
     const startY = 60;
 
-    new CardGridPanel(this, startX, startY, {
+    const deckPanel = new CardGridPanel(this, startX, startY, {
       cards: this.playerDeckData,
       width: panelWidth,
       height: panelHeight,
       cols: 6,
-      // onCardSelect: (cardData) => {
-      //     // (Opcional) Tocar um som quando o jogador clica na carta
-      // }
     });
+
+    this.createFilterMenu(startX + panelWidth - 100, 30, labels, deckPanel);
 
     const buttonsY = startY + panelHeight + 45;
 
     const readyBtn = new ToonButton(this, {
       x: SCREEN.CENTER_X + 150,
       y: buttonsY,
-      text: "INICIAR DUELO",
+      text: start_duel,
       width: 220,
     });
 
@@ -97,7 +153,7 @@ export class DeckPreviewScene extends Phaser.Scene {
       x: SCREEN.CENTER_X - 100,
       y: buttonsY,
       ...COMPONENTS.BUTTONS.SECONDARY,
-      text: text.back,
+      text: back,
       width: 220,
     });
 
@@ -113,6 +169,113 @@ export class DeckPreviewScene extends Phaser.Scene {
       this.scene.start("NameScene", {
         difficulty: this.difficulty,
       });
+    });
+  }
+
+  public getFilteredDeckDataList(option: FilterOption = "ALL"): CardData[] {
+    const deckIds = this.gameState.playerDeck;
+
+    const cardDataArray = deckIds.map((id) => CARD_DATABASE[id]);
+
+    const dataCopy: CardData[] = [...cardDataArray];
+
+    const handler = this.filterHanders[option];
+
+    return handler(dataCopy);
+  }
+
+  private createFilterMenu(
+    x: number,
+    y: number,
+    translations: Record<string, string>,
+    gridPanel: CardGridPanel,
+  ) {
+    const { COLORS, COMPONENTS, DEPTHS } = THEME_CONFIG;
+
+    const filterBtn = new ToonButton(this, {
+      x: x - 22.5,
+      y: y,
+      text: `☰ ${translations.all}`,
+      width: 135,
+      height: 40,
+      fontSize: "14px",
+      ...COMPONENTS.BUTTONS.SECONDARY,
+    });
+
+    const sortToggleBtn = new ToonButton(this, {
+      x: x + 70,
+      y: y,
+      text: "⬇", //start as "DESC"
+      width: 40,
+      height: 40,
+      fontSize: "16px",
+      ...COMPONENTS.BUTTONS.SECONDARY,
+    });
+
+    sortToggleBtn.on("pointerdown", () => {
+      this.currentSort = this.currentSort == "DESC" ? "ASC" : "DESC";
+      sortToggleBtn.setText(this.currentSort == "ASC" ? "⬆" : "⬇");
+
+      const newCards = this.getFilteredDeckDataList(this.currentFilter);
+      gridPanel.updateCards(newCards);
+    });
+
+    //menu container
+    const dropDownMenu = this.add.container(x, y + 18); //position below button
+    dropDownMenu.setDepth(DEPTHS.UI_BASE + 10);
+    dropDownMenu.setVisible(false);
+
+    //dropdown background
+    const menuBg = this.add.graphics();
+    menuBg.fillStyle(COLORS.PANEL_BG_DARK, 0.95);
+
+    //background
+    menuBg.fillRoundedRect(-90, 0, 180, 300, 6);
+    dropDownMenu.add(menuBg);
+
+    const filterOptions: FilterConfig[] = [
+      { label: `${translations.all}`, type: "ALL" },
+      { label: `${translations.mana}`, type: "MANA" },
+      { label: "ATK", type: "ATK" },
+      { label: "DEF", type: "DEF" },
+      { label: `${translations.monster}`, type: "TYPE_MONSTER" },
+      { label: `${translations.effect_monster}`, type: "TYPE_EFFECT" },
+      { label: `${translations.spells}`, type: "TYPE_SPELL" },
+      { label: `${translations.traps}`, type: "TYPE_TRAP" },
+    ];
+
+    filterOptions.forEach((option, i) => {
+      const optionBtn = new ToonButton(this, {
+        x: 0,
+        y: 21 + i * 40,
+        text: option.label,
+        width: 176,
+        height: 35,
+        fontSize: "14px",
+        ...COMPONENTS.BUTTONS.SECONDARY,
+      });
+
+      optionBtn.on("pointerdown", () => {
+        filterBtn.setText(`☰ ${option.label}`);
+        dropDownMenu.setVisible(false); //close menu after choice
+
+        this.currentFilter = option.type;
+
+        if (!OrderByOption.includes(this.currentFilter)) {
+          sortToggleBtn.setVisible(false);
+        } else {
+          sortToggleBtn.setVisible(true);
+        }
+
+        const newCards = this.getFilteredDeckDataList(this.currentFilter);
+        gridPanel.updateCards(newCards);
+      });
+
+      dropDownMenu.add(optionBtn);
+    });
+
+    filterBtn.on("pointerdown", () => {
+      dropDownMenu.setVisible(!dropDownMenu.visible);
     });
   }
 }
