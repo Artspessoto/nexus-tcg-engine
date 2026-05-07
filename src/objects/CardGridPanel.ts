@@ -17,6 +17,7 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
   private detailTypeText!: Phaser.GameObjects.Text;
   private detailDescText!: Phaser.GameObjects.Text;
   private selectionHighlight!: Phaser.GameObjects.Graphics;
+  private panelConfig!: CardGridPanelConfig;
 
   constructor(
     scene: Phaser.Scene,
@@ -26,8 +27,18 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
   ) {
     super(scene, x, y);
 
+    this.panelConfig = config;
+
     this.buildPanel(config);
     this.scene.add.existing(this);
+  }
+
+  public updateCards(newCards: CardData[]) {
+    this.panelConfig.cards = newCards;
+
+    this.removeAll(true);
+
+    this.buildPanel(this.panelConfig);
   }
 
   private buildPanel(config: CardGridPanelConfig) {
