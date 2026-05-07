@@ -320,6 +320,22 @@ export class Card extends Phaser.GameObjects.Container {
 
     this.frame.setTexture("battle_ui", this.getFrameKey(data.type));
 
+    const { SUPPORTS, DEFAULT } = CARD_CONFIG.POSITIONS;
+    let manaPosition: { x: number; y: number };
+
+    switch (data.type) {
+      case "SPELL":
+        manaPosition = SUPPORTS.MANA.SPELL;
+        break;
+      case "TRAP":
+        manaPosition = SUPPORTS.MANA.TRAP;
+        break;
+      default:
+        manaPosition = DEFAULT.MANA;
+        break;
+    }
+    this.manaText.setPosition(manaPosition.x, manaPosition.y);
+
     if (this.cardImage) {
       //TODO: data.imageKey.trim() !== "" in validation
       if (data.imageKey) {
