@@ -129,6 +129,7 @@ export const createMockBattleContext = (): IBattleContext => {
       currentTurn: 1,
       getHP: vi.fn().mockReturnValue(600),
       currentPhase: "MAIN",
+      playerDeck: [],
       get isDragging() {
         return draggingState;
       },
@@ -140,7 +141,6 @@ export const createMockBattleContext = (): IBattleContext => {
       setDeckState: vi.fn(),
       initializeDecks: vi.fn(),
       setPlayerName: vi.fn(),
-      getDeckDataList: vi.fn(),
     },
     currentPhase: "MAIN",
     translationText: {
