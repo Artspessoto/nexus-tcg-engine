@@ -3,7 +3,7 @@ export const CARD_CONFIG = {
   HEIGHT: 400, //250
   POSITIONS: {
     DEFAULT: {
-      MANA: { x: 122, y: -174 },
+      MANA: { x: 123, y: -174 },
       NAME: { x: 0, y: 70 },
       DESC: { x: 0, y: 110 },
       ATK: { x: -122, y: 160 },
@@ -11,8 +11,8 @@ export const CARD_CONFIG = {
     },
     SUPPORTS: {
       MANA: {
-        SPELL: { x: 128, y: -175 },
-        TRAP: { x: 125, y: -175 }
+        SPELL: { x: 129, y: -178 },
+        TRAP: { x: 126, y: -178 },
       },
     },
   },

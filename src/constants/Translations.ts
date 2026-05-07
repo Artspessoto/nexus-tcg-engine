@@ -31,6 +31,9 @@ export const TRANSLATIONS = {
       back: "VOLTAR",
     },
     deck_preview: {
+      title: "PREPARAÇÃO DE BATALHA",
+      subtitle: "Revisando as cartas de {name}",
+      cards: "CARTAS",
       start_duel: "INICIAR DUELO",
       labels: {
         all: "TODOS",
@@ -122,6 +125,9 @@ export const TRANSLATIONS = {
       back: "BACK",
     },
     deck_preview: {
+      title: "BATTLE PREPARATION",
+      subtitle: "Reviewing {name}'s cards",
+      cards: "cards",
       start_duel: "START DUEL",
       labels: {
         all: "ALL",
