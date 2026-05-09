@@ -83,10 +83,10 @@ export class Card extends Phaser.GameObjects.Container {
     height: number,
     width: number,
   ) {
-    if (!data.imageKey || data.imageKey.trim() == "") return;
+    const hasImage = data.imageKey && data.imageKey.trim() !== "";
 
-    const textureKey = data.atlasKey || data.imageKey;
-    const frameKey = data.atlasKey ? data.imageKey : undefined;
+    const textureKey = hasImage ? data.atlasKey || data.imageKey : "battle_ui";
+    const frameKey = hasImage && data.atlasKey ? data.imageKey : "monster_card";
 
     this.cardImage = scene.add.image(0, -50, textureKey, frameKey);
 
@@ -97,6 +97,8 @@ export class Card extends Phaser.GameObjects.Container {
     }
 
     this.visualElements.add(this.cardImage);
+
+    if (!hasImage) this.cardImage.setVisible(false);
 
     const offsetY = -72; //vertical align for the mask
     const maskWidth = width * 0.82;
@@ -187,19 +189,23 @@ export class Card extends Phaser.GameObjects.Container {
   }
 
   private setStats(data: CardData) {
-    if (data.type === "MONSTER" || data.type === "EFFECT_MONSTER") {
-      const { ATK, DEF } = CARD_CONFIG.POSITIONS.DEFAULT;
+    const { ATK, DEF } = CARD_CONFIG.POSITIONS.DEFAULT;
 
-      this.atkText = this.scene.add
-        .text(ATK.x, ATK.y, `${data.atk || 0}`, CARD_CONFIG.STYLES.STATS)
-        .setOrigin(0.5);
-      this.defText = this.scene.add
-        .text(DEF.x, DEF.y, `${data.def || 0}`, CARD_CONFIG.STYLES.STATS)
-        .setOrigin(0.5);
+    this.atkText = this.scene.add
+      .text(ATK.x, ATK.y, `${data.atk || 0}`, CARD_CONFIG.STYLES.STATS)
+      .setOrigin(0.5);
+    this.defText = this.scene.add
+      .text(DEF.x, DEF.y, `${data.def || 0}`, CARD_CONFIG.STYLES.STATS)
+      .setOrigin(0.5);
 
-      this.visualElements.add([this.atkText, this.defText]);
+    this.visualElements.add([this.atkText, this.defText]);
 
-      this.createFieldBadgeStats(data);
+    this.createFieldBadgeStats(data);
+
+    const isMonster = data.type.includes("MONSTER");
+    if (!isMonster) {
+      this.atkText.setVisible(false);
+      this.defText.setVisible(false);
     }
   }
 
