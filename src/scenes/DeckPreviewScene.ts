@@ -103,7 +103,7 @@ export class DeckPreviewScene extends Phaser.Scene {
     const { SCREEN } = LAYOUT_CONFIG;
     const { COLORS, FONTS, COMPONENTS } = THEME_CONFIG;
 
-    const panelWidth = 1120;
+    const panelWidth = 1000;
     const panelHeight = 550;
 
     const startX = (SCREEN.WIDTH - panelWidth) / 2;
@@ -154,7 +154,7 @@ export class DeckPreviewScene extends Phaser.Scene {
       cards: this.playerDeckData,
       width: panelWidth,
       height: panelHeight,
-      cols: 6,
+      cols: 5,
     });
 
     this.createFilterMenu(startX + panelWidth - 100, 30, labels, deckPanel);
