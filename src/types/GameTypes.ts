@@ -7,10 +7,13 @@ export type PlacementMode = "ATK" | "DEF" | "FACE_UP" | "SET";
 
 type Languages = keyof typeof TRANSLATIONS;
 export type TranslationStructure = (typeof TRANSLATIONS)[Languages];
-export type GameSide = "PLAYER" | "OPPONENT";
 export type Lang = "pt-br" | "en";
-export type Notice = "PHASE" | "WARNING" | "TURN" | "NEUTRAL";
+export type NameTranslations = TranslationStructure["name_scene"];
 export type BattleTranslations = TranslationStructure["battle_scene"];
+export type DeckPreviewTranslations = TranslationStructure["deck_preview"];
+
+export type GameSide = "PLAYER" | "OPPONENT";
+export type Notice = "PHASE" | "WARNING" | "TURN" | "NEUTRAL";
 
 export type Slot = {
   index: number;
@@ -33,6 +36,6 @@ export type Move =
       params?: EffectInstructions;
     }
   | { type: "ACTIVATE_EFFECT"; card: Card; target: Card | null }
-  | { type: "CHANGE_POS"; card: Card; newMode: PlacementMode, isFlip: boolean }
+  | { type: "CHANGE_POS"; card: Card; newMode: PlacementMode; isFlip: boolean }
   | { type: "ATTACK"; attacker: Card; target: Card | null }
   | { type: "PASS" };

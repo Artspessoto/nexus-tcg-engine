@@ -9,7 +9,7 @@ import { LanguageManager } from "../managers/language/LanguageManager";
 import { CardGridPanel } from "../objects/CardGridPanel";
 import { ToonButton } from "../objects/ToonButton";
 import type { CardData } from "../types/CardTypes";
-import type { Difficulty } from "../types/GameTypes";
+import type { DeckPreviewTranslations, Difficulty } from "../types/GameTypes";
 
 export interface DeckPreviewConfig {
   playerName: string;
@@ -97,7 +97,7 @@ export class DeckPreviewScene extends Phaser.Scene {
   create() {
     const lang = LanguageManager.getInstance().currentLang;
     const { back } = TRANSLATIONS[lang].name_scene;
-    const { start_duel, labels, title, subtitle, cards } =
+    const { start_duel, title, subtitle, cards } =
       TRANSLATIONS[lang].deck_preview;
 
     const { SCREEN } = LAYOUT_CONFIG;
@@ -157,7 +157,12 @@ export class DeckPreviewScene extends Phaser.Scene {
       cols: 5,
     });
 
-    this.createFilterMenu(startX + panelWidth - 100, 30, labels, deckPanel);
+    this.createFilterMenu(
+      startX + panelWidth - 100,
+      30,
+      TRANSLATIONS[lang].deck_preview,
+      deckPanel,
+    );
 
     const buttonsY = startY + panelHeight + 45;
 
@@ -223,7 +228,7 @@ export class DeckPreviewScene extends Phaser.Scene {
   private createFilterMenu(
     x: number,
     y: number,
-    translations: Record<string, string>,
+    translations: DeckPreviewTranslations,
     gridPanel: CardGridPanel,
   ) {
     const { COLORS, COMPONENTS, DEPTHS } = THEME_CONFIG;
@@ -231,7 +236,7 @@ export class DeckPreviewScene extends Phaser.Scene {
     const filterBtn = new ToonButton(this, {
       x: x - 22.5,
       y: y,
-      text: `☰ ${translations.all}`,
+      text: `☰ ${translations.labels.all}`,
       width: 135,
       height: 40,
       fontSize: "14px",
@@ -270,14 +275,14 @@ export class DeckPreviewScene extends Phaser.Scene {
     dropDownMenu.add(menuBg);
 
     const filterOptions: FilterConfig[] = [
-      { label: `${translations.all}`, type: "ALL" },
-      { label: `${translations.mana}`, type: "MANA" },
+      { label: `${translations.labels.all}`, type: "ALL" },
+      { label: `${translations.labels.mana}`, type: "MANA" },
       { label: "ATK", type: "ATK" },
       { label: "DEF", type: "DEF" },
-      { label: `${translations.monster}`, type: "TYPE_MONSTER" },
-      { label: `${translations.effect_monster}`, type: "TYPE_EFFECT" },
-      { label: `${translations.spells}`, type: "TYPE_SPELL" },
-      { label: `${translations.traps}`, type: "TYPE_TRAP" },
+      { label: `${translations.labels.monster}`, type: "TYPE_MONSTER" },
+      { label: `${translations.labels.effect_monster}`, type: "TYPE_EFFECT" },
+      { label: `${translations.labels.spells}`, type: "TYPE_SPELL" },
+      { label: `${translations.labels.traps}`, type: "TYPE_TRAP" },
     ];
 
     filterOptions.forEach((option, i) => {

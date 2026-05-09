@@ -26,6 +26,10 @@ export const TRANSLATIONS = {
     },
     name_scene: {
       title: "Digite seu nome",
+      warnings: {
+        empty_name: "O nome não pode ficar vazio!",
+        too_long_name: "O nome deve ter no máximo {max} letras.",
+      },
       confirm: "CONFIRMAR",
       back_to_menu: "VOLTAR AO MENU",
       back: "VOLTAR",
@@ -120,6 +124,10 @@ export const TRANSLATIONS = {
     },
     name_scene: {
       title: "Enter your name",
+      warnings: {
+        empty_name: "Name cannot be empty!",
+        too_long_name: "Name cannot exceed {max} characters",
+      },
       confirm: "CONFIRM",
       back_to_menu: "BACK TO MENU",
       back: "BACK",
