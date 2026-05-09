@@ -4,9 +4,12 @@ import { LanguageManager } from "../managers/language/LanguageManager";
 import { TRANSLATIONS } from "../constants/Translations";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import type { NameTranslations } from "../types/GameTypes";
 
 export class NameScene extends Phaser.Scene {
   private difficulty: string = "";
+  private warningText!: Phaser.GameObjects.Text;
+  private readonly MAX_NAME_LENGTH = 12;
 
   constructor() {
     super("NameScene");
@@ -22,7 +25,7 @@ export class NameScene extends Phaser.Scene {
 
   create() {
     const lang = LanguageManager.getInstance().currentLang;
-    const text = TRANSLATIONS[lang].name_scene;
+    const text: NameTranslations = TRANSLATIONS[lang].name_scene;
 
     const { SCREEN } = LAYOUT_CONFIG;
     const { COLORS } = THEME_CONFIG;
@@ -50,6 +53,16 @@ export class NameScene extends Phaser.Scene {
 
     const inputElement = this.add.dom(640, 350).createFromCache("nameform");
 
+    this.warningText = this.add
+      .text(SCREEN.CENTER_X, 400, "", {
+        fontSize: "16px",
+        color: "#ff4d4d",
+        fontStyle: "bold",
+        fontFamily: "Arial",
+      })
+      .setOrigin(0.5)
+      .setAlpha(0); //"invisible"(transparent)
+
     const confirmBtn = new ToonButton(this, {
       x: 640,
       y: 480,
@@ -75,19 +88,34 @@ export class NameScene extends Phaser.Scene {
     });
 
     this.input.keyboard?.on("keydown-ENTER", () => {
-      this.callNextScene(inputElement);
+      this.callNextScene(text, inputElement);
     });
 
     confirmBtn.on("pointerdown", () => {
-      this.callNextScene(inputElement);
+      this.callNextScene(text, inputElement);
     });
   }
 
-  private callNextScene(element: Phaser.GameObjects.DOMElement) {
+  private callNextScene(
+    translation: NameTranslations,
+    element: Phaser.GameObjects.DOMElement,
+  ) {
     const nameInput = element.getChildByName("nameField") as HTMLInputElement;
     const playerName = nameInput.value.trim();
 
-    if (playerName.length > 0) {
+    this.warningText.setAlpha(0);
+
+    if (playerName.length == 0) {
+      this.showWarning(translation.warnings.empty_name, element);
+    } else if (playerName.length > this.MAX_NAME_LENGTH) {
+      this.showWarning(
+        translation.warnings.too_long_name.replace(
+          "{max}",
+          `${this.MAX_NAME_LENGTH}`,
+        ),
+        element,
+      );
+    } else {
       //Battle scene transition
       this.cameras.main.fadeOut(500, 0, 0, 0);
       this.cameras.main.once("camerafadeoutcomplete", () => {
@@ -96,14 +124,27 @@ export class NameScene extends Phaser.Scene {
           difficulty: this.difficulty,
         });
       });
-    } else {
-      this.tweens.add({
-        targets: element,
-        x: element.x + 10,
-        duration: 50,
-        yoyo: true,
-        repeat: 3,
-      });
     }
+  }
+
+  private showWarning(message: string, element: Phaser.GameObjects.DOMElement) {
+    this.warningText.setText(message);
+    this.warningText.setAlpha(1);
+
+    this.tweens.add({
+      targets: element,
+      x: element.x + 10,
+      duration: 50,
+      yoyo: true,
+      repeat: 3,
+    });
+
+    this.tweens.add({
+      targets: this.warningText,
+      x: this.warningText.x + 5,
+      duration: 50,
+      yoyo: true,
+      repeat: 3,
+    });
   }
 }
