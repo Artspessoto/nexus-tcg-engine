@@ -310,8 +310,9 @@ export class EffectManager implements IEffectManager {
   ): Promise<void> {
     const graveyardCards = this.context.field.graveyardSlot[side];
 
-    const validCards = graveyardCards.filter((card) =>
-      this.validateType(card, effect),
+    //prevent source card revive by its own effc
+    const validCards = graveyardCards.filter(
+      (card) => this.validateType(card, effect) && card !== source,
     );
 
     if (validCards.length == 0) {
@@ -391,7 +392,7 @@ export class EffectManager implements IEffectManager {
 
   private resolveChangePosition(target: Card) {
     const isFaceDown = target.isFaceDown;
-    const newMode = target.angle === 270 ? "ATK" : "DEF";
+    const newMode = target.isDefMode ? "ATK" : "DEF";
     EventBus.emit(GameEvent.CARD_POSITION_CHANGED, {
       card: target,
       isFlip: isFaceDown,
@@ -400,11 +401,17 @@ export class EffectManager implements IEffectManager {
   }
 
   private resolveBounce(target: Card) {
-    const hand = this.context.getHand(target.owner);
+    //returns to the original owner
+    const hand = this.context.getHand(target.originalOwner);
+
+    //remove from controller
     this.context.field.releaseSlot(target, target.owner);
+
     target.resetStats();
     target.setLocation("HAND");
     target.hasActivatedEffect = false;
+
+    target.setOwner(target.originalOwner);
     hand.addCardBack(target);
   }
 
