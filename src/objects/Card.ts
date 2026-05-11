@@ -234,7 +234,9 @@ export class Card extends Phaser.GameObjects.Container {
 
     this.setSize(FIELD_W, FIELD_H);
 
-    if (!this._isFaceDown && this.fieldStatsBadge) {
+    const isMonster = this.currentData.type.includes("MONSTER");
+
+    if (!this._isFaceDown && this.fieldStatsBadge && isMonster) {
       this.fieldStatsBadge.setVisible(true);
     }
   }
@@ -289,12 +291,14 @@ export class Card extends Phaser.GameObjects.Container {
     this.manaText.setVisible(true);
     this.descText.setVisible(true);
 
-    if (this.atkText) this.atkText.setVisible(true);
-    if (this.defText) this.defText.setVisible(true);
+    const isMonsterType = this.currentData.type.includes("MONSTER");
+
+    if (this.atkText) this.atkText.setVisible(isMonsterType);
+    if (this.defText) this.defText.setVisible(isMonsterType);
 
     if (this.location == "FIELD" && this.fieldStatsBadge) {
-      this.fieldStatsBadge.setVisible(true);
-      this.refreshPositionHighlight();
+      this.fieldStatsBadge.setVisible(isMonsterType);
+      if (isMonsterType) this.refreshPositionHighlight();
     }
   }
 
