@@ -271,9 +271,14 @@ export class FieldManager implements IFieldManager {
     //sent to original owner location
     card.setOwner(realSide);
 
+    card.setLocation("GRAVEYARD");
+
+    card.setFieldVisuals();
+
+    card.setFaceUp();
+
     this.graveyardSlot[realSide].unshift(card);
     card.resetStats();
-    card.setLocation("GRAVEYARD");
     card.hasActivatedEffect = false;
 
     EventBus.emit(GameEvent.CARD_SENT_TO_GRAVEYARD, {
