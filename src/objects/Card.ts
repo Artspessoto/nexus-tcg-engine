@@ -85,8 +85,10 @@ export class Card extends Phaser.GameObjects.Container {
   ) {
     const hasImage = data.imageKey && data.imageKey.trim() !== "";
 
-    const textureKey = hasImage ? data.atlasKey || data.imageKey : "battle_ui";
-    const frameKey = hasImage && data.atlasKey ? data.imageKey : "monster_card";
+    if (!hasImage) return;
+
+    const textureKey = data.atlasKey || data.imageKey;
+    const frameKey = data.atlasKey ? data.imageKey : undefined;
 
     this.cardImage = scene.add.image(0, -50, textureKey, frameKey);
 
@@ -98,7 +100,7 @@ export class Card extends Phaser.GameObjects.Container {
 
     this.visualElements.add(this.cardImage);
 
-    if (!hasImage) this.cardImage.setVisible(false);
+    // if (!hasImage) this.cardImage.setVisible(false);
 
     const offsetY = -72; //vertical align for the mask
     const maskWidth = width * 0.82;
