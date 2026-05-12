@@ -462,7 +462,8 @@ export class EffectManager implements IEffectManager {
           }
         });
     } else {
-      this.context.selectedCard = target;
+      // this.context.selectedCard = target;
+      this.context.selectedCard = null;
       this.context.field.occupySlot(side, "MONSTER", slot.index, target);
       this.context.field.playCardToZone(target, slot.x, slot.y, mode);
 
