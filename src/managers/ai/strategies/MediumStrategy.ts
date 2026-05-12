@@ -273,7 +273,8 @@ export class MediumStrategy extends BaseStrategy {
         ? strongestEnemy.getCardData().atk || 0
         : (strongestEnemy.getCardData().def ?? 0);
 
-      if (atk > enemyValue) return "ATK";
+      //if atk is equal or high than enemy value
+      if (atk >= enemyValue) return "ATK";
     }
 
     if (this.hasCombatTrickGameChanger(remainingMana, data)) return "ATK";
@@ -295,6 +296,9 @@ export class MediumStrategy extends BaseStrategy {
     const hand = this.context.getHand(this.side).hand;
 
     for (const modifierCard of atkModifiers) {
+      //ignores trap (trap can only be actived in enemy battle phase)
+      if (modifierCard.getType() == "TRAP") continue;
+
       const isFromHand = hand.includes(modifierCard);
       const cost = modifierCard.getCardData().manaCost;
 

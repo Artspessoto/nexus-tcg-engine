@@ -511,7 +511,12 @@ export class MediumEvaluator extends BaseEvaluator {
       }
 
       if (snapshot.synergies.hasKillTraps) {
-        return -80;
+        return 60;
+      }
+
+      //prevents attack if player has any support in field
+      if (hasUnknownThreats) {
+        return -90;
       }
 
       const finalPrediction =
