@@ -63,6 +63,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public npcAction!: IAIManager;
 
   public phaseButton!: ToonButton;
+  public pauseButton!: ToonButton;
   public playerDisplayName!: string;
 
   private isChangingPhase: boolean = false;
@@ -154,10 +155,27 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     });
     this.phaseButton.setVisible(false).setDepth(DEPTHS.PHASE_BUTTON - 1);
 
+    this.pauseButton = new ToonButton(this, {
+      x: BATTLE.PAUSE_BUTTON.x,
+      y: BATTLE.PAUSE_BUTTON.y,
+      text: "⏸",
+      fontSize: "18px",
+      textColor: "#fff",
+      color: COMPONENTS.BUTTONS.PHASE.color,
+      hoverColor: COMPONENTS.BUTTONS.PHASE.color,
+      width: BATTLE.PAUSE_BUTTON.width,
+      height: BATTLE.PAUSE_BUTTON.height,
+    });
+    this.pauseButton.setVisible(true).setDepth(DEPTHS.PHASE_BUTTON - 1);
+
     this.phaseButton.on("pointerdown", () => {
       if (this.controls.isSelectionLocked()) return;
 
       this.handleNextPhase();
+    });
+
+    this.pauseButton.on("pointerdown", () => {
+      this.togglePause();
     });
 
     this.controls.setupGlobalInputs();
@@ -172,6 +190,10 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   }
 
   private setupEventListeners(): void {
+    EventBus.on(GameEvent.GAME_RESUMED, () => {
+      this.pauseButton.setVisible(true);
+    });
+    
     EventBus.on(GameEvent.TURN_STARTED, (data) => {
       this.handleAITurnBasedAction(data);
     });
@@ -575,5 +597,14 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public clearAllMenus() {
     this.playerUI.clearSelectionMenu();
     this.opponentUI.clearSelectionMenu();
+  }
+
+  public togglePause() {
+    this.pauseButton.setVisible(false);
+
+    this.scene.pause();
+    this.scene.launch("PauseScene");
+
+    EventBus.emit(GameEvent.GAME_PAUSED, { message: "pause" });
   }
 }

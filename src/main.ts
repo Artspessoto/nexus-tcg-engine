@@ -7,6 +7,7 @@ import { BattleScene } from "./scenes/BattleScene";
 import { GraveyardScene } from "./scenes/GraveyardScene";
 import { LAYOUT_CONFIG } from "./constants/LayoutConfig";
 import { DeckPreviewScene } from "./scenes/DeckPreviewScene";
+import { PauseScene } from "./scenes/PauseScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -40,6 +41,7 @@ const config: Phaser.Types.Core.GameConfig = {
     BattleScene,
     GraveyardScene,
     DeckPreviewScene,
+    PauseScene,
   ],
 };
 

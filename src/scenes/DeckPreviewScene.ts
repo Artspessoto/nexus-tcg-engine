@@ -194,12 +194,6 @@ export class DeckPreviewScene extends Phaser.Scene {
     this.input.keyboard?.on("keydown-ENTER", () => {
       this.callNextScene();
     });
-
-    this.input.keyboard?.on("keydown-ESC", () => {
-      this.scene.start("NameScene", {
-        difficulty: this.difficulty,
-      });
-    });
   }
 
   private callNextScene() {
@@ -317,6 +311,16 @@ export class DeckPreviewScene extends Phaser.Scene {
 
     filterBtn.on("pointerdown", () => {
       dropDownMenu.setVisible(!dropDownMenu.visible);
+    });
+
+    this.input.keyboard?.on("keydown-ESC", () => {
+      if (dropDownMenu.visible) {
+        dropDownMenu.setVisible(false);
+        return;
+      }
+      this.scene.start("NameScene", {
+        difficulty: this.difficulty,
+      });
     });
   }
 }

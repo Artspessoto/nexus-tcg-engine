@@ -45,6 +45,10 @@ export enum GameEvent {
   EFFECT_RESOLVED = "EFFECT_RESOLVED",
   CARD_STATS_CHANGED = "CARD_STATS_CHANGED",
   CARD_POSITION_CHANGED = "CARD_POSITION_CHANGED",
+
+  //GAME
+  GAME_PAUSED = "GAME_PAUSED",
+  GAME_RESUMED = "GAME_RESUMED",
 }
 
 export type PhaseChangedPayload = {
@@ -126,6 +130,14 @@ export type NoticeRequestedPayload = {
   type: "PHASE" | "WARNING" | "TURN" | "NEUTRAL";
 };
 
+export type GamePausedPayload = {
+  message: string;
+};
+
+export type GameResumedPayload = {
+  message: string;
+};
+
 export interface GameEventMap {
   [GameEvent.PHASE_CHANGED]: PhaseChangedPayload;
   [GameEvent.CARD_PLAYED]: CardPlayedPayload;
@@ -154,4 +166,6 @@ export interface GameEventMap {
   [GameEvent.REQUEST_CARD_MENU]: RequestCardMenuPayload;
   [GameEvent.ACTION_FINALIZED]: ActionFinalizedPayload;
   [GameEvent.NOTICE_REQUESTED]: NoticeRequestedPayload;
+  [GameEvent.GAME_PAUSED]: GamePausedPayload;
+  [GameEvent.GAME_RESUMED]: GameResumedPayload;
 }
