@@ -136,6 +136,10 @@ export const THEME_CONFIG = {
       PHASE: {
         color: 0x242424,
       },
+      RESUME: {
+        color: 0x333333,
+        hoverColor: 0x555555,
+      },
     },
     UI: {
       BANNER_HEIGHT: 80,

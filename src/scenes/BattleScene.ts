@@ -104,7 +104,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
   create() {
     const { SCREEN, BATTLE } = LAYOUT_CONFIG;
-    const { DEPTHS, COMPONENTS } = THEME_CONFIG;
+    const { DEPTHS, COMPONENTS, COLORS } = THEME_CONFIG;
 
     const lang = LanguageManager.getInstance().currentLanguage;
     const currentTranslations = TRANSLATIONS[lang];
@@ -160,9 +160,10 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       y: BATTLE.PAUSE_BUTTON.y,
       text: "⏸",
       fontSize: "18px",
-      textColor: "#fff",
+      textColor: COMPONENTS.BUTTONS.PRIMARY.textColor,
       color: COMPONENTS.BUTTONS.PHASE.color,
       hoverColor: COMPONENTS.BUTTONS.PHASE.color,
+      borderColor: COLORS.GOLD_METAL,
       width: BATTLE.PAUSE_BUTTON.width,
       height: BATTLE.PAUSE_BUTTON.height,
     });

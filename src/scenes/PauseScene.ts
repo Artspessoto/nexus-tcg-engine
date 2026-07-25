@@ -1,4 +1,5 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
 import { ToonButton } from "../objects/ToonButton";
@@ -10,35 +11,42 @@ export class PauseScene extends Phaser.Scene {
 
   create() {
     const { CENTER_X, CENTER_Y, WIDTH, HEIGHT } = LAYOUT_CONFIG.SCREEN;
+    const { COLORS, COMPONENTS } = THEME_CONFIG;
 
     const overlay = this.add.rectangle(
       CENTER_X,
       CENTER_Y,
       WIDTH,
       HEIGHT,
-      0x000000,
+      COLORS.OVERLAY_BLACK,
       0.7,
     );
     overlay.setInteractive();
 
     const panelWidth = 300;
     const panelHeight = 200;
+    const cornerRadius = 16;
 
-    const panel = this.add.rectangle(
-      CENTER_X,
-      CENTER_Y,
+    const panel = this.add.graphics();
+    panel.fillStyle(0x1a1a1a, 1);
+    panel.lineStyle(4, COLORS.GOLD_METAL, 1);
+
+    const panelX = CENTER_X - panelWidth / 2;
+    const panelY = CENTER_Y - panelHeight / 2;
+
+    panel.fillRoundedRect(panelX, panelY, panelWidth, panelHeight, cornerRadius);
+    panel.strokeRoundedRect(
+      panelX,
+      panelY,
       panelWidth,
       panelHeight,
-      0x1a1a1a,
-      1,
+      cornerRadius,
     );
-
-    panel.setStrokeStyle(4, 0xddb63e);
 
     this.add
       .text(CENTER_X, CENTER_Y - 40, "PAUSADO", {
         fontSize: "32px",
-        fontFamily: "SuaFonteAqui",
+        fontFamily: "Arial Black",
         color: "#ddb63e",
         fontStyle: "bold",
       })
@@ -49,11 +57,10 @@ export class PauseScene extends Phaser.Scene {
       y: CENTER_Y + 40,
       text: "RETOMAR",
       fontSize: "20px",
-      fontFamily: "Arial Black",
       textColor: "#ffffff",
-      color: 0x333333,
-      hoverColor: 0x555555,
-      width: 220,
+      color: COMPONENTS.BUTTONS.RESUME.color,
+      hoverColor: COMPONENTS.BUTTONS.RESUME.hoverColor,
+      width: 200,
       height: 50,
     });
 

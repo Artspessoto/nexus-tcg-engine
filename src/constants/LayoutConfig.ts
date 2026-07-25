@@ -34,7 +34,7 @@ export const LAYOUT_CONFIG = {
   },
   BATTLE: {
     PHASE_BUTTON: { x: 1120, y: 420, width: 200, height: 60 },
-    PAUSE_BUTTON: { x: 1130, y: 25, width: 60, height: 40 },
+    PAUSE_BUTTON: { x: 1130, y: 30, width: 60, height: 40 },
     ACTIVATION_CENTER: { x: 640, y: 360 },
     OVERLAY_DEPTH: 20000,
   },
