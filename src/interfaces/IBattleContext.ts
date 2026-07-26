@@ -48,6 +48,9 @@ export interface IBattleContext {
     instructions?: { target: Card | null },
   ): Promise<void>;
   onAttackDeclared(attacker: Card, target?: Card | null): Promise<void>;
+  triggerGameOver(loserSide: GameSide, reason: string): void;
+  applyDamage(side: GameSide, amount: number): void;
+  togglePause(): void;
   clearAllMenus(): void;
 
   add: Phaser.GameObjects.GameObjectFactory;

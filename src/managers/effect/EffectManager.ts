@@ -259,7 +259,7 @@ export class EffectManager implements IEffectManager {
           hand.drawCard(deck.position, drawCard);
         });
       } else {
-        Logger.debug("SYSTEM", "Deck out");
+        EventBus.emit(GameEvent.DECK_OUT, { loserSide: side})
         break;
       }
     }

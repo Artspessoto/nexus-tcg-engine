@@ -1,7 +1,6 @@
 import type { Card } from "../../objects/Card";
 import type {
   Notice,
-  GameSide,
   TranslationStructure,
   PlacementMode,
 } from "../../types/GameTypes";
@@ -11,7 +10,7 @@ export interface IUIManager {
   setupUI(): void;
   setupLifePoints(): void;
   showNotice(message: string, type: Notice): void;
-  updateLP(side: GameSide, amount: number): void;
+  animateLPChange(amount: number, startLP: number, targetLP: number): void;
   updateMana(amount: number): void;
   handleFlipSummon(card: Card): void;
   handleChangePosition(card: Card): void;

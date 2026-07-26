@@ -9,6 +9,8 @@ export interface TacticalAdvantage {
 }
 
 export interface FieldSnapshot {
+  playerLP: number;
+  npcLP: number;
   npcMonsters: Card[];
   npcSupports: Card[];
   npcGraveyard: Card[];

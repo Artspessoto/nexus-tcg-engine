@@ -135,6 +135,7 @@ export const createMockBattleContext = (): IBattleContext => {
       },
       modifyHP: vi.fn(),
       setPhase: vi.fn(),
+      setHP: vi.fn(),
       setDragging: vi.fn((value: boolean) => (draggingState = value)),
       nextTurn: vi.fn(),
       advanceTurnCount: vi.fn(),
@@ -144,6 +145,8 @@ export const createMockBattleContext = (): IBattleContext => {
     },
     currentPhase: "MAIN",
     translationText: {
+      lose_battle: "vitória",
+      win_battle: "derrota",
       opponent: "Oponente",
       draw_phase: "Fase de compra",
       opponent_draw: "Oponente comprou",
@@ -214,7 +217,7 @@ export const createMockBattleContext = (): IBattleContext => {
       updateMana: vi.fn(),
       showFieldCardMenu: vi.fn(),
       showGraveyardMenu: vi.fn(),
-      updateLP: vi.fn(),
+      animateLPChange: vi.fn(),
       showNotice: vi.fn(),
       showTrapResponseAction: vi.fn().mockResolvedValue(false),
     }),
@@ -258,6 +261,7 @@ export const createMockBattleContext = (): IBattleContext => {
     npcAction: {
       executeTurn: vi.fn(),
       getCombatResponse: vi.fn(),
+      isGameOver: vi.fn(),
     },
     field: {
       monsterSlots: {
@@ -297,5 +301,8 @@ export const createMockBattleContext = (): IBattleContext => {
     cardActivation: vi.fn(),
     onAttackDeclared: vi.fn(),
     clearAllMenus: vi.fn(),
+    applyDamage: vi.fn(),
+    togglePause: vi.fn(),
+    triggerGameOver: vi.fn(),
   };
 };

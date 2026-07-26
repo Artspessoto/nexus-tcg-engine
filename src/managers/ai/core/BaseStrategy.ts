@@ -23,8 +23,13 @@ export abstract class BaseStrategy implements IAIStrategy {
 
   public async playMainPhase(): Promise<void> {
     let safetyBreak = 0;
+
     while (safetyBreak < 10) {
       const snapshot = this.createFieldSnapshot();
+      const { playerLP, npcLP } = snapshot;
+
+      if (playerLP <= 0 || npcLP <= 0) break;
+
       const moves = this.generateMoves(snapshot);
       const betterChoice = this.chooseBestMove(moves, snapshot);
 
@@ -47,6 +52,10 @@ export abstract class BaseStrategy implements IAIStrategy {
 
     while (atkLimit < 3) {
       const snapshot = this.createFieldSnapshot();
+      const { playerLP, npcLP } = snapshot;
+
+      if (playerLP <= 0 || npcLP <= 0) break;
+
       const moves = this.generateMoves(snapshot);
 
       const combatMoves = moves.filter(
@@ -275,6 +284,8 @@ export abstract class BaseStrategy implements IAIStrategy {
     const playerGraveyard = cardList("PLAYER", "graveyardSlot");
 
     return {
+      playerLP: this.context.gameState.getHP("PLAYER"),
+      npcLP: this.context.gameState.getHP("OPPONENT"),
       npcMonsters,
       npcSupports,
       npcGraveyard,

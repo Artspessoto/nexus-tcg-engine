@@ -69,30 +69,6 @@ export class UIManager implements IUIManager {
       }
     });
 
-    EventBus.on(GameEvent.DIRECT_ATTACK, (data) => {
-      if (data.targetSide == this.side) {
-        this.updateLP(this.side, -data.damage);
-      }
-    });
-
-    EventBus.on(GameEvent.BATTLE_RESOLVED, (data) => {
-      //attacker wins
-      if (data.winner == data.attacker && data.target.owner == this.side) {
-        this.updateLP(this.side, -data.damage);
-      }
-
-      //defender wins
-      else if (data.winner == data.target && data.attacker.owner == this.side) {
-        this.updateLP(this.side, -data.damage);
-      }
-    });
-
-    EventBus.on(GameEvent.LP_CHANGED, (data) => {
-      if (data.side == this.side) {
-        this.updateLP(side, data.amount);
-      }
-    });
-
     EventBus.on(GameEvent.MANA_CHANGED, (data) => {
       if (data.side == this.side) {
         this.updateMana(data.amount);
@@ -209,15 +185,11 @@ export class UIManager implements IUIManager {
     this.createLPBar(UI.LP_BAR.X, yPos, currentHP);
   }
 
-  public updateLP(side: GameSide, amount: number) {
+  public animateLPChange(amount: number, startLP: number, targetLP: number) {
     const { ANIMATIONS } = THEME_CONFIG;
-    const startLP = this.context.gameState.getHP(side);
-
-    this.context.gameState.modifyHP(side, amount);
 
     this.animateLPImpact(amount);
 
-    const targetLP = this.context.gameState.getHP(side);
     const lpCounter = { value: startLP };
 
     this.context.tweens.add({

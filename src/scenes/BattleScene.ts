@@ -191,10 +191,36 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   }
 
   private setupEventListeners(): void {
+    EventBus.on(GameEvent.LP_CHANGED, (data) => {
+      this.applyDamage(data.side, data.amount);
+    });
+
+    EventBus.on(GameEvent.DECK_OUT, (data) => {
+      this.time.delayedCall(1000, () => {
+        this.triggerGameOver(data.loserSide, "DECK OUT");
+      });
+    });
+
+    EventBus.on(GameEvent.DIRECT_ATTACK, (data) => {
+      this.applyDamage(data.targetSide, -data.damage);
+    });
+
+    EventBus.on(GameEvent.BATTLE_RESOLVED, (data) => {
+      //attacker wins
+      if (data.winner == data.attacker) {
+        this.applyDamage(data.target.owner, -data.damage);
+      }
+
+      //defender wins
+      else if (data.winner == data.target) {
+        this.applyDamage(data.attacker.owner, -data.damage);
+      }
+    });
+
     EventBus.on(GameEvent.GAME_RESUMED, () => {
       this.pauseButton.setVisible(true);
     });
-    
+
     EventBus.on(GameEvent.TURN_STARTED, (data) => {
       this.handleAITurnBasedAction(data);
     });
@@ -595,12 +621,91 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     }
   }
 
-  public clearAllMenus() {
+  public triggerGameOver(loserSide: GameSide, reason: string): void {
+    const { SCREEN } = LAYOUT_CONFIG;
+    const { COLORS } = THEME_CONFIG;
+
+    this.pauseButton.setVisible(false);
+    this.phaseButton.setVisible(false);
+
+    const overLay = this.add
+      .rectangle(
+        SCREEN.CENTER_X,
+        SCREEN.CENTER_Y,
+        SCREEN.WIDTH,
+        SCREEN.HEIGHT,
+        COLORS.OVERLAY_BLACK,
+      )
+      .setAlpha(0)
+      .setDepth(999);
+
+    this.tweens.add({
+      targets: overLay,
+      alpha: 0.7,
+      duration: 500,
+    });
+
+    let displayMessage = "DEFEAT!";
+
+    if (reason == "DEFEAT") {
+      displayMessage =
+        loserSide == "OPPONENT"
+          ? this.translationText.win_battle
+          : this.translationText.lose_battle;
+    }
+
+    const gameOverText = this.add
+      .text(SCREEN.CENTER_X, SCREEN.CENTER_Y, displayMessage, {
+        fontSize: "40px",
+        fontFamily: "Arial Black",
+        stroke: "#FFFFFF",
+        strokeThickness: 10,
+        color: "#FF0000",
+      })
+      .setOrigin(0.5)
+      .setDepth(10000)
+      .setScale(5)
+      .setAlpha(0);
+
+    this.tweens.add({
+      targets: gameOverText,
+      scale: 1,
+      alpha: 1,
+      duration: 400,
+      ease: "Bounce.easeOut",
+      onComplete: () => {
+        this.time.delayedCall(1000, () => {
+          this.cameras.main.fadeOut(500, 0, 0, 0);
+          this.cameras.main.once("camerafadeoutcomplete", () => {
+            this.scene.start("MenuScene");
+          });
+        });
+      },
+    });
+  }
+
+  public applyDamage(side: GameSide, amount: number) {
+    const startLP = this.gameState.getHP(side);
+
+    this.gameState.modifyHP(side, amount);
+
+    const targetLP = this.gameState.getHP(side);
+
+    this.getUI(side).animateLPChange(amount, startLP, targetLP);
+
+    if (targetLP <= 0) {
+      this.time.delayedCall(1500, () => {
+        this.triggerGameOver(side, "DEFEAT");
+      });
+    }
+  }
+
+  public clearAllMenus(): void {
     this.playerUI.clearSelectionMenu();
     this.opponentUI.clearSelectionMenu();
   }
 
-  public togglePause() {
+  public togglePause(): void {
     this.pauseButton.setVisible(false);
 
     this.scene.pause();
