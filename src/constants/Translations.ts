@@ -34,6 +34,10 @@ export const TRANSLATIONS = {
       back_to_menu: "VOLTAR AO MENU",
       back: "VOLTAR",
     },
+    pause_scene: {
+      paused: "PAUSADO",
+      resume: "RETOMAR",
+    },
     deck_preview: {
       title: "PREPARAÇÃO DE BATALHA",
       subtitle: "Revisando as cartas de {name}",
@@ -59,6 +63,8 @@ export const TRANSLATIONS = {
       insufficient_mana: "MANA INSUFICIENTE",
       turn_label: "TURNO",
       revive: "REVIVER",
+      win_battle: "VITÓRIA!",
+      lose_battle: "DERROTA!", 
       battle_buttons: {
         to_battle: "INICIAR BATALHA",
         end_turn: "ENCERRAR TURNO",
@@ -132,6 +138,10 @@ export const TRANSLATIONS = {
       back_to_menu: "BACK TO MENU",
       back: "BACK",
     },
+    pause_scene: {
+      paused: "PAUSED",
+      resume: "RESUME",
+    },
     deck_preview: {
       title: "BATTLE PREPARATION",
       subtitle: "Reviewing {name}'s cards",
@@ -157,6 +167,8 @@ export const TRANSLATIONS = {
       insufficient_mana: "INSUFFICIENT MANA",
       turn_label: "TURN",
       revive: "REVIVE",
+      win_battle: "YOU WIN!",
+      lose_battle: "YOU LOSE!", 
       battle_buttons: {
         to_battle: "START BATTLE",
         end_turn: "END TURN",

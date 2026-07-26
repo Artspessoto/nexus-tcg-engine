@@ -49,6 +49,7 @@ export enum GameEvent {
   //GAME
   GAME_PAUSED = "GAME_PAUSED",
   GAME_RESUMED = "GAME_RESUMED",
+  DECK_OUT = "DECK_OUT"
 }
 
 export type PhaseChangedPayload = {
@@ -138,6 +139,10 @@ export type GameResumedPayload = {
   message: string;
 };
 
+export type DeckOut = {
+  loserSide: GameSide
+}
+
 export interface GameEventMap {
   [GameEvent.PHASE_CHANGED]: PhaseChangedPayload;
   [GameEvent.CARD_PLAYED]: CardPlayedPayload;
@@ -168,4 +173,5 @@ export interface GameEventMap {
   [GameEvent.NOTICE_REQUESTED]: NoticeRequestedPayload;
   [GameEvent.GAME_PAUSED]: GamePausedPayload;
   [GameEvent.GAME_RESUMED]: GameResumedPayload;
+  [GameEvent.DECK_OUT]: DeckOut;
 }

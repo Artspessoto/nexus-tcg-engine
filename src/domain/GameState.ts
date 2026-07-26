@@ -53,13 +53,22 @@ export class GameState {
   }
 
   public modifyHP(side: GameSide, amount: number) {
-    if (side === "PLAYER") this.playerHP += amount;
-    else this.opponentHP += amount;
+    const currentLP = this.getHP(side);
+    const newLP = currentLP + amount;
+
+    const finalLP = Math.max(0, newLP);
+
+    this.setHP(side, finalLP);
   }
 
   public modifyMana(side: GameSide, amount: number) {
     if (side === "PLAYER") this.playerMana += amount;
     else this.opponentMana += amount;
+  }
+
+  public setHP(side: GameSide, amount: number) {
+    if (side === "PLAYER") this.playerHP = amount;
+    else this.opponentHP = amount;
   }
 
   public setPhase(phase: GamePhase) {

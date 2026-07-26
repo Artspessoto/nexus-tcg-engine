@@ -1,7 +1,9 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { TRANSLATIONS } from "../constants/Translations";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
+import { LanguageManager } from "../managers/language/LanguageManager";
 import { ToonButton } from "../objects/ToonButton";
 
 export class PauseScene extends Phaser.Scene {
@@ -10,6 +12,9 @@ export class PauseScene extends Phaser.Scene {
   }
 
   create() {
+    const lang = LanguageManager.getInstance().currentLanguage;
+    const currentTranslations = TRANSLATIONS[lang].pause_scene;
+    
     const { CENTER_X, CENTER_Y, WIDTH, HEIGHT } = LAYOUT_CONFIG.SCREEN;
     const { COLORS, COMPONENTS } = THEME_CONFIG;
 
@@ -44,7 +49,7 @@ export class PauseScene extends Phaser.Scene {
     );
 
     this.add
-      .text(CENTER_X, CENTER_Y - 40, "PAUSADO", {
+      .text(CENTER_X, CENTER_Y - 40, currentTranslations.paused, {
         fontSize: "32px",
         fontFamily: "Arial Black",
         color: "#ddb63e",
@@ -55,7 +60,7 @@ export class PauseScene extends Phaser.Scene {
     const resumeButton = new ToonButton(this, {
       x: CENTER_X,
       y: CENTER_Y + 40,
-      text: "RETOMAR",
+      text: currentTranslations.resume,
       fontSize: "20px",
       textColor: "#ffffff",
       color: COMPONENTS.BUTTONS.RESUME.color,

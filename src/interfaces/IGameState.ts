@@ -15,6 +15,7 @@ export interface IGameState {
   modifyHP(side: GameSide, amount: number): void;
   modifyMana(side: GameSide, amount: number): void;
   setPhase(phase: GamePhase): void;
+  setHP(side: GameSide, amount: number): void;
   setPlayerName(name: string): void;
   nextTurn(): void;
   advanceTurnCount(): void;
