@@ -158,7 +158,6 @@ export const createMockBattleContext = (): IBattleContext => {
       turn_label: "Turno",
       revive: "REVIVER",
       battle_buttons: {
-        to_battle: "",
         end_turn: "",
         details: "",
         active: "",
@@ -166,6 +165,11 @@ export const createMockBattleContext = (): IBattleContext => {
         attack: "",
         change_pos: "",
         flip: "",
+        to_battle: "",
+        next_duel: "",
+        back_to_menu: "",
+        rematch: "",
+        surrender: "",
       },
       card_types: {
         MONSTER: "MONSTRO",

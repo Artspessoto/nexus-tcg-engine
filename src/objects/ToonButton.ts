@@ -62,6 +62,8 @@ export class ToonButton extends Phaser.GameObjects.Container {
         fontStyle: "bold",
       })
       .setOrigin(0.5);
+    
+    this.adjustTextScale();
 
     if (config.headerText) {
       this.headerLabel = scene.add
@@ -106,7 +108,7 @@ export class ToonButton extends Phaser.GameObjects.Container {
     scene.add.existing(this);
   }
 
-  private drawBackground(color: number) {
+  private drawBackground(color: number): void {
     this.bg.clear();
 
     const halfW = this.config.width / 2;
@@ -135,11 +137,12 @@ export class ToonButton extends Phaser.GameObjects.Container {
     );
   }
 
-  public setText(newText: string) {
+  public setText(newText: string): void {
     this.label.setText(newText);
+    this.adjustTextScale();
   }
 
-  public setHeaderText(text: string) {
+  public setHeaderText(text: string): void {
     if (!this.headerLabel) {
       this.headerLabel = this.scene.add
         .text(0, -15, text.toUpperCase(), {
@@ -159,12 +162,12 @@ export class ToonButton extends Phaser.GameObjects.Container {
     }
   }
 
-  public setButtonColor(color: number) {
+  public setButtonColor(color: number): void {
     this.config.color = color;
     this.drawBackground(color);
   }
 
-  public updatePhase(turn: string, phaseText: string, color?: number) {
+  public updatePhase(turn: string, phaseText: string, color?: number): void {
     this.config.alpha = 1;
 
     this.label.setAlpha(1);
@@ -180,7 +183,7 @@ export class ToonButton extends Phaser.GameObjects.Container {
     }
   }
 
-  public setDisabledState(text: string, color: number = 0x333333) {
+  public setDisabledState(text: string, color: number = 0x333333): void {
     this.disableInteractive();
     this.config.color = color;
     this.config.alpha = 0.7;
@@ -189,5 +192,17 @@ export class ToonButton extends Phaser.GameObjects.Container {
 
     this.label.setAlpha(0.5);
     if (this.headerLabel) this.headerLabel.setAlpha(0.5);
+  }
+
+  private adjustTextScale(): void {
+    this.label.setScale(1);
+
+    const padding = 20; //margin 10 for each side
+    const maxWidth = this.config.width - padding;
+
+    if (this.label.displayWidth > maxWidth) {
+      const scaleFactor = maxWidth / this.label.displayWidth;
+      this.label.setScale(scaleFactor);
+    }
   }
 }

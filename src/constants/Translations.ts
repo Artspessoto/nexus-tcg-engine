@@ -64,7 +64,7 @@ export const TRANSLATIONS = {
       turn_label: "TURNO",
       revive: "REVIVER",
       win_battle: "VITÓRIA!",
-      lose_battle: "DERROTA!", 
+      lose_battle: "DERROTA!",
       battle_buttons: {
         to_battle: "INICIAR BATALHA",
         end_turn: "ENCERRAR TURNO",
@@ -74,6 +74,10 @@ export const TRANSLATIONS = {
         attack: "ATACAR",
         change_pos: "MUDAR POS.",
         flip: "VIRAR",
+        back_to_menu: "VOLTAR AO MENU",
+        surrender: "DESISTIR",
+        rematch: "TENTAR NOVAMENTE",
+        next_duel: "AVANÇAR"
       },
       card_types: {
         MONSTER: "MONSTRO",
@@ -178,6 +182,10 @@ export const TRANSLATIONS = {
         attack: "ATTACK",
         change_pos: "CHANGE POS.",
         flip: "FLIP",
+        back_to_menu: "BACK TO MENU",
+        surrender: "SURRENDER",
+        rematch: "REMATCH",
+        next_duel: "NEXT DUEL"
       },
       card_types: {
         MONSTER: "MONSTER",

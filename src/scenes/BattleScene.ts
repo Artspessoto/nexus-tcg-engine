@@ -43,6 +43,7 @@ export interface BattleSceneConfig {
   playerName: string;
   playerDeckIds: string[];
   difficulty: Difficulty;
+  retriesLeft?: number;
 }
 
 export class BattleScene extends Phaser.Scene implements IBattleContext {
@@ -70,12 +71,17 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public selectedCard: Card | null = null;
   private overlayLayer!: Phaser.GameObjects.Container;
   private gameDifficulty: Difficulty = "EASY";
+  private sceneConfig!: BattleSceneConfig;
+  private retriesLeft: number = 1;
 
   constructor() {
     super("BattleScene");
   }
 
   init(config: BattleSceneConfig) {
+    this.sceneConfig = config;
+    this.retriesLeft =
+      config.retriesLeft !== undefined ? config.retriesLeft : 1;
     this.playerDisplayName = config.playerName || "PLAYER 1";
     this.gameDifficulty = config.difficulty;
 
@@ -641,30 +647,35 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         COLORS.OVERLAY_BLACK,
       )
       .setAlpha(0)
-      .setDepth(999);
+      .setDepth(DEPTHS.BANNERS - 1);
 
     this.tweens.add({
       targets: overLay,
-      alpha: 0.7,
-      duration: 500,
+      alpha: 0.8,
+      duration: ANIMATIONS.DURATIONS.SLOW,
     });
 
     let displayMessage = "DEFEAT!";
+    let textColor = "#FF0000";
 
-    if (reason == "DEFEAT") {
-      displayMessage =
-        loserSide == "OPPONENT"
-          ? this.translationText.win_battle
-          : this.translationText.lose_battle;
+    if (reason == "DEFEAT" || reason == "DECK OUT") {
+      const isPlayerWinner = loserSide === "OPPONENT";
+      displayMessage = isPlayerWinner
+        ? this.translationText.win_battle
+        : this.translationText.lose_battle;
+
+      textColor = isPlayerWinner ? "#4dff4d" : "#FF4444";
     }
 
     const gameOverText = this.add
-      .text(SCREEN.CENTER_X, SCREEN.CENTER_Y, displayMessage, {
-        fontSize: "40px",
+      .text(SCREEN.CENTER_X, SCREEN.CENTER_Y - 50, displayMessage, {
+        fontSize: "60px",
         fontFamily: FONTS.FAMILY_DISPLAY,
-        stroke: "#FFFFFF",
-        strokeThickness: 10,
-        color: "#FF0000",
+        fontStyle: "bold italic",
+        stroke: "#000000",
+        strokeThickness: 6,
+        color: textColor,
+        padding: { x: 10, y: 10 }
       })
       .setOrigin(0.5)
       .setDepth(DEPTHS.BANNERS)
@@ -676,13 +687,10 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       scale: 1,
       alpha: 1,
       duration: ANIMATIONS.DURATIONS.ACTIVATION,
-      ease: ANIMATIONS.EASING.BOUNCE,
+      ease: ANIMATIONS.EASING.EXPO_OUT,
       onComplete: () => {
-        this.time.delayedCall(1000, () => {
-          this.cameras.main.fadeOut(500, 0, 0, 0);
-          this.cameras.main.once("camerafadeoutcomplete", () => {
-            this.scene.start("MenuScene");
-          });
+        this.time.delayedCall(500, () => {
+          this.showGameOverButtons(loserSide);
         });
       },
     });
@@ -700,6 +708,86 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     if (targetLP <= 0) {
       this.time.delayedCall(1500, () => {
         this.triggerGameOver(side, "DEFEAT");
+      });
+    }
+  }
+
+  private showGameOverButtons(loserSide: GameSide): void {
+    const { SCREEN } = LAYOUT_CONFIG;
+    const { DEPTHS } = THEME_CONFIG;
+    const { battle_buttons } = this.translationText
+
+    const isPlayerWinner = loserSide == "OPPONENT";
+
+    if (isPlayerWinner) {
+      const continueBtn = new ToonButton(this, {
+        x: SCREEN.CENTER_X,
+        y: SCREEN.CENTER_Y + 100,
+        text: battle_buttons.next_duel,
+        width: 180,
+        height: 50,
+      }).setDepth(DEPTHS.BANNERS);
+
+      continueBtn.on("pointerdown", () => {
+        // this.scene.start("RewardScene");
+      });
+      return;
+    }
+
+    //player lost but he has one more chance
+    if (this.retriesLeft > 0) {
+      const retryBtn = new ToonButton(this, {
+        x: SCREEN.CENTER_X + 110,
+        y: SCREEN.CENTER_Y + 100,
+        text: battle_buttons.rematch,
+        width: 200,
+        height: 50,
+      }).setDepth(DEPTHS.BANNERS);
+
+      retryBtn.on("pointerdown", () => {
+        this.cameras.main.fadeOut(500, 0, 0, 0);
+        this.cameras.main.once("camerafadeoutcomplete", () => {
+          this.scene.restart({
+            ...this.sceneConfig,
+            retriesLeft: this.retriesLeft - 1,
+          });
+        });
+      });
+
+      const giveUpBtn = new ToonButton(this, {
+        x: SCREEN.CENTER_X - 110,
+        y: SCREEN.CENTER_Y + 100,
+        text: battle_buttons.surrender,
+        width: 200,
+        height: 50,
+        textColor: "#fff",
+        color: 0x1a1a1a,
+        hoverColor: 0x333333,
+      }).setDepth(DEPTHS.BANNERS);
+
+      giveUpBtn.on("pointerdown", () => {
+        this.cameras.main.fadeOut(500, 0, 0, 0);
+        this.cameras.main.once("camerafadeoutcomplete", () => {
+          this.scene.start("MenuScene");
+        });
+      });
+    } else {
+      const menuBtn = new ToonButton(this, {
+        x: SCREEN.CENTER_X,
+        y: SCREEN.CENTER_Y + 120,
+        text: battle_buttons.back_to_menu,
+        width: 220,
+        height: 50,
+        textColor: "#fff",
+        color: 0x1a1a1a,
+        hoverColor: 0x333333
+      }).setDepth(DEPTHS.BANNERS);
+
+      menuBtn.on("pointerdown", () => {
+        this.cameras.main.fadeOut(500, 0, 0, 0);
+        this.cameras.main.once("camerafadeoutcomplete", () => {
+          this.scene.start("MenuScene");
+        });
       });
     }
   }

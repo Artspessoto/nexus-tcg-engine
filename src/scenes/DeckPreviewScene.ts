@@ -203,6 +203,7 @@ export class DeckPreviewScene extends Phaser.Scene {
         playerName: this.playerName,
         difficulty: this.difficulty,
         playerDeckIds: this.playerDeckIds,
+        retriesLeft: 1        
       });
     });
   }

@@ -19,8 +19,8 @@ describe("GameState", () => {
     it("should start with correct default values", () => {
       expect(gameState.currentPhase).toBe("DRAW");
       expect(gameState.activePlayer).toBe("PLAYER");
-      expect(gameState.playerHP).toBe(500);
-      expect(gameState.opponentHP).toBe(500);
+      expect(gameState.playerHP).toBe(300);
+      expect(gameState.opponentHP).toBe(300);
       expect(gameState.playerMana).toBe(5);
       expect(gameState.currentTurn).toBe(1);
       expect(gameState.isDragging).toBe(false);
@@ -37,12 +37,12 @@ describe("GameState", () => {
   describe("LP Management", () => {
     it("should modify Opponent HP correctly", () => {
       gameState.modifyHP("OPPONENT", -150);
-      expect(gameState.getHP("OPPONENT")).toBe(350);
+      expect(gameState.getHP("OPPONENT")).toBe(150);
     });
 
     it("should allow healing (positive HP modification)", () => {
       gameState.modifyHP("PLAYER", 50);
-      expect(gameState.getHP("PLAYER")).toBe(550);
+      expect(gameState.getHP("PLAYER")).toBe(350);
     });
   });
 

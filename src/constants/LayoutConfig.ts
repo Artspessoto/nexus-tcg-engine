@@ -39,7 +39,7 @@ export const LAYOUT_CONFIG = {
     OVERLAY_DEPTH: 20000,
   },
   GAME_STATE: {
-    BASE_LP: 500,
+    BASE_LP: 300,
     BASE_MANA: 5,
     BASE_DECK: 20
   },
