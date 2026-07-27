@@ -69,12 +69,6 @@ export class UIManager implements IUIManager {
       }
     });
 
-    EventBus.on(GameEvent.MANA_CHANGED, (data) => {
-      if (data.side == this.side) {
-        this.updateMana(data.amount);
-      }
-    });
-
     EventBus.on(GameEvent.INSUFFICIENT_MANA, () => {
       if (this.side == "PLAYER") {
         this.showNotice(
@@ -203,12 +197,10 @@ export class UIManager implements IUIManager {
     });
   }
 
-  public updateMana(amount: number) {
+  public animateManaChange(amount: number) {
     const { ANIMATIONS } = THEME_CONFIG;
-    this.context.gameState.modifyMana(this.side, amount);
-
-    const newMana = this.context.gameState.getMana(this.side);
-    this.manaText.setText(`${newMana}`);
+    
+    this.manaText.setText(`${amount}`);
 
     this.context.tweens.add({
       targets: this.manaAura,

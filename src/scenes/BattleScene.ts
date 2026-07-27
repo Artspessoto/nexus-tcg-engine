@@ -191,6 +191,10 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   }
 
   private setupEventListeners(): void {
+    EventBus.on(GameEvent.MANA_CHANGED, (data) => {
+      this.applyManaChanged(data.side, data.amount);
+    });
+
     EventBus.on(GameEvent.LP_CHANGED, (data) => {
       this.applyDamage(data.side, data.amount);
     });
@@ -623,7 +627,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
   public triggerGameOver(loserSide: GameSide, reason: string): void {
     const { SCREEN } = LAYOUT_CONFIG;
-    const { COLORS } = THEME_CONFIG;
+    const { COLORS, DEPTHS, ANIMATIONS, FONTS } = THEME_CONFIG;
 
     this.pauseButton.setVisible(false);
     this.phaseButton.setVisible(false);
@@ -657,13 +661,13 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     const gameOverText = this.add
       .text(SCREEN.CENTER_X, SCREEN.CENTER_Y, displayMessage, {
         fontSize: "40px",
-        fontFamily: "Arial Black",
+        fontFamily: FONTS.FAMILY_DISPLAY,
         stroke: "#FFFFFF",
         strokeThickness: 10,
         color: "#FF0000",
       })
       .setOrigin(0.5)
-      .setDepth(10000)
+      .setDepth(DEPTHS.BANNERS)
       .setScale(5)
       .setAlpha(0);
 
@@ -671,8 +675,8 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       targets: gameOverText,
       scale: 1,
       alpha: 1,
-      duration: 400,
-      ease: "Bounce.easeOut",
+      duration: ANIMATIONS.DURATIONS.ACTIVATION,
+      ease: ANIMATIONS.EASING.BOUNCE,
       onComplete: () => {
         this.time.delayedCall(1000, () => {
           this.cameras.main.fadeOut(500, 0, 0, 0);
@@ -684,7 +688,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     });
   }
 
-  public applyDamage(side: GameSide, amount: number) {
+  private applyDamage(side: GameSide, amount: number) {
     const startLP = this.gameState.getHP(side);
 
     this.gameState.modifyHP(side, amount);
@@ -698,6 +702,14 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         this.triggerGameOver(side, "DEFEAT");
       });
     }
+  }
+
+  public applyManaChanged(side: GameSide, amount: number): void {
+    this.gameState.modifyMana(side, amount);
+
+    const newMana = this.gameState.getMana(side);
+
+    this.getUI(side).animateManaChange(newMana);
   }
 
   public clearAllMenus(): void {

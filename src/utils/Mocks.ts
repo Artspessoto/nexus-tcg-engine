@@ -301,7 +301,6 @@ export const createMockBattleContext = (): IBattleContext => {
     cardActivation: vi.fn(),
     onAttackDeclared: vi.fn(),
     clearAllMenus: vi.fn(),
-    applyDamage: vi.fn(),
     togglePause: vi.fn(),
     triggerGameOver: vi.fn(),
   };

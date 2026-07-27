@@ -11,7 +11,7 @@ export interface IUIManager {
   setupLifePoints(): void;
   showNotice(message: string, type: Notice): void;
   animateLPChange(amount: number, startLP: number, targetLP: number): void;
-  updateMana(amount: number): void;
+  animateManaChange(amount: number): void;
   handleFlipSummon(card: Card): void;
   handleChangePosition(card: Card): void;
   showSelectionMenu(

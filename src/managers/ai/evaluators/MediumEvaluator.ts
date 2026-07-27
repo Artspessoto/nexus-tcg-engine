@@ -311,8 +311,7 @@ export class MediumEvaluator extends BaseEvaluator {
     cardToPlay: Card,
     snapshot: FieldSnapshot,
   ): number {
-    const { npcMonsters, currentLP: npcLP, advantage } = snapshot;
-    const playerLP = this.context.gameState.getHP("PLAYER");
+    const { npcMonsters, currentLP: npcLP, advantage, playerLP } = snapshot;
     const cardAtk = cardToPlay.getCardData().atk || 0;
     const criticalLP = LAYOUT_CONFIG.GAME_STATE.BASE_LP / 3;
 
