@@ -15,7 +15,7 @@ The functional requirements of this project aim to describe the actions that the
 | **FR01** | **Deck Management**         | The player must have a fixed deck of exactly 20 cards.                                                                                                                                   |
 | **FR02** | **Card Replacement**        | After defeating an NPC, the player chooses 1 of 3 offered cards. To add it, they must remove a current card from their deck.                                                             |
 | **FR03** | **Floor flow**              | The game processes 5 castle levels. Each level features 4 common NPCs and 1 Final Boss.                                                                                                 |
-| **FR04** | **Life System (Hearts)**    | Manage the attempt system: Easy (5), Medium (3), and Hard (1). Losing a duel consumes one life.                                                                                          |
+| **FR04** | **Rematch System**    | The player is granted exactly 1 Rematch attempt per campaign run. Losing a duel without an available rematch results in Game Over.                                                                                          |
 | **FR05** | **Duel Resolution**         | The system must monitor LP and Deck levels to trigger victory or defeat sequences based on the Game Rules (Section 4.3).                                                                 |
 | **FR06** | **Response Window (Traps)** | When an attack is declared, the system must provide a Decision Modal for the defender. They can choose to activate a response or pass, pausing the combat flow until a decision is made. |
 | **FR07** | **Priority AI**             | The NPC evaluates the field and its own hand, assigning weights to moves to decide the best action based on difficulty.                                                                  |
@@ -112,7 +112,7 @@ The game follows a linear and continuous flow inspired by _battle-rush_ systems.
 2. **Battle Scene:** A cycle of 4 phases (Draw ➡️ Main ➡️ Battle ➡️ End Turn).
 3. **Result Scene:**
    - **Victory:** Direct transition to the Reward Screen (Choose 1 of 3 hidden cards + mandatory substitution).
-   - **Defeat:** Consumes 1 life (heart). If lives remain, a rematch is allowed; otherwise, a total progress Reset (Game Over) is executed.
+   - **Defeat:** The player can choose to "Give Up" (Game Over) or use their single campaign "Rematch". If the Rematch has already been consumed in a previous floor, a total progress Reset (Game Over) is executed immediately.
 
 ---
 
@@ -197,7 +197,7 @@ The screen is divided for easier analysis:
 
 ### 14.2. Game Over and Reset
 
-- The game ends when the player's **Hearts (Lives)** reach 0.
+- The game ends when the player is defeated and has already consumed their single campaign rematch chance (or intentionally chooses surrender).
 - **Reset Flow:** The player is sent to the Game Over screen; "Restart" clears progress, resets the deck to initial settings, and returns the player to the Main Menu.
 
 ---
