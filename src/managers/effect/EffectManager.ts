@@ -259,7 +259,10 @@ export class EffectManager implements IEffectManager {
           hand.drawCard(deck.position, drawCard);
         });
       } else {
-        EventBus.emit(GameEvent.DECK_OUT, { loserSide: side})
+        EventBus.emit(GameEvent.GAME_OVER, {
+          loserSide: side,
+          reason: "DECK OUT",
+        });
         break;
       }
     }

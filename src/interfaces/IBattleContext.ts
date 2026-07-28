@@ -48,7 +48,7 @@ export interface IBattleContext {
     instructions?: { target: Card | null },
   ): Promise<void>;
   onAttackDeclared(attacker: Card, target?: Card | null): Promise<void>;
-  triggerGameOver(loserSide: GameSide, reason: string): void;
+  triggerGameOver(loserSide: GameSide, reason: "DECK OUT" | "DEFEAT"): void;
   togglePause(): void;
   clearAllMenus(): void;
 

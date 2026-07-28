@@ -205,9 +205,9 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       this.applyDamage(data.side, data.amount);
     });
 
-    EventBus.on(GameEvent.DECK_OUT, (data) => {
+    EventBus.on(GameEvent.GAME_OVER, (data) => {
       this.time.delayedCall(1000, () => {
-        this.triggerGameOver(data.loserSide, "DECK OUT");
+        this.triggerGameOver(data.loserSide, data.reason);
       });
     });
 
@@ -337,7 +337,10 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         this.currentHand.drawCard(this.currentDeck.position, cardData);
       } else {
         //deck out
-        Logger.debug("SYSTEM", "Deck out");
+        EventBus.emit(GameEvent.GAME_OVER, {
+          loserSide: activeSide,
+          reason: "DECK OUT",
+        });
       }
     }
   }
@@ -631,7 +634,10 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     }
   }
 
-  public triggerGameOver(loserSide: GameSide, reason: string): void {
+  public triggerGameOver(
+    loserSide: GameSide,
+    reason: "DEFEAT" | "DECK OUT",
+  ): void {
     const { SCREEN } = LAYOUT_CONFIG;
     const { COLORS, DEPTHS, ANIMATIONS, FONTS } = THEME_CONFIG;
 
@@ -675,7 +681,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         stroke: "#000000",
         strokeThickness: 6,
         color: textColor,
-        padding: { x: 10, y: 10 }
+        padding: { x: 10, y: 10 },
       })
       .setOrigin(0.5)
       .setDepth(DEPTHS.BANNERS)
@@ -707,7 +713,10 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
     if (targetLP <= 0) {
       this.time.delayedCall(1500, () => {
-        this.triggerGameOver(side, "DEFEAT");
+        EventBus.emit(GameEvent.GAME_OVER, {
+          loserSide: side,
+          reason: "DEFEAT",
+        });
       });
     }
   }
@@ -715,7 +724,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   private showGameOverButtons(loserSide: GameSide): void {
     const { SCREEN } = LAYOUT_CONFIG;
     const { DEPTHS } = THEME_CONFIG;
-    const { battle_buttons } = this.translationText
+    const { battle_buttons } = this.translationText;
 
     const isPlayerWinner = loserSide == "OPPONENT";
 
@@ -780,7 +789,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         height: 50,
         textColor: "#fff",
         color: 0x1a1a1a,
-        hoverColor: 0x333333
+        hoverColor: 0x333333,
       }).setDepth(DEPTHS.BANNERS);
 
       menuBtn.on("pointerdown", () => {
