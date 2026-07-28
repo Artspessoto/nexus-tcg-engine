@@ -156,7 +156,7 @@ export class UIManager implements IUIManager {
         SCREEN.CENTER_X,
         SCREEN.CENTER_Y,
         SCREEN.WIDTH,
-        THEME_CONFIG.COMPONENTS.UI.BANNER_HEIGHT,
+        THEME_CONFIG.COMPONENTS.UI.PHASE_BANNER_HEIGHT,
         COLORS.OVERLAY_BLACK,
         0.85,
       )

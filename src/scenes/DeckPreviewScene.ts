@@ -199,11 +199,10 @@ export class DeckPreviewScene extends Phaser.Scene {
   private callNextScene() {
     this.cameras.main.fadeOut(500, 0, 0, 0);
     this.cameras.main.once("camerafadeoutcomplete", () => {
-      this.scene.start("BattleScene", {
+      this.scene.start("VersusScene", {
         playerName: this.playerName,
         difficulty: this.difficulty,
-        playerDeckIds: this.playerDeckIds,
-        retriesLeft: 1        
+        playerDeckIds: this.playerDeckIds,      
       });
     });
   }

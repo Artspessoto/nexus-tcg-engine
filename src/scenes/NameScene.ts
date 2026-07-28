@@ -71,7 +71,7 @@ export class NameScene extends Phaser.Scene {
 
     const backToMenuBtn = new ToonButton(this, {
       x: 640,
-      y: 560,
+      y: 550,
       text: text.back_to_menu,
       fontSize: "22px",
       textColor: "#fff",

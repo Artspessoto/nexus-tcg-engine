@@ -142,7 +142,8 @@ export const THEME_CONFIG = {
       },
     },
     UI: {
-      BANNER_HEIGHT: 80,
+      PHASE_BANNER_HEIGHT: 80,
+      VERSUS_BANNER_HEIGHT: 250
     },
   },
   //z-index

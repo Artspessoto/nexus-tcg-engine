@@ -17,6 +17,10 @@ export class MenuScene extends Phaser.Scene {
 
   preload() {
     this.load.image("background", "assets/system/menu_background.jpg");
+    this.load.image(
+      "versus_background",
+      "assets/system/battle_transition_background.jpg",
+    );
   }
 
   create() {
