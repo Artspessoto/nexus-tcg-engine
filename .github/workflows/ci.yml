@@ -2,7 +2,7 @@ name: Toon Castle CI
 
 on:
   push:
-    branches-ignore: [main]
+    branches: [main, develop]
   pull_request:
     branches: [main, develop]
 
