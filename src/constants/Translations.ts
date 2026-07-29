@@ -8,6 +8,7 @@ export const TRANSLATIONS = {
       easy: "Fácil",
       medium: "Médio",
       hard: "Difícil",
+      tutorial: "TUTORIAL",
     },
     guide: {
       title: "A ASCENSÃO DA TORRE",
@@ -116,6 +117,7 @@ export const TRANSLATIONS = {
       easy: "Easy",
       medium: "Medium",
       hard: "Hard",
+      tutorial: "TUTORIAL"
     },
     guide: {
       title: "THE TOWER ASCENSION",

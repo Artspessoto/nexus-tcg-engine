@@ -104,17 +104,23 @@ export class MenuScene extends Phaser.Scene {
       this.scene.start("NameScene", { difficulty: this.selectedDifficulty });
     });
 
-    const guideBtn = new ToonButton(this, {
+    const tutorialBtn = new ToonButton(this, {
       x: SCREEN.CENTER_X,
       y: MENU.ACTIONS.GUIDE_Y,
-      text: strings.guide,
+      text: strings.tutorial,
       fontSize: "22px",
       ...COMPONENTS.BUTTONS.SECONDARY,
     });
 
-    guideBtn.on("pointerdown", () => {
-      this.scene.pause();
-      this.scene.launch("GuideScene");
+    // guideBtn.on("pointerdown", () => {
+    //   this.scene.pause();
+    //   this.scene.launch("GuideScene");
+    // });
+    tutorialBtn.on("pointerdown", () => {
+      this.cameras.main.fadeOut(500, 0, 0, 0);
+      this.cameras.main.once("camerafadeoutcomplete", () => {
+        this.scene.start("TutorialBoardScene");
+      });
     });
 
     const langPickerY = MENU.LANG_PICKER.Y;
