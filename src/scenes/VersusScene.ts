@@ -25,7 +25,6 @@ export class VersusScene extends Phaser.Scene {
   create() {
     const { SCREEN } = LAYOUT_CONFIG;
     const { FONTS, COLORS } = THEME_CONFIG;
-    console.log(this.playerDeckIds);
 
     const bg = this.add.image(
       SCREEN.CENTER_X,
@@ -242,12 +241,17 @@ export class VersusScene extends Phaser.Scene {
   }
 
   private callNextScene(): void {
-    this.time.delayedCall(1500, () => {
-      this.scene.start("BattleScene", {
-        playerName: this.playerName,
-        difficulty: this.difficulty,
-        playerDeckIds: this.playerDeckIds,
-        retriesLeft: 1,
+    // this.cameras.main.shake(200, 0.015);
+    this.time.delayedCall(1600, () => {
+      this.cameras.main.zoomTo(3, 600, "Sine.easeIn");
+      this.cameras.main.fadeOut(800, 255, 255, 255);
+      this.cameras.main.once("camerafadeoutcomplete", () => {
+        this.scene.start("BattleScene", {
+          playerName: this.playerName,
+          difficulty: this.difficulty,
+          playerDeckIds: this.playerDeckIds,
+          retriesLeft: 1,
+        });
       });
     });
   }
