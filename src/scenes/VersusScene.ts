@@ -24,7 +24,7 @@ export class VersusScene extends Phaser.Scene {
 
   create() {
     const { SCREEN } = LAYOUT_CONFIG;
-    const { FONTS, COLORS } = THEME_CONFIG;
+    const { FONTS, COLORS, ANIMATIONS } = THEME_CONFIG;
 
     const bg = this.add.image(
       SCREEN.CENTER_X,
@@ -138,24 +138,20 @@ export class VersusScene extends Phaser.Scene {
 
     const textY = SCREEN.CENTER_Y + bannerHeight / 2 + 30; //closer to banner
 
+    const textConfig = {
+      fontFamily: FONTS.FAMILY_DISPLAY,
+      fontSize: "28px",
+      color: "#ffffff",
+      stroke: "#000000",
+      strokeThickness: 5,
+    };
+
     const playerText = this.add
-      .text(-SCREEN.WIDTH / 4, textY, this.playerName, {
-        fontFamily: FONTS.FAMILY_DISPLAY,
-        fontSize: "28px",
-        color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 5,
-      })
+      .text(-SCREEN.WIDTH / 4, textY, this.playerName, textConfig)
       .setOrigin(0.5);
 
     const npcText = this.add
-      .text(SCREEN.WIDTH + SCREEN.WIDTH / 4, textY, "NPC 1", {
-        fontFamily: FONTS.FAMILY_DISPLAY,
-        fontSize: "28px",
-        color: "#ffffff",
-        stroke: "#000000",
-        strokeThickness: 5,
-      })
+      .text(SCREEN.WIDTH + SCREEN.WIDTH / 4, textY, "NPC 1", textConfig)
       .setOrigin(0.5);
 
     const vsText = this.add
@@ -176,14 +172,14 @@ export class VersusScene extends Phaser.Scene {
     this.tweens.add({
       targets: playerSpeedLines,
       tilePositionX: -500, //move to left
-      duration: 1500,
+      duration: ANIMATIONS.DURATIONS.SLOW,
       repeat: -1, //infinity loop
     });
 
     this.tweens.add({
       targets: npcSpeedLines,
       tilePositionX: 500, //move to right
-      duration: 1500,
+      duration: ANIMATIONS.DURATIONS.SLOW,
       repeat: -1, //loop
     });
 
@@ -191,45 +187,64 @@ export class VersusScene extends Phaser.Scene {
     this.tweens.add({
       targets: bgBorder,
       scaleX: 1,
-      duration: 300,
-      ease: "Power2",
+      duration: ANIMATIONS.DURATIONS.NORMAL,
+      ease: ANIMATIONS.EASING.SMOOTH,
       onComplete: () => {
         //player slide in
         this.tweens.add({
           targets: [playerBanner, playerSpeedLines],
           x: 0,
-          duration: 400,
-          ease: "Power3",
+          duration: ANIMATIONS.DURATIONS.ACTIVATION,
+          ease: ANIMATIONS.EASING.DYNAMIC,
         });
         this.tweens.add({
           targets: [playerText, playerAvatar],
           x: SCREEN.WIDTH / 4,
-          duration: 400,
-          ease: "Power3",
+          duration: ANIMATIONS.DURATIONS.ACTIVATION,
+          ease: ANIMATIONS.EASING.DYNAMIC,
         });
 
         //NPC slide in
         this.tweens.add({
           targets: [npcBanner, npcSpeedLines],
           x: SCREEN.WIDTH - bannerW,
-          duration: 400,
-          ease: "Power3",
+          duration: ANIMATIONS.DURATIONS.ACTIVATION,
+          ease: ANIMATIONS.EASING.DYNAMIC,
         });
         this.tweens.add({
           targets: [npcText, npcAvatar],
           x: SCREEN.WIDTH * 0.75,
-          duration: 400,
-          ease: "Power3",
+          duration: ANIMATIONS.DURATIONS.ACTIVATION,
+          ease: ANIMATIONS.EASING.DYNAMIC,
           onComplete: () => {
             //show speed lines and shock "VS" on center
             playerSpeedLines.setAlpha(1);
             npcSpeedLines.setAlpha(1);
 
+            //impact flash for "VS" text
+            const impactFlash = this.add
+              .rectangle(
+                SCREEN.CENTER_X,
+                SCREEN.CENTER_Y,
+                SCREEN.WIDTH,
+                SCREEN.HEIGHT,
+                0xffffff,
+                1,
+              )
+              .setDepth(9);
+
+            this.tweens.add({
+              targets: impactFlash,
+              alpha: 0,
+              duration: ANIMATIONS.DURATIONS.PREVIEW,
+              onComplete: () => impactFlash.destroy(), //clean of memory
+            });
+
             this.tweens.add({
               targets: vsText,
               scale: 1,
-              duration: 500,
-              ease: "Bounce.easeOut",
+              duration: ANIMATIONS.DURATIONS.SLOW,
+              ease: ANIMATIONS.EASING.SHOCK,
               onComplete: () => {
                 this.callNextScene();
               },
@@ -241,10 +256,11 @@ export class VersusScene extends Phaser.Scene {
   }
 
   private callNextScene(): void {
-    // this.cameras.main.shake(200, 0.015);
+    const { ACCELERATE } = THEME_CONFIG.ANIMATIONS.EASING;
+
     this.time.delayedCall(1600, () => {
-      this.cameras.main.zoomTo(3, 600, "Sine.easeIn");
-      this.cameras.main.fadeOut(800, 255, 255, 255);
+      this.cameras.main.zoomTo(3, 600, ACCELERATE);
+      this.cameras.main.fadeOut(800, 255, 255, 255); //brighten the screen with white
       this.cameras.main.once("camerafadeoutcomplete", () => {
         this.scene.start("BattleScene", {
           playerName: this.playerName,

@@ -100,6 +100,7 @@ export class NameScene extends Phaser.Scene {
     translation: NameTranslations,
     element: Phaser.GameObjects.DOMElement,
   ) {
+    const { ANIMATIONS } = THEME_CONFIG;
     const nameInput = element.getChildByName("nameField") as HTMLInputElement;
     const playerName = nameInput.value.trim();
 
@@ -116,7 +117,13 @@ export class NameScene extends Phaser.Scene {
         element,
       );
     } else {
-      //Battle scene transition
+      //deck preview scene transition
+      this.tweens.add({
+        targets: element,
+        alpha: 0,
+        duration: ANIMATIONS.DURATIONS.SLOW,
+      });
+
       this.cameras.main.fadeOut(500, 0, 0, 0);
       this.cameras.main.once("camerafadeoutcomplete", () => {
         this.scene.start("DeckPreviewScene", {

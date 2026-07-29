@@ -100,6 +100,9 @@ export const THEME_CONFIG = {
       POWER_OUT: "Power2.easeOut",
       EXPO_OUT: "Expo.easeOut",
       SMOOTH: "Power2",
+      DYNAMIC: "Power3",
+      SHOCK: "Bounce.easeOut",
+      ACCELERATE: "Sine.easeIn"
     },
     SHAKES: {
       LIGHT: { duration: 100, intensity: 0.002 },
@@ -143,7 +146,7 @@ export const THEME_CONFIG = {
     },
     UI: {
       PHASE_BANNER_HEIGHT: 80,
-      VERSUS_BANNER_HEIGHT: 250
+      VERSUS_BANNER_HEIGHT: 250,
     },
   },
   //z-index
