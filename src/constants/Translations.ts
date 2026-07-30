@@ -17,6 +17,8 @@ export const TRANSLATIONS = {
       step_3:
         "E aqui está a sua mana/energia disponível para jogar as cartas no campo.",
       step_4:
+        "Este é o seu deck, você possui 20 cartas e a cada turno seu, você compra uma carta. Se acabar suas cartas, você perde o seu duelo",
+      step_5:
         "Aqui está o campo de batalha, ele contém 3 espaços para monstros e 3 espaços para magias/armadilhas",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
@@ -138,6 +140,8 @@ export const TRANSLATIONS = {
       step_3:
         "E aqui está a sua mana/energia disponível para jogar as cartas no campo.",
       step_4:
+        "Este é o seu deck, você possui 20 cartas e a cada turno seu, você compra uma carta. Se acabar suas cartas, você perde o seu duelo",
+      step_5:
         "Aqui está o campo de batalha, ele contém 3 espaços para monstros e 3 espaços para magias/armadilhas",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",

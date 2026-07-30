@@ -234,6 +234,9 @@ export class TutorialUIScene extends Phaser.Scene {
     if (this.currentStepIndex < TUTORIAL_STEPS.length - 1) {
       this.currentStepIndex++;
       this.showCurrentStep();
+      this.scene
+        .get("TutorialBoardScene")
+        .events.emit(TutorialEvent.ADVANCE_DIALOG);
     }
   }
 }

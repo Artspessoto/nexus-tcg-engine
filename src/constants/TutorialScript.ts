@@ -1,7 +1,7 @@
 import type { TutorialStep } from "../types/TutorialType";
 import { LAYOUT_CONFIG } from "./LayoutConfig";
 
-const { UI } = LAYOUT_CONFIG;
+const { UI, DECK } = LAYOUT_CONFIG;
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
   { textKey: "step_1", layoutMode: "NARRATIVE" },
@@ -17,6 +17,15 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       x: UI.MANA.PLAYER.x,
       y: UI.MANA.PLAYER.y,
       id: "MANA_PLAYER",
+    },
+  },
+  {
+    textKey: "step_4",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: DECK.PLAYER.x,
+      y: DECK.PLAYER.y,
+      id: "PLAYER_DECK",
     },
   },
 ];

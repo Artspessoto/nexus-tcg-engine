@@ -5,6 +5,7 @@ import {
   type CameraFocusPayload,
 } from "../events/TutorialEvents";
 import type { GameSide } from "../types/GameTypes";
+import { DeckView } from "../view/DeckView";
 
 export class TutorialBoardScene extends Phaser.Scene {
   private overlay!: Phaser.GameObjects.Rectangle;
@@ -31,6 +32,9 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.createDummyLPBar("PLAYER", GAME_STATE.BASE_LP);
     this.createDummyLPBar("OPPONENT", GAME_STATE.BASE_LP);
 
+    this.createDummyDeck("PLAYER");
+    this.createDummyDeck("OPPONENT");
+
     this.overlay = this.add
       .rectangle(
         SCREEN.CENTER_X,
@@ -56,15 +60,27 @@ export class TutorialBoardScene extends Phaser.Scene {
     });
   }
 
+  private createDummyDeck(side: GameSide): void {
+    const { DECK } = LAYOUT_CONFIG;
+    const position = DECK[side];
+
+    const dummyDeck = new DeckView(this, {
+      x: position.x,
+      y: position.y,
+    });
+    dummyDeck.createDeckVisual(20);
+
+    dummyDeck.container.setDepth(0);
+    this.uiElements.set(`${side}_DECK`, dummyDeck.container);
+  }
+
   private createDummyMana(side: GameSide, amount: number): void {
     const { FONTS } = THEME_CONFIG;
     const position = LAYOUT_CONFIG.UI.MANA[side];
 
     const container = this.add.container(position.x, position.y).setDepth(0);
 
-    const icon = this.add
-      .image(0, 0, "battle_ui", "mana_icon")
-      .setScale(0.4);
+    const icon = this.add.image(0, 0, "battle_ui", "mana_icon").setScale(0.4);
 
     const text = this.add
       .text(0, 0, `${amount}`, FONTS.STYLES.MANA_DISPLAY)

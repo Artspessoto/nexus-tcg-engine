@@ -103,24 +103,47 @@ export const createMockCard = (overrides: Partial<Card> = {}): Card => {
 export const createMockBattleContext = (): IBattleContext => {
   let draggingState = false;
 
+  const mockAdd = {
+    zone: vi
+      .fn()
+      .mockReturnValue({ ...createMockGameObject(), getData: undefined }),
+    graphics: vi.fn().mockReturnValue(createMockGameObject()),
+    existing: vi.fn(),
+    container: vi
+      .fn()
+      .mockReturnValue({
+        ...createMockGameObject(),
+        add: vi.fn(),
+        setY: vi.fn(),
+      }),
+    text: vi.fn().mockReturnValue(createMockGameObject()),
+    image: vi.fn().mockReturnValue(createMockGameObject()),
+    plane: vi.fn().mockImplementation((_x, y, texture) => {
+      const plane =
+        createMockGameObject() as unknown as Phaser.GameObjects.Plane;
+      plane.y = y;
+      plane.texture = texture;
+      return plane;
+    }) as unknown as PlaneFunction,
+  } as unknown as Phaser.GameObjects.GameObjectFactory;
+
+  const mockTweens = {
+    killTweensOf: vi.fn(),
+    add: vi.fn((config) => {
+      if (typeof config.onComplete === "function") config.onComplete();
+      if (typeof config.onStart === "function") config.onStart();
+      if (config.onYoyoAll) config.onYoyoAll();
+      if (config.onYoyo) config.onYoyo();
+      return {
+        stop: () => {},
+        pause: () => {},
+        play: () => {},
+      } as Phaser.Tweens.Tween;
+    }),
+  } as unknown as Phaser.Tweens.TweenManager;
+
   return {
-    add: {
-      zone: vi
-        .fn()
-        .mockReturnValue({ ...createMockGameObject(), getData: undefined }),
-      graphics: vi.fn().mockReturnValue(createMockGameObject()),
-      existing: vi.fn(),
-      container: vi.fn().mockReturnValue({ add: vi.fn(), setY: vi.fn() }),
-      text: vi.fn().mockReturnValue(createMockGameObject()),
-      image: vi.fn().mockReturnValue(createMockGameObject()),
-      plane: vi.fn().mockImplementation((_x, y, texture) => {
-        const plane =
-          createMockGameObject() as unknown as Phaser.GameObjects.Plane;
-        plane.y = y;
-        plane.texture = texture;
-        return plane;
-      }) as unknown as PlaneFunction,
-    } as unknown as Phaser.GameObjects.GameObjectFactory,
+    add: mockAdd,
     gameState: {
       getDeckCount: vi.fn().mockReturnValue(20),
       getMana: vi.fn().mockReturnValue(10),
@@ -197,21 +220,7 @@ export const createMockBattleContext = (): IBattleContext => {
         select_valid_response: "",
       },
     },
-    tweens: {
-      killTweensOf: vi.fn(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      add: vi.fn((config: any) => {
-        if (typeof config.onComplete === "function") config.onComplete();
-        if (typeof config.onStart === "function") config.onStart();
-        if (config.onYoyoAll) config.onYoyoAll();
-        if (config.onYoyo) config.onYoyo();
-        return {
-          stop: () => {},
-          pause: () => {},
-          play: () => {},
-        } as Phaser.Tweens.Tween;
-      }),
-    } as unknown as Phaser.Tweens.TweenManager,
+    tweens: mockTweens,
     cameras: {
       main: {
         shake: vi.fn(),
@@ -255,7 +264,13 @@ export const createMockBattleContext = (): IBattleContext => {
       cancelResponseAction: vi.fn(),
     },
     engine: {
-      scene: { launch: vi.fn() } as unknown as Phaser.Scenes.ScenePlugin,
+      add: mockAdd,
+      tweens: mockTweens,
+      engine: {
+        add: mockAdd,
+        tweens: mockTweens,
+        scene: { launch: vi.fn() } as unknown as Phaser.Scenes.ScenePlugin,
+      },
     } as unknown as Phaser.Scene,
     controls: {
       setupGlobalInputs: vi.fn(),
