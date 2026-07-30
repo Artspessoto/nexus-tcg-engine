@@ -10,6 +10,7 @@ import { DeckPreviewScene } from "./scenes/DeckPreviewScene";
 import { PauseScene } from "./scenes/PauseScene";
 import { VersusScene } from "./scenes/VersusScene";
 import { TutorialBoardScene } from "./scenes/TutorialBoardScene";
+import { TutorialUIScene } from "./scenes/TutorialUIScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -39,6 +40,7 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [
     MenuScene,
     TutorialBoardScene,
+    TutorialUIScene,
     NameScene,
     GuideScene,
     BattleScene,

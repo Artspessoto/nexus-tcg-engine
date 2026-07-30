@@ -7,13 +7,15 @@ import {
 import type { GameSide } from "../types/GameTypes";
 
 export class TutorialBoardScene extends Phaser.Scene {
+  private overlay!: Phaser.GameObjects.Rectangle;
+
   constructor() {
     super("TutorialBoardScene");
   }
 
   create() {
     const { SCREEN, GAME_STATE } = LAYOUT_CONFIG;
-    const { DEPTHS } = THEME_CONFIG;
+    const { DEPTHS, COLORS } = THEME_CONFIG;
 
     const bg = this.add.image(
       SCREEN.CENTER_X,
@@ -28,11 +30,25 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.createDummyLPBar("PLAYER", GAME_STATE.BASE_LP);
     this.createDummyLPBar("OPPONENT", GAME_STATE.BASE_LP);
 
-    this.events.on(
-      TutorialEvent.FOCUS_CAMERA,
-      (payload: CameraFocusPayload) => this.handleCameraFocus(payload),
-      this,
-    );
+    this.overlay = this.add
+      .rectangle(
+        SCREEN.CENTER_X,
+        SCREEN.CENTER_Y,
+        SCREEN.WIDTH,
+        SCREEN.HEIGHT,
+        COLORS.OVERLAY_BLACK,
+        0.7,
+      )
+      .setDepth(DEPTHS.UI_BASE - 1)
+      .setAlpha(0); //behind the dummies and invisible
+
+    this.events.on(TutorialEvent.FOCUS_CAMERA, this.handleCameraFocus, this);
+    this.events.on(TutorialEvent.RESET_CAMERA, this.handleCameraReset, this);
+
+    this.events.once("shutdown", () => {
+      this.events.off(TutorialEvent.FOCUS_CAMERA, this.handleCameraFocus, this);
+      this.events.off(TutorialEvent.RESET_CAMERA, this.handleCameraReset, this);
+    });
   }
 
   private createDummyMana(side: GameSide, amount: number): void {
@@ -52,7 +68,7 @@ export class TutorialBoardScene extends Phaser.Scene {
 
   private createDummyLPBar(side: GameSide, initialHP: number): void {
     const { UI } = LAYOUT_CONFIG;
-    const { COLORS, FONTS } = THEME_CONFIG;
+    const { COLORS, FONTS, DEPTHS } = THEME_CONFIG;
     const { HEIGHT, RADIUS, WIDTH, X, Y_OPPONENT, Y_PLAYER } = UI.LP_BAR;
     const isPlayer = side == "PLAYER";
 
@@ -60,7 +76,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     const xPos = X;
     const playerName = isPlayer ? "PLAYER" : "NPC";
 
-    const container = this.add.container(xPos, yPos);
+    const container = this.add.container(xPos, yPos).setDepth(DEPTHS.UI_BASE);
 
     const bg = this.add.graphics();
     bg.fillStyle(COLORS.OVERLAY_BLACK, 0.5);
@@ -112,7 +128,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     }
   }
 
-  private handleCameraFocus(payload: CameraFocusPayload) {
+  private handleCameraFocus(payload: CameraFocusPayload): void {
     const { ANIMATIONS } = THEME_CONFIG;
     const duration = 1000;
 
@@ -123,5 +139,33 @@ export class TutorialBoardScene extends Phaser.Scene {
       ANIMATIONS.EASING.SMOOTH,
     );
     this.cameras.main.zoomTo(payload.zoom, duration, ANIMATIONS.EASING.SMOOTH);
+
+    //show overlay to focus object
+    this.tweens.add({
+      targets: this.overlay,
+      alpha: 1,
+      duration,
+      ease: ANIMATIONS.EASING.SMOOTH,
+    });
+  }
+
+  private handleCameraReset(duration: number = 1000): void {
+    const { ANIMATIONS } = THEME_CONFIG;
+    const { SCREEN } = LAYOUT_CONFIG;
+
+    this.cameras.main.pan(
+      SCREEN.CENTER_X,
+      SCREEN.CENTER_Y,
+      duration,
+      ANIMATIONS.EASING.SMOOTH,
+    );
+    this.cameras.main.zoomTo(1, duration, ANIMATIONS.EASING.SMOOTH);
+
+    this.tweens.add({
+      targets: this.overlay,
+      alpha: 0,
+      duration,
+      ease: ANIMATIONS.EASING.SMOOTH,
+    });
   }
 }
