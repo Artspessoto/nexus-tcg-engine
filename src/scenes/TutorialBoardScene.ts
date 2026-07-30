@@ -1,15 +1,19 @@
+import { CARD_DATABASE } from "../constants/CardDatabase";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import {
   TutorialEvent,
   type CameraFocusPayload,
 } from "../events/TutorialEvents";
+import { Card } from "../objects/Card";
 import type { GameSide } from "../types/GameTypes";
 import { DeckView } from "../view/DeckView";
 
 export class TutorialBoardScene extends Phaser.Scene {
   private overlay!: Phaser.GameObjects.Rectangle;
   private uiElements: Map<string, Phaser.GameObjects.Container> = new Map();
+  private dummyCards: Map<string, Card> = new Map();
+  private currentFocusedCard: Card | null = null;
 
   constructor() {
     super("TutorialBoardScene");
@@ -34,6 +38,8 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     this.createDummyDeck("PLAYER");
     this.createDummyDeck("OPPONENT");
+
+    this.createDummyHand();
 
     this.overlay = this.add
       .rectangle(
@@ -155,12 +161,83 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.uiElements.set(`LP_BAR_${side}`, container);
   }
 
+  private createDummyHand(): void {
+    const { SCREEN, HAND } = LAYOUT_CONFIG;
+    const { COMPONENTS } = THEME_CONFIG;
+
+    const tutorialCards = [
+      "TOON_KNIGHT",
+      "MAGE_APPRENTICE",
+      "FIRE_BALL",
+      "DARK_TRAP",
+    ];
+
+    const spacing = HAND.SPACING;
+    const centerX = SCREEN.CENTER_X;
+
+    const totalHandWidth = (tutorialCards.length - 1) * spacing; //460
+    const startX = centerX - totalHandWidth / 2; //410
+
+    tutorialCards.forEach((card, index) => {
+      const cardData = CARD_DATABASE[card];
+      const targetX = startX + index * spacing;
+
+      const dummyCard = new Card(
+        this,
+        targetX,
+        HAND.PLAYER.NORMAL_Y,
+        cardData,
+        "PLAYER",
+        "PLAYER",
+      );
+
+      dummyCard.setScale(COMPONENTS.CARD.SCALES.PLAYER_HAND);
+      dummyCard.disableInteractive();
+
+      this.uiElements.set(`HAND_CARD_${card}`, dummyCard);
+      this.dummyCards.set(`HAND_CARD_${card}`, dummyCard);
+    });
+  }
+
+  private handleDummyHover(dummyCard: Card): void {
+    const { COMPONENTS, ANIMATIONS, DEPTHS } = THEME_CONFIG;
+
+    this.tweens.add({
+      targets: dummyCard.visualElements,
+      y: COMPONENTS.CARD.OFFSETS.HOVER_Y,
+      scale: COMPONENTS.CARD.SCALES.ZOOM,
+      duration: ANIMATIONS.DURATIONS.PREVIEW,
+      ease: ANIMATIONS.EASING.BOUNCE,
+    });
+    dummyCard.setDepth(DEPTHS.UI_BASE + 1);
+  }
+
+  private handleDummyOut(dummyCard: Card): void {
+    const { COMPONENTS, ANIMATIONS, DEPTHS } = THEME_CONFIG;
+    const { HAND } = LAYOUT_CONFIG;
+
+    this.tweens.add({
+      targets: dummyCard.visualElements,
+      y: HAND.PLAYER.NORMAL_Y,
+      scale: COMPONENTS.CARD.SCALES.PLAYER_HAND,
+      duration: ANIMATIONS.DURATIONS.PREVIEW,
+      ease: ANIMATIONS.EASING.SMOOTH,
+    });
+
+    dummyCard.setDepth(DEPTHS.UI_BASE);
+  }
+
   private handleCameraFocus(targetData?: {
     id?: string;
     x: number;
     y: number;
   }): void {
     const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
+
+    if (this.currentFocusedCard) {
+      this.handleDummyOut(this.currentFocusedCard);
+      this.currentFocusedCard = null;
+    }
 
     //reset depth of all elements
     this.uiElements.forEach((container) => container.setDepth(0));
@@ -170,6 +247,13 @@ export class TutorialBoardScene extends Phaser.Scene {
       const element = this.uiElements.get(targetData.id);
       if (element) {
         element.setDepth(DEPTHS.UI_BASE);
+      }
+
+      //if element is card, apply hover effect
+      const card = this.dummyCards.get(targetData.id);
+      if (card) {
+        this.handleDummyHover(card);
+        this.currentFocusedCard = card;
       }
     }
 
@@ -184,6 +268,11 @@ export class TutorialBoardScene extends Phaser.Scene {
 
   private handleCameraReset(duration: number = 1000): void {
     const { ANIMATIONS } = THEME_CONFIG;
+
+    if (this.currentFocusedCard) {
+      this.handleDummyOut(this.currentFocusedCard);
+      this.currentFocusedCard = null;
+    }
 
     //return all elements behind overlay
     this.uiElements.forEach((container) => container.setDepth(0));

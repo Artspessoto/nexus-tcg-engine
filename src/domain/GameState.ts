@@ -2,8 +2,9 @@ import type { GamePhase, GameSide } from "../types/GameTypes";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import type { CardData } from "../types/CardTypes";
 import { CARD_DATABASE } from "../constants/CardDatabase";
+import type { IGameState } from "../interfaces/IGameState";
 
-export class GameState {
+export class GameState implements IGameState {
   private _currentPhase: GamePhase = "DRAW";
   private _isDragging: boolean = false;
   private _activePlayer: GameSide = "PLAYER";

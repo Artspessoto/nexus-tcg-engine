@@ -63,6 +63,19 @@ export class TutorialUIScene extends Phaser.Scene {
       fontSize: "20px",
     }).on("pointerdown", () => this.advanceStep());
 
+    //return to menu scene
+    new ToonButton(this, {
+      x: 1130,
+      y: 30,
+      text: this.translationText.skip_btn,
+      width: 100,
+      height: 40,
+      fontSize: "16px",
+      textColor: "#fff",
+      color: 0x1a1a1a,
+      hoverColor: 0x333333,
+    }).on("pointerdown", () => this.executeSkip());
+
     this.tooltipHintText = this.add
       .text(0, 0, "➔", {
         fontFamily: FONTS.FAMILY_DISPLAY,
@@ -80,6 +93,16 @@ export class TutorialUIScene extends Phaser.Scene {
         const step = TUTORIAL_STEPS[this.currentStepIndex];
         if (step.layoutMode === "TOOLTIP") this.advanceStep();
       });
+
+    this.input.keyboard?.on("keydown-ENTER", () => {
+      this.advanceStep();
+    });
+    this.input.keyboard?.on("keydown-SPACE", () => {
+      this.advanceStep();
+    });
+    this.input.keyboard?.on("keydown-ESC", () => {
+      this.executeSkip();
+    });
 
     this.dialogContainer.add([
       this.panelGraphics,
@@ -137,19 +160,29 @@ export class TutorialUIScene extends Phaser.Scene {
 
   private applyNarrativeLayout(): { x: number; y: number } {
     const { SCREEN } = LAYOUT_CONFIG;
-    const boxWidth = SCREEN.WIDTH - 100;
-    const boxHeight = 150;
+
+    //box dimensions
+    const boxWidth = SCREEN.WIDTH - 240;
+    const boxHeight = 130;
 
     //text and visible config
+    this.dialogText.setOrigin(0, 0.5);
     this.dialogText.setStyle({
-      fontSize: "24px",
-      wordWrap: { width: boxWidth - 190 },
-      lineSpacing: 4,
+      fontSize: "20px",
+      wordWrap: { width: boxWidth - 220 },
+      lineSpacing: 8,
+      align: "left",
     });
-    this.dialogText.setPosition(30, 30);
+    this.dialogText.setPosition(40, boxHeight / 2);
+
+    const btnWidth = 100;
+    const btnHeight = 45;
 
     this.nextBtn.setVisible(true);
-    this.nextBtn.setPosition(boxWidth - 170, boxHeight - 65);
+    this.nextBtn.setPosition(
+      boxWidth - btnWidth - 10,
+      boxHeight - btnHeight,
+    );
 
     this.tooltipHintText.setVisible(false);
     this.clickZone.disableInteractive();
@@ -157,8 +190,8 @@ export class TutorialUIScene extends Phaser.Scene {
     this.drawPanelBackground(boxWidth, boxHeight);
 
     return {
-      x: 50,
-      y: SCREEN.HEIGHT - boxHeight - 30,
+      x: (SCREEN.WIDTH - boxWidth) / 2,
+      y: SCREEN.HEIGHT - boxHeight - 40,
     };
   }
 
@@ -170,6 +203,7 @@ export class TutorialUIScene extends Phaser.Scene {
 
     const boxWidth = 320;
 
+    this.dialogText.setOrigin(0, 0);
     this.dialogText.setStyle({
       fontSize: "16px",
       wordWrap: { width: boxWidth - 40 },
@@ -238,5 +272,15 @@ export class TutorialUIScene extends Phaser.Scene {
         .get("TutorialBoardScene")
         .events.emit(TutorialEvent.ADVANCE_DIALOG);
     }
+  }
+
+  private executeSkip(): void {
+    this.cameras.main.fadeOut(500, 0, 0, 0);
+
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+      this.scene.stop("TutorialBoardScene");
+      this.scene.stop("TutorialUIScene");
+      this.scene.start("MenuScene");
+    });
   }
 }

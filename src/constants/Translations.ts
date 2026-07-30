@@ -11,18 +11,30 @@ export const TRANSLATIONS = {
       tutorial: "TUTORIAL",
     },
     tutorial: {
-      step_1: "Bem-vindo ao tutorial! Vamos conhecer os fundamentos do jogo",
+      step_1:
+        "Bem-vindo ao Toon Castle, desafiante! Antes de você encarar os perigos reais do castelo, vamos conhecer os fundamentos básicos do duelo. Preste atenção aos recursos.",
+      step_1b:
+        "Agora se você não é novo por aqui, se já conhece as regras ou quer voltar ao menu, clique no botão 'PULAR' no topo da tela. Agora vamos começar!",
       step_2:
         "Este são seus pontos de vida (LP). Se chegar a zero, você perde o duelo!",
       step_3:
         "E aqui está a sua mana/energia disponível para jogar as cartas no campo.",
       step_4:
-        "Este é o seu deck, você possui 20 cartas e a cada turno seu, você compra uma carta. Se acabar suas cartas, você perde o seu duelo",
+        "Este é o seu deck. Você possui 20 cartas e compra uma a cada turno. Se suas cartas acabarem, você sofre um 'Deck Out' e perde a partida.",
       step_5:
-        "Aqui está o campo de batalha, ele contém 3 espaços para monstros e 3 espaços para magias/armadilhas",
+        "Esta é uma Carta de Monstro. Ela possui pontos de Ataque (ATK) e Defesa (DEF). Você pode invocá-la no campo em Modo de Ataque (face para cima) ou em Modo de Defesa (face para baixo).",
+      step_6:
+        "Este é um Monstro de Efeito. Ele é invocado da mesma forma que um monstro normal, porém possui uma habilidade especial que pode ser ativada no turno seguinte à sua invocação.",
+      step_7:
+        "Esta é uma Carta Mágica. Elas causam efeito direto no oponente ou em cartas do campo! Podem ser de ativação rápida direto da mão ou ativadas no campo durante a sua Fase Principal (mas nunca na Fase de Batalha).",
+      step_8:
+        "Esta é uma Carta Armadilha. Ela não tem ativação rápida. Você precisa baixá-la no campo (com a face para baixo) e só poderá ativá-la no turno seguinte, seja na Fase Principal ou durante a Batalha, para surpreender o oponente!",
+      step_9:
+        "Aqui está o campo de batalha. Ele contém 3 espaços para monstros e 3 espaços logo atrás para magias e armadilhas.",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
+      skip_btn: "PULAR",
     },
     guide: {
       title: "A ASCENSÃO DA TORRE",
@@ -134,18 +146,30 @@ export const TRANSLATIONS = {
       tutorial: "TUTORIAL",
     },
     tutorial: {
-      step_1: "Bem-vindo ao tutorial! Vamos conhecer os fundamentos do jogo",
+      step_1:
+        "Welcome to Toon Castle, challenger! Before you face the real dangers of the castle, let's go over the basics of dueling. Keep an eye on your resources.",
+      step_1b:
+        "If you're not new around here, already know the rules, or just want to head back to the menu, hit the 'SKIP' button at the top of the screen. Now, let's get started!",
       step_2:
-        "Este são seus pontos de vida (LP). Se chegar a zero, você perde o duelo!",
+        "These are your Life Points (LP). If they hit zero, you lose the duel!",
       step_3:
-        "E aqui está a sua mana/energia disponível para jogar as cartas no campo.",
+        "And here's your available mana/energy for playing cards on the field.",
       step_4:
-        "Este é o seu deck, você possui 20 cartas e a cada turno seu, você compra uma carta. Se acabar suas cartas, você perde o seu duelo",
+        "This is your deck. You have 20 cards and draw one every turn. If you run out of cards, you 'Deck Out' and lose the match.",
       step_5:
-        "Aqui está o campo de batalha, ele contém 3 espaços para monstros e 3 espaços para magias/armadilhas",
-      next_btn: "PRÓXIMO",
-      menu_btn: "VOLTAR AO MENU",
-      play_btn: "JOGAR AGORA",
+        "This is a Monster Card. It has Attack (ATK) and Defense (DEF) points. You can summon it to the field in Attack Mode (face-up) or Defense Mode (face-down).",
+      step_6:
+        "This is an Effect Monster. It's summoned just like a normal monster, but it has a special ability you can activate on the turn after it's summoned.",
+      step_7:
+        "This is a Spell Card. They have a direct impact on the opponent or cards on the field! They can be quick-played straight from your hand or activated on the field during your Main Phase (but never in the Battle Phase).",
+      step_8:
+        "This is a Trap Card. It doesn't have a quick activation. You need to set it on the field (face-down) and you can only activate it on the next turn, either in the Main Phase or during Battle, to surprise your opponent!",
+      step_9:
+        "Here is the battlefield. It has 3 slots for monsters, and 3 slots right behind them for spells and traps.",
+      next_btn: "NEXT",
+      menu_btn: "BACK TO MENU",
+      play_btn: "PLAY NOW",
+      skip_btn: "SKIP",
     },
     guide: {
       title: "THE TOWER ASCENSION",

@@ -101,7 +101,9 @@ export class MenuScene extends Phaser.Scene {
     });
 
     startBtn.on("pointerdown", () => {
-      this.scene.start("NameScene", { difficulty: this.selectedDifficulty });
+      this.callNextScene(() => {
+        this.scene.start("NameScene", { difficulty: this.selectedDifficulty });
+      });
     });
 
     const tutorialBtn = new ToonButton(this, {
@@ -117,8 +119,7 @@ export class MenuScene extends Phaser.Scene {
     //   this.scene.launch("GuideScene");
     // });
     tutorialBtn.on("pointerdown", () => {
-      this.cameras.main.fadeOut(500, 0, 0, 0);
-      this.cameras.main.once("camerafadeoutcomplete", () => {
+      this.callNextScene(() => {
         this.scene.launch("TutorialUIScene");
         this.scene.start("TutorialBoardScene");
       });
@@ -190,6 +191,13 @@ export class MenuScene extends Phaser.Scene {
         DIFF_BUTTONS.HEIGHT,
         10,
       );
+    });
+  }
+
+  private callNextScene(fn: () => void) {
+    this.cameras.main.fadeOut(500, 0, 0, 0);
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+      fn();
     });
   }
 }
