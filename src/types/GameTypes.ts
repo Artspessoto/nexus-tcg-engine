@@ -9,6 +9,7 @@ type Languages = keyof typeof TRANSLATIONS;
 export type TranslationStructure = (typeof TRANSLATIONS)[Languages];
 export type Lang = "pt-br" | "en";
 export type NameTranslations = TranslationStructure["name_scene"];
+export type TutorialTranslations = TranslationStructure["tutorial"];
 export type BattleTranslations = TranslationStructure["battle_scene"];
 export type DeckPreviewTranslations = TranslationStructure["deck_preview"];
 

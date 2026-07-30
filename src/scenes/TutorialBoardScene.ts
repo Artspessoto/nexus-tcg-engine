@@ -8,6 +8,7 @@ import type { GameSide } from "../types/GameTypes";
 
 export class TutorialBoardScene extends Phaser.Scene {
   private overlay!: Phaser.GameObjects.Rectangle;
+  private uiElements: Map<string, Phaser.GameObjects.Container> = new Map();
 
   constructor() {
     super("TutorialBoardScene");
@@ -42,8 +43,12 @@ export class TutorialBoardScene extends Phaser.Scene {
       .setDepth(DEPTHS.UI_BASE - 1)
       .setAlpha(0); //behind the dummies and invisible
 
-    this.events.on(TutorialEvent.FOCUS_CAMERA, this.handleCameraFocus, this);
-    this.events.on(TutorialEvent.RESET_CAMERA, this.handleCameraReset, this);
+    this.events.on(TutorialEvent.FOCUS_CAMERA, (data: CameraFocusPayload) => {
+      this.handleCameraFocus(data);
+    });
+    this.events.on(TutorialEvent.RESET_CAMERA, () => {
+      this.handleCameraReset();
+    });
 
     this.events.once("shutdown", () => {
       this.events.off(TutorialEvent.FOCUS_CAMERA, this.handleCameraFocus, this);
@@ -52,23 +57,27 @@ export class TutorialBoardScene extends Phaser.Scene {
   }
 
   private createDummyMana(side: GameSide, amount: number): void {
-    const { DEPTHS, FONTS } = THEME_CONFIG;
+    const { FONTS } = THEME_CONFIG;
     const position = LAYOUT_CONFIG.UI.MANA[side];
 
-    this.add
-      .image(position.x, position.y, "battle_ui", "mana_icon")
-      .setScale(0.4)
-      .setDepth(DEPTHS.UI_BASE);
+    const container = this.add.container(position.x, position.y).setDepth(0);
 
-    this.add
-      .text(position.x, position.y, `${amount}`, FONTS.STYLES.MANA_DISPLAY)
-      .setOrigin(0.5)
-      .setDepth(DEPTHS.UI_BASE + 1);
+    const icon = this.add
+      .image(0, 0, "battle_ui", "mana_icon")
+      .setScale(0.4);
+
+    const text = this.add
+      .text(0, 0, `${amount}`, FONTS.STYLES.MANA_DISPLAY)
+      .setOrigin(0.5);
+
+    container.add([icon, text]);
+
+    this.uiElements.set(`MANA_${side}`, container);
   }
 
   private createDummyLPBar(side: GameSide, initialHP: number): void {
     const { UI } = LAYOUT_CONFIG;
-    const { COLORS, FONTS, DEPTHS } = THEME_CONFIG;
+    const { COLORS, FONTS } = THEME_CONFIG;
     const { HEIGHT, RADIUS, WIDTH, X, Y_OPPONENT, Y_PLAYER } = UI.LP_BAR;
     const isPlayer = side == "PLAYER";
 
@@ -76,7 +85,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     const xPos = X;
     const playerName = isPlayer ? "PLAYER" : "NPC";
 
-    const container = this.add.container(xPos, yPos).setDepth(DEPTHS.UI_BASE);
+    const container = this.add.container(xPos, yPos).setDepth(0);
 
     const bg = this.add.graphics();
     bg.fillStyle(COLORS.OVERLAY_BLACK, 0.5);
@@ -126,40 +135,42 @@ export class TutorialBoardScene extends Phaser.Scene {
     if (isPlayer) {
       container.setY(yPos - 10);
     }
+
+    this.uiElements.set(`LP_BAR_${side}`, container);
   }
 
-  private handleCameraFocus(payload: CameraFocusPayload): void {
-    const { ANIMATIONS } = THEME_CONFIG;
-    const duration = 1000;
+  private handleCameraFocus(targetData?: {
+    id?: string;
+    x: number;
+    y: number;
+  }): void {
+    const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
 
-    this.cameras.main.pan(
-      payload.x,
-      payload.y,
-      duration,
-      ANIMATIONS.EASING.SMOOTH,
-    );
-    this.cameras.main.zoomTo(payload.zoom, duration, ANIMATIONS.EASING.SMOOTH);
+    //reset depth of all elements
+    this.uiElements.forEach((container) => container.setDepth(0));
+
+    //turns element front of the overlay
+    if (targetData && targetData.id) {
+      const element = this.uiElements.get(targetData.id);
+      if (element) {
+        element.setDepth(DEPTHS.UI_BASE);
+      }
+    }
 
     //show overlay to focus object
     this.tweens.add({
       targets: this.overlay,
       alpha: 1,
-      duration,
+      duration: 1000,
       ease: ANIMATIONS.EASING.SMOOTH,
     });
   }
 
   private handleCameraReset(duration: number = 1000): void {
     const { ANIMATIONS } = THEME_CONFIG;
-    const { SCREEN } = LAYOUT_CONFIG;
 
-    this.cameras.main.pan(
-      SCREEN.CENTER_X,
-      SCREEN.CENTER_Y,
-      duration,
-      ANIMATIONS.EASING.SMOOTH,
-    );
-    this.cameras.main.zoomTo(1, duration, ANIMATIONS.EASING.SMOOTH);
+    //return all elements behind overlay
+    this.uiElements.forEach((container) => container.setDepth(0));
 
     this.tweens.add({
       targets: this.overlay,

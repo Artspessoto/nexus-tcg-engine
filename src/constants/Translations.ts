@@ -10,6 +10,18 @@ export const TRANSLATIONS = {
       hard: "Difícil",
       tutorial: "TUTORIAL",
     },
+    tutorial: {
+      step_1: "Bem-vindo ao tutorial! Vamos conhecer os fundamentos do jogo",
+      step_2:
+        "Este são seus pontos de vida (LP). Se chegar a zero, você perde o duelo!",
+      step_3:
+        "E aqui está a sua mana/energia disponível para jogar as cartas no campo.",
+      step_4:
+        "Aqui está o campo de batalha, ele contém 3 espaços para monstros e 3 espaços para magias/armadilhas",
+      next_btn: "PRÓXIMO",
+      menu_btn: "VOLTAR AO MENU",
+      play_btn: "JOGAR AGORA",
+    },
     guide: {
       title: "A ASCENSÃO DA TORRE",
       lore:
@@ -78,7 +90,7 @@ export const TRANSLATIONS = {
         back_to_menu: "VOLTAR AO MENU",
         surrender: "DESISTIR",
         rematch: "TENTAR NOVAMENTE",
-        next_duel: "AVANÇAR"
+        next_duel: "AVANÇAR",
       },
       card_types: {
         MONSTER: "MONSTRO",
@@ -117,7 +129,19 @@ export const TRANSLATIONS = {
       easy: "Easy",
       medium: "Medium",
       hard: "Hard",
-      tutorial: "TUTORIAL"
+      tutorial: "TUTORIAL",
+    },
+    tutorial: {
+      step_1: "Bem-vindo ao tutorial! Vamos conhecer os fundamentos do jogo",
+      step_2:
+        "Este são seus pontos de vida (LP). Se chegar a zero, você perde o duelo!",
+      step_3:
+        "E aqui está a sua mana/energia disponível para jogar as cartas no campo.",
+      step_4:
+        "Aqui está o campo de batalha, ele contém 3 espaços para monstros e 3 espaços para magias/armadilhas",
+      next_btn: "PRÓXIMO",
+      menu_btn: "VOLTAR AO MENU",
+      play_btn: "JOGAR AGORA",
     },
     guide: {
       title: "THE TOWER ASCENSION",
@@ -174,7 +198,7 @@ export const TRANSLATIONS = {
       turn_label: "TURN",
       revive: "REVIVE",
       win_battle: "YOU WIN!",
-      lose_battle: "YOU LOSE!", 
+      lose_battle: "YOU LOSE!",
       battle_buttons: {
         to_battle: "START BATTLE",
         end_turn: "END TURN",
@@ -187,7 +211,7 @@ export const TRANSLATIONS = {
         back_to_menu: "BACK TO MENU",
         surrender: "SURRENDER",
         rematch: "REMATCH",
-        next_duel: "NEXT DUEL"
+        next_duel: "NEXT DUEL",
       },
       card_types: {
         MONSTER: "MONSTER",

@@ -5,7 +5,7 @@ export enum TutorialEvent {
   RESET_CAMERA = "RESET_CAMERA"
 }
 
-export type CameraFocusPayload = { x: number; y: number; zoom: number };
+export type CameraFocusPayload = { x: number; y: number, id: string };
 
 export interface TutorialEventMap {
   [TutorialEvent.FOCUS_CAMERA]: CameraFocusPayload;
