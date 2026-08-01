@@ -22,15 +22,23 @@ export const TRANSLATIONS = {
       step_4:
         "Este é o seu deck. Você possui 20 cartas e compra uma a cada turno. Se suas cartas acabarem, você sofre um 'Deck Out' e perde a partida.",
       step_5:
+        "Você inicia o duelo com 5 cartas do seu deck, mas atenção: o limite da sua mão é 6. As cartas são divididas em 4 classes: monstro, monstro de efeito, magia e armadilha.",
+      step_5a:
         "Esta é uma Carta de Monstro. Ela possui pontos de Ataque (ATK) e Defesa (DEF). Você pode invocá-la no campo em Modo de Ataque (face para cima) ou em Modo de Defesa (face para baixo).",
-      step_6:
+      step_5b:
         "Este é um Monstro de Efeito. Ele é invocado da mesma forma que um monstro normal, porém possui uma habilidade especial que pode ser ativada no turno seguinte à sua invocação.",
-      step_7:
+      step_5c:
         "Esta é uma Carta Mágica. Elas causam efeito direto no oponente ou em cartas do campo! Podem ser de ativação rápida direto da mão ou ativadas no campo durante a sua Fase Principal (mas nunca na Fase de Batalha).",
-      step_8:
+      step_5d:
         "Esta é uma Carta Armadilha. Ela não tem ativação rápida. Você precisa baixá-la no campo (com a face para baixo) e só poderá ativá-la no turno seguinte, seja na Fase Principal ou durante a Batalha, para surpreender o oponente!",
-      step_9:
-        "Aqui está o campo de batalha. Ele contém 3 espaços para monstros e 3 espaços logo atrás para magias e armadilhas.",
+      step_6:
+        "Agora vamos para o campo de batalha, nele tem os espaços para invocar suas cartas e a zona de cemitério.",
+      step_6a:
+        "Aqui é onde fica localizado a zona de monstros, onde tem um limite de 3 invocações (tanto para monstros comuns quanto de efeito)",
+      step_6b:
+        "Aqui é a zona de cartas de feitiço, onde você pode colocar cartas mágicas ou armadilhas, mas atenção: para ativar uma carta mágica da mão, precisa ter um espaço disponível na zona.",
+      step_6c:
+        "A zona de cemitério é onde as cartas usadas e destruídas em combate e/ou por efeito são enviadas.",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
@@ -157,14 +165,16 @@ export const TRANSLATIONS = {
       step_4:
         "This is your deck. You have 20 cards and draw one every turn. If you run out of cards, you 'Deck Out' and lose the match.",
       step_5:
+        "You start the duel with 5 cards, but pay attention: your hand limit is 6. Cards are divided into 4 types: Monster, Effect Monster, Spell, and Trap.",
+      step_5a:
         "This is a Monster Card. It has Attack (ATK) and Defense (DEF) points. You can summon it to the field in Attack Mode (face-up) or Defense Mode (face-down).",
-      step_6:
+      step_5b:
         "This is an Effect Monster. It's summoned just like a normal monster, but it has a special ability you can activate on the turn after it's summoned.",
-      step_7:
+      step_5c:
         "This is a Spell Card. They have a direct impact on the opponent or cards on the field! They can be quick-played straight from your hand or activated on the field during your Main Phase (but never in the Battle Phase).",
-      step_8:
+      step_5d:
         "This is a Trap Card. It doesn't have a quick activation. You need to set it on the field (face-down) and you can only activate it on the next turn, either in the Main Phase or during Battle, to surprise your opponent!",
-      step_9:
+      step_6:
         "Here is the battlefield. It has 3 slots for monsters, and 3 slots right behind them for spells and traps.",
       next_btn: "NEXT",
       menu_btn: "BACK TO MENU",

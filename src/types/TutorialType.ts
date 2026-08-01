@@ -6,3 +6,5 @@ export interface TutorialStep {
   focusTarget?: CameraFocusPayload;
   dialogSize?: { width: number; height: number };
 }
+
+export type LayoutTargetCategory = "DEFAULT" | "FIELD" | "HAND" | "UI"

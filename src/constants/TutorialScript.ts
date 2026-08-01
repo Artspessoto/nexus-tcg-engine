@@ -1,7 +1,7 @@
 import type { TutorialStep } from "../types/TutorialType";
 import { LAYOUT_CONFIG } from "./LayoutConfig";
 
-const { UI, DECK, HAND } = LAYOUT_CONFIG;
+const { UI, DECK, HAND, SCREEN } = LAYOUT_CONFIG;
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
   { textKey: "step_1", layoutMode: "NARRATIVE" },
@@ -33,36 +33,76 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     textKey: "step_5",
     layoutMode: "TOOLTIP",
     focusTarget: {
-      x: 400,
+      x: 200,
+      y: HAND.PLAYER.NORMAL_Y,
+      id: "PLAYER_HAND",
+    },
+  },
+  {
+    textKey: "step_5a",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: 180,
       y: HAND.PLAYER.NORMAL_Y,
       id: "HAND_CARD_TOON_KNIGHT",
     },
   },
   {
-    textKey: "step_6",
+    textKey: "step_5b",
     layoutMode: "TOOLTIP",
     focusTarget: {
-      x: 500,
+      x: 300,
       y: HAND.PLAYER.NORMAL_Y,
       id: "HAND_CARD_MAGE_APPRENTICE",
     },
   },
   {
-    textKey: "step_7",
+    textKey: "step_5c",
     layoutMode: "TOOLTIP",
     focusTarget: {
-      x: 650,
+      x: 420,
       y: HAND.PLAYER.NORMAL_Y,
       id: "HAND_CARD_FIRE_BALL",
     },
   },
   {
-    textKey: "step_8",
+    textKey: "step_5d",
     layoutMode: "TOOLTIP",
     focusTarget: {
-      x: 750,
+      x: 530,
       y: HAND.PLAYER.NORMAL_Y,
       id: "HAND_CARD_DARK_TRAP",
+    },
+  },
+  {
+    textKey: "step_6",
+    layoutMode: "NARRATIVE",
+  },
+  {
+    textKey: "step_6a",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: 70,
+      y: SCREEN.CENTER_Y + 50,
+      id: "FIELD_MONSTER_ZONES",
+    },
+  },
+  {
+    textKey: "step_6b",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: 70,
+      y: SCREEN.CENTER_Y + 200,
+      id: "FIELD_SPELL_ZONES",
+    },
+  },
+    {
+    textKey: "step_6c",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: 150,
+      y: SCREEN.CENTER_Y,
+      id: "FIELD_GRAVEYARD_ZONE",
     },
   },
 ];

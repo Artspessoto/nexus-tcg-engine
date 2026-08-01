@@ -11,7 +11,10 @@ import { DeckView } from "../view/DeckView";
 
 export class TutorialBoardScene extends Phaser.Scene {
   private overlay!: Phaser.GameObjects.Rectangle;
-  private uiElements: Map<string, Phaser.GameObjects.Container> = new Map();
+  private uiElements: Map<
+    string,
+    Phaser.GameObjects.Container | Phaser.GameObjects.Graphics
+  > = new Map();
   private dummyCards: Map<string, Card> = new Map();
   private currentFocusedCard: Card | null = null;
 
@@ -40,6 +43,8 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.createDummyDeck("OPPONENT");
 
     this.createDummyHand();
+
+    this.createDummyField();
 
     this.overlay = this.add
       .rectangle(
@@ -192,11 +197,180 @@ export class TutorialBoardScene extends Phaser.Scene {
       );
 
       dummyCard.setScale(COMPONENTS.CARD.SCALES.PLAYER_HAND);
-      dummyCard.disableInteractive();
+      dummyCard.setInteractive({ draggable: true });
 
       this.uiElements.set(`HAND_CARD_${card}`, dummyCard);
       this.dummyCards.set(`HAND_CARD_${card}`, dummyCard);
     });
+  }
+
+  private hideDummyHand(): void {
+    const { HAND } = LAYOUT_CONFIG;
+    const { ANIMATIONS } = THEME_CONFIG;
+
+    this.dummyCards.forEach((card, key) => {
+      if (key.includes("HAND_CARD")) {
+        this.tweens.killTweensOf(card);
+        this.tweens.add({
+          targets: card,
+          y: HAND.PLAYER.HIDDEN_Y,
+          duration: ANIMATIONS.DURATIONS.SLOW,
+          ease: ANIMATIONS.EASING.SMOOTH,
+        });
+      }
+    });
+  }
+
+  private showDummyHand(): void {
+    const { HAND } = LAYOUT_CONFIG;
+    const { ANIMATIONS } = THEME_CONFIG;
+
+    this.dummyCards.forEach((card, key) => {
+      if (key.includes("HAND_CARD")) {
+        this.tweens.killTweensOf(card);
+        this.tweens.add({
+          targets: card,
+          y: HAND.PLAYER.NORMAL_Y,
+          duration: ANIMATIONS.DURATIONS.SLOW,
+          ease: ANIMATIONS.EASING.BOUNCE,
+        });
+      }
+    });
+  }
+
+  private createDummyField(): void {
+    const monsterZonesContainer = this.dummyMonsterField();
+    const spellZonesContainer = this.dummySpellField();
+    const graveyardGraphics = this.dummyGraveyardField();
+
+    this.uiElements.set("FIELD_MONSTER_ZONES", monsterZonesContainer);
+    this.uiElements.set("FIELD_SPELL_ZONES", spellZonesContainer);
+    this.uiElements.set("FIELD_GRAVEYARD_ZONE", graveyardGraphics);
+  }
+
+  private dummyMonsterField(): Phaser.GameObjects.Container {
+    const { FIELD } = LAYOUT_CONFIG;
+    const { COLORS } = THEME_CONFIG;
+
+    //rectangle config
+    const shrinkW = 10;
+    const shrinkH = 15;
+    const finalWidth = FIELD.ZONE_SIZE.W - shrinkW;
+    const finalHeight = FIELD.ZONE_SIZE.H - shrinkH;
+
+    const visualOffsetX = 0.5;
+    const visualOffsetY = 0;
+
+    const monsterZonesContainer = this.add
+      .container(0, 0)
+      .setDepth(0)
+      .setAlpha(0);
+
+    const monsterGraphics = this.add.graphics();
+    monsterGraphics.lineStyle(
+      4,
+      Phaser.Display.Color.HexStringToColor(COLORS.GOLD_GLOW).color,
+      1,
+    );
+    monsterZonesContainer.add(monsterGraphics);
+
+    FIELD.PLAYER.MONSTER.forEach((pos, i) => {
+      const zone = this.add
+        .zone(pos.x, pos.y, FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
+        .setRectangleDropZone(FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
+        .setData("type", "MONSTER")
+        .setData("index", i);
+
+      monsterZonesContainer.add(zone);
+
+      monsterGraphics.strokeRoundedRect(
+        pos.x - finalWidth / 2 + visualOffsetX,
+        pos.y - finalHeight / 2 + visualOffsetY,
+        finalWidth,
+        finalHeight,
+        6, //radius
+      );
+    });
+
+    return monsterZonesContainer;
+  }
+
+  private dummyGraveyardField(): Phaser.GameObjects.Graphics {
+    const { FIELD } = LAYOUT_CONFIG;
+
+    const graveyardGraphics = this.add.graphics().setAlpha(0);
+    graveyardGraphics.lineStyle(4, 0x00ffff, 1);
+
+    //rectangle config
+    const shrinkW = 10;
+    const shrinkH = 15;
+    const finalWidth = FIELD.ZONE_SIZE.W - shrinkW;
+    const finalHeight = FIELD.ZONE_SIZE.H - shrinkH;
+
+    const visualOffsetX = 0.5;
+    const visualOffsetY = 0;
+
+    const graveyardX = FIELD.PLAYER.GRAVEYARD.x;
+    const graveyardY = FIELD.PLAYER.GRAVEYARD.y;
+
+    graveyardGraphics.strokeRoundedRect(
+      graveyardX - finalWidth / 2 + visualOffsetX,
+      graveyardY - finalHeight / 2 + visualOffsetY,
+      finalWidth,
+      finalHeight,
+      6,
+    );
+
+    return graveyardGraphics;
+  }
+
+  private dummySpellField(): Phaser.GameObjects.Container {
+    const { FIELD } = LAYOUT_CONFIG;
+
+    const finalWidth = FIELD.ZONE_SIZE.W - 10;
+    const finalHeight = FIELD.ZONE_SIZE.H - 15;
+
+    const spellZonesContainer = this.add
+      .container(0, 0)
+      .setDepth(0)
+      .setAlpha(0);
+
+    const spellGraphics = this.add.graphics();
+    spellGraphics.lineStyle(
+      4,
+      Phaser.Display.Color.HexStringToColor("#55aaff").color,
+      1,
+    );
+    spellZonesContainer.add(spellGraphics);
+
+    //spell slot config (w x h)
+    const spellShrinkW = 12;
+    const spellShrinkH = 15;
+    const spellFinalWidth = FIELD.ZONE_SIZE.W - spellShrinkW;
+    const spellFinalHeight = FIELD.ZONE_SIZE.H - spellShrinkH;
+
+    const spellOffsetX = 1.5;
+    const spellOffsetY = 5;
+
+    FIELD.PLAYER.SPELL.forEach((pos, i) => {
+      const zone = this.add
+        .zone(pos.x, pos.y, FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
+        .setRectangleDropZone(FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
+        .setData("type", "SPELL")
+        .setData("index", i);
+
+      spellZonesContainer.add(zone);
+
+      spellGraphics.strokeRoundedRect(
+        pos.x - finalWidth / 2 + spellOffsetX,
+        pos.y - finalHeight / 2 + spellOffsetY,
+        spellFinalWidth,
+        spellFinalHeight,
+        6,
+      );
+    });
+
+    return spellZonesContainer;
   }
 
   private handleDummyHover(dummyCard: Card): void {
@@ -213,13 +387,12 @@ export class TutorialBoardScene extends Phaser.Scene {
   }
 
   private handleDummyOut(dummyCard: Card): void {
-    const { COMPONENTS, ANIMATIONS, DEPTHS } = THEME_CONFIG;
-    const { HAND } = LAYOUT_CONFIG;
+    const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
 
     this.tweens.add({
       targets: dummyCard.visualElements,
-      y: HAND.PLAYER.NORMAL_Y,
-      scale: COMPONENTS.CARD.SCALES.PLAYER_HAND,
+      y: 0,
+      scale: 1,
       duration: ANIMATIONS.DURATIONS.PREVIEW,
       ease: ANIMATIONS.EASING.SMOOTH,
     });
@@ -240,20 +413,50 @@ export class TutorialBoardScene extends Phaser.Scene {
     }
 
     //reset depth of all elements
-    this.uiElements.forEach((container) => container.setDepth(0));
+    this.uiElements.forEach((container, key) => {
+      container.setDepth(0);
+
+      if (key.includes("FIELD") && key !== targetData?.id) {
+        this.tweens.killTweensOf(container);
+        this.tweens.add({
+          targets: container,
+          alpha: 0,
+          duration: ANIMATIONS.DURATIONS.SLOW,
+          ease: ANIMATIONS.EASING.SMOOTH,
+        });
+      }
+    });
 
     //turns element front of the overlay
     if (targetData && targetData.id) {
-      const element = this.uiElements.get(targetData.id);
-      if (element) {
-        element.setDepth(DEPTHS.UI_BASE);
-      }
+      if (targetData.id == "PLAYER_HAND") {
+        this.dummyCards.forEach((card) => {
+          card.setDepth(DEPTHS.UI_BASE);
+        });
+      } else {
+        const element = this.uiElements.get(targetData.id);
+        if (element) {
+          element.setDepth(DEPTHS.UI_BASE);
 
-      //if element is card, apply hover effect
-      const card = this.dummyCards.get(targetData.id);
-      if (card) {
-        this.handleDummyHover(card);
-        this.currentFocusedCard = card;
+          if (targetData.id.includes("FIELD")) {
+            this.tweens.killTweensOf(element);
+            this.hideDummyHand();
+
+            this.tweens.add({
+              targets: element,
+              alpha: 1,
+              duration: ANIMATIONS.DURATIONS.SLOW,
+              ease: ANIMATIONS.EASING.SMOOTH,
+            });
+          }
+        }
+
+        //if element is card, apply hover effect
+        const card = this.dummyCards.get(targetData.id);
+        if (card) {
+          this.handleDummyHover(card);
+          this.currentFocusedCard = card;
+        }
       }
     }
 
@@ -275,7 +478,21 @@ export class TutorialBoardScene extends Phaser.Scene {
     }
 
     //return all elements behind overlay
-    this.uiElements.forEach((container) => container.setDepth(0));
+    this.uiElements.forEach((container, key) => {
+      container.setDepth(0);
+
+      if (key.includes("FIELD")) {
+        this.tweens.killTweensOf(container);
+        this.showDummyHand();
+
+        this.tweens.add({
+          targets: container,
+          alpha: 0,
+          duration: ANIMATIONS.DURATIONS.SLOW,
+          ease: ANIMATIONS.EASING.SMOOTH,
+        });
+      }
+    });
 
     this.tweens.add({
       targets: this.overlay,

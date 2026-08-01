@@ -9,6 +9,7 @@ import {
 import { LanguageManager } from "../managers/language/LanguageManager";
 import { ToonButton } from "../objects/ToonButton";
 import type { TutorialTranslations } from "../types/GameTypes";
+import type { LayoutTargetCategory } from "../types/TutorialType";
 
 export class TutorialUIScene extends Phaser.Scene {
   private currentStepIndex: number = 0;
@@ -22,8 +23,65 @@ export class TutorialUIScene extends Phaser.Scene {
   private tooltipHintText!: Phaser.GameObjects.Text;
   private clickZone!: Phaser.GameObjects.Zone;
 
+  private layoutHandlers: Record<
+    LayoutTargetCategory,
+    (
+      target: CameraFocusPayload | undefined,
+      boxWidth: number,
+      boxHeight: number,
+    ) => { x: number; y: number }
+  >;
+
   constructor() {
     super("TutorialUIScene");
+
+    const { SCREEN } = LAYOUT_CONFIG;
+
+    this.layoutHandlers = {
+      DEFAULT: (_target, boxWidth, boxHeight) => ({
+        x: SCREEN.CENTER_X - boxWidth / 2,
+        y: SCREEN.CENTER_Y - boxHeight / 2,
+      }),
+      FIELD: (target, boxWidth, boxHeight) => {
+        if (!target)
+          return this.layoutHandlers.DEFAULT(target, boxWidth, boxHeight);
+
+        //vertically center with the target, snapping to screen edges
+        const desiredY = target.y - boxHeight / 2;
+        return {
+          x: target.x + 20,
+          y: Phaser.Math.Clamp(desiredY, 30, SCREEN.HEIGHT - boxHeight - 30),
+        };
+      },
+      HAND: (target, boxWidth, boxHeight) => {
+        if (!target)
+          return this.layoutHandlers.DEFAULT(target, boxWidth, boxHeight);
+
+        const desiredX = target.x - boxWidth / 2;
+        const desiredY = target.y - boxHeight / 2;
+
+        return {
+          x: Phaser.Math.Clamp(desiredX, 20, SCREEN.WIDTH - boxWidth - 20),
+          y: Phaser.Math.Clamp(desiredY, 30, SCREEN.HEIGHT - boxHeight - 30),
+        };
+      },
+      UI: (target, boxWidth, boxHeight) => {
+        if (!target)
+          return this.layoutHandlers.DEFAULT(target, boxWidth, boxHeight);
+
+        //pos on the side opposite the focus
+        const targetX =
+          target.x < SCREEN.CENTER_X
+            ? target.x + 200
+            : target.x - boxWidth - 80;
+
+        const desiredY = target.y - boxHeight / 2;
+        return {
+          x: targetX,
+          y: Phaser.Math.Clamp(desiredY, 30, SCREEN.HEIGHT - boxHeight - 30),
+        };
+      },
+    };
   }
 
   init() {
@@ -158,6 +216,13 @@ export class TutorialUIScene extends Phaser.Scene {
     });
   }
 
+  private getLayoutCategory(id?: string): LayoutTargetCategory {
+    if (!id) return "DEFAULT";
+    if (id.includes("FIELD")) return "FIELD";
+    if (id.includes("HAND")) return "HAND";
+    return "UI"; //for lp, mana, deck
+  }
+
   private applyNarrativeLayout(): { x: number; y: number } {
     const { SCREEN } = LAYOUT_CONFIG;
 
@@ -179,10 +244,7 @@ export class TutorialUIScene extends Phaser.Scene {
     const btnHeight = 45;
 
     this.nextBtn.setVisible(true);
-    this.nextBtn.setPosition(
-      boxWidth - btnWidth - 10,
-      boxHeight - btnHeight,
-    );
+    this.nextBtn.setPosition(boxWidth - btnWidth - 10, boxHeight - btnHeight);
 
     this.tooltipHintText.setVisible(false);
     this.clickZone.disableInteractive();
@@ -199,8 +261,6 @@ export class TutorialUIScene extends Phaser.Scene {
     x: number;
     y: number;
   } {
-    const { SCREEN } = LAYOUT_CONFIG;
-
     const boxWidth = 320;
 
     this.dialogText.setOrigin(0, 0);
@@ -225,26 +285,14 @@ export class TutorialUIScene extends Phaser.Scene {
 
     this.drawPanelBackground(boxWidth, boxHeight);
 
-    //position logic by target
-    let targetX: number;
-    let targetY: number;
+    const category = this.getLayoutCategory(focusTarget?.id);
+    const { x, y } = this.layoutHandlers[category](
+      focusTarget,
+      boxWidth,
+      boxHeight,
+    );
 
-    if (!focusTarget) {
-      targetX = SCREEN.CENTER_X - boxWidth / 2;
-      targetY = SCREEN.CENTER_Y - boxHeight / 2;
-    } else {
-      //pos on the side opposite the focus
-      if (focusTarget.x < SCREEN.CENTER_X) {
-        targetX = focusTarget.x + 200;
-      } else {
-        targetX = focusTarget.x - boxWidth - 80;
-      }
-      //vertically center with the target, snapping to screen edges
-      const desiredY = focusTarget.y - boxHeight / 2;
-      targetY = Phaser.Math.Clamp(desiredY, 30, SCREEN.HEIGHT - boxHeight - 30);
-    }
-
-    return { x: targetX, y: targetY };
+    return { x, y };
   }
 
   private drawPanelBackground(width: number, height: number): void {
