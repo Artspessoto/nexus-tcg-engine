@@ -1,10 +1,31 @@
 import type { CameraFocusPayload } from "../events/TutorialEvents";
+import type { GameSide } from "./GameTypes";
 
 export interface TutorialStep {
   textKey: string;
-  layoutMode: "NARRATIVE" | "TOOLTIP"
+  layoutMode: "NARRATIVE" | "TOOLTIP";
   focusTarget?: CameraFocusPayload;
   dialogSize?: { width: number; height: number };
 }
 
-export type LayoutTargetCategory = "DEFAULT" | "FIELD" | "HAND" | "UI"
+export type LayoutTargetCategory = "DEFAULT" | "FIELD" | "HAND" | "UI";
+
+export type TutorialElementId =
+  | "FIELD_MONSTER_ZONES"
+  | "FIELD_SPELL_ZONES"
+  | "FIELD_GRAVEYARD_ZONE"
+  | `MANA_${GameSide}`
+  | `LP_BAR_${GameSide}`
+  | `HAND_CARD_${string}`
+  | `${GameSide}_DECK`
+  | "PLAYER_HAND";
+
+export interface ZoneConfig {
+  type: "MONSTER" | "SPELL" | "GRAVEYARD";
+  positions: { x: number; y: number }[];
+  color: string | number;
+  shrinkW: number;
+  shrinkH: number;
+  offsetX?: number; 
+  offsetY?: number;
+}

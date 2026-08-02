@@ -7,12 +7,13 @@ import {
 } from "../events/TutorialEvents";
 import { Card } from "../objects/Card";
 import type { GameSide } from "../types/GameTypes";
+import type { TutorialElementId, ZoneConfig } from "../types/TutorialType";
 import { DeckView } from "../view/DeckView";
 
 export class TutorialBoardScene extends Phaser.Scene {
   private overlay!: Phaser.GameObjects.Rectangle;
   private uiElements: Map<
-    string,
+    TutorialElementId,
     Phaser.GameObjects.Container | Phaser.GameObjects.Graphics
   > = new Map();
   private dummyCards: Map<string, Card> = new Map();
@@ -239,138 +240,92 @@ export class TutorialBoardScene extends Phaser.Scene {
   }
 
   private createDummyField(): void {
-    const monsterZonesContainer = this.dummyMonsterField();
-    const spellZonesContainer = this.dummySpellField();
-    const graveyardGraphics = this.dummyGraveyardField();
-
-    this.uiElements.set("FIELD_MONSTER_ZONES", monsterZonesContainer);
-    this.uiElements.set("FIELD_SPELL_ZONES", spellZonesContainer);
-    this.uiElements.set("FIELD_GRAVEYARD_ZONE", graveyardGraphics);
-  }
-
-  private dummyMonsterField(): Phaser.GameObjects.Container {
     const { FIELD } = LAYOUT_CONFIG;
     const { COLORS } = THEME_CONFIG;
 
-    //rectangle config
-    const shrinkW = 10;
-    const shrinkH = 15;
+    const monsterZonesContainer = this.createZoneGroup({
+      type: "MONSTER",
+      positions: FIELD.PLAYER.MONSTER,
+      color: COLORS.GOLD_GLOW,
+      shrinkW: 10,
+      shrinkH: 15,
+      offsetX: 0.5,
+      offsetY: 0,
+    });
+
+    const spellZonesContainer = this.createZoneGroup({
+      type: "SPELL",
+      positions: FIELD.PLAYER.SPELL,
+      color: "#55aaff",
+      shrinkW: 12,
+      shrinkH: 15,
+      offsetX: 1.5,
+      offsetY: 5,
+    });
+
+    const graveyardContainer = this.createZoneGroup({
+      type: "GRAVEYARD",
+      positions: [FIELD.PLAYER.GRAVEYARD],
+      color: 0x00ffff,
+      shrinkW: 10,
+      shrinkH: 15,
+      offsetX: 0.5,
+      offsetY: 0,
+    });
+
+    this.uiElements.set("FIELD_MONSTER_ZONES", monsterZonesContainer);
+    this.uiElements.set("FIELD_SPELL_ZONES", spellZonesContainer);
+    this.uiElements.set("FIELD_GRAVEYARD_ZONE", graveyardContainer);
+  }
+
+  private createZoneGroup(config: ZoneConfig): Phaser.GameObjects.Container {
+    const { FIELD } = LAYOUT_CONFIG;
+    const {
+      type,
+      positions,
+      color,
+      shrinkW,
+      shrinkH,
+      offsetX = 0,
+      offsetY = 0,
+    } = config;
+
+    const container = this.add.container(0, 0).setDepth(0).setAlpha(0);
+    const graphics = this.add.graphics();
+
+    const lineColor =
+      typeof color === "string"
+        ? Phaser.Display.Color.HexStringToColor(color).color
+        : color;
+
+    graphics.lineStyle(4, lineColor, 1);
+    container.add(graphics);
+
     const finalWidth = FIELD.ZONE_SIZE.W - shrinkW;
     const finalHeight = FIELD.ZONE_SIZE.H - shrinkH;
 
-    const visualOffsetX = 0.5;
-    const visualOffsetY = 0;
+    positions.forEach((pos, index) => {
+      //graveyard dont need zone
+      if (type !== "GRAVEYARD") {
+        const zone = this.add
+          .zone(pos.x, pos.y, FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
+          .setRectangleDropZone(FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
+          .setData("type", type)
+          .setData("index", index);
 
-    const monsterZonesContainer = this.add
-      .container(0, 0)
-      .setDepth(0)
-      .setAlpha(0);
+        container.add(zone);
+      }
 
-    const monsterGraphics = this.add.graphics();
-    monsterGraphics.lineStyle(
-      4,
-      Phaser.Display.Color.HexStringToColor(COLORS.GOLD_GLOW).color,
-      1,
-    );
-    monsterZonesContainer.add(monsterGraphics);
-
-    FIELD.PLAYER.MONSTER.forEach((pos, i) => {
-      const zone = this.add
-        .zone(pos.x, pos.y, FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
-        .setRectangleDropZone(FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
-        .setData("type", "MONSTER")
-        .setData("index", i);
-
-      monsterZonesContainer.add(zone);
-
-      monsterGraphics.strokeRoundedRect(
-        pos.x - finalWidth / 2 + visualOffsetX,
-        pos.y - finalHeight / 2 + visualOffsetY,
+      graphics.strokeRoundedRect(
+        pos.x - finalWidth / 2 + offsetX,
+        pos.y - finalHeight / 2 + offsetY,
         finalWidth,
         finalHeight,
-        6, //radius
+        6, // radius
       );
     });
 
-    return monsterZonesContainer;
-  }
-
-  private dummyGraveyardField(): Phaser.GameObjects.Graphics {
-    const { FIELD } = LAYOUT_CONFIG;
-
-    const graveyardGraphics = this.add.graphics().setAlpha(0);
-    graveyardGraphics.lineStyle(4, 0x00ffff, 1);
-
-    //rectangle config
-    const shrinkW = 10;
-    const shrinkH = 15;
-    const finalWidth = FIELD.ZONE_SIZE.W - shrinkW;
-    const finalHeight = FIELD.ZONE_SIZE.H - shrinkH;
-
-    const visualOffsetX = 0.5;
-    const visualOffsetY = 0;
-
-    const graveyardX = FIELD.PLAYER.GRAVEYARD.x;
-    const graveyardY = FIELD.PLAYER.GRAVEYARD.y;
-
-    graveyardGraphics.strokeRoundedRect(
-      graveyardX - finalWidth / 2 + visualOffsetX,
-      graveyardY - finalHeight / 2 + visualOffsetY,
-      finalWidth,
-      finalHeight,
-      6,
-    );
-
-    return graveyardGraphics;
-  }
-
-  private dummySpellField(): Phaser.GameObjects.Container {
-    const { FIELD } = LAYOUT_CONFIG;
-
-    const finalWidth = FIELD.ZONE_SIZE.W - 10;
-    const finalHeight = FIELD.ZONE_SIZE.H - 15;
-
-    const spellZonesContainer = this.add
-      .container(0, 0)
-      .setDepth(0)
-      .setAlpha(0);
-
-    const spellGraphics = this.add.graphics();
-    spellGraphics.lineStyle(
-      4,
-      Phaser.Display.Color.HexStringToColor("#55aaff").color,
-      1,
-    );
-    spellZonesContainer.add(spellGraphics);
-
-    //spell slot config (w x h)
-    const spellShrinkW = 12;
-    const spellShrinkH = 15;
-    const spellFinalWidth = FIELD.ZONE_SIZE.W - spellShrinkW;
-    const spellFinalHeight = FIELD.ZONE_SIZE.H - spellShrinkH;
-
-    const spellOffsetX = 1.5;
-    const spellOffsetY = 5;
-
-    FIELD.PLAYER.SPELL.forEach((pos, i) => {
-      const zone = this.add
-        .zone(pos.x, pos.y, FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
-        .setRectangleDropZone(FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
-        .setData("type", "SPELL")
-        .setData("index", i);
-
-      spellZonesContainer.add(zone);
-
-      spellGraphics.strokeRoundedRect(
-        pos.x - finalWidth / 2 + spellOffsetX,
-        pos.y - finalHeight / 2 + spellOffsetY,
-        spellFinalWidth,
-        spellFinalHeight,
-        6,
-      );
-    });
-
-    return spellZonesContainer;
+    return container;
   }
 
   private handleDummyHover(dummyCard: Card): void {
@@ -401,7 +356,7 @@ export class TutorialBoardScene extends Phaser.Scene {
   }
 
   private handleCameraFocus(targetData?: {
-    id?: string;
+    id?: TutorialElementId;
     x: number;
     y: number;
   }): void {
