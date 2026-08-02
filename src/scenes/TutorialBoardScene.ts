@@ -1,16 +1,21 @@
 import { CARD_DATABASE } from "../constants/CardDatabase";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { TRANSLATIONS } from "../constants/Translations";
 import {
   TutorialEvent,
+  type AdvanceDialogPayload,
   type CameraFocusPayload,
 } from "../events/TutorialEvents";
+import { LanguageManager } from "../managers/language/LanguageManager";
 import { Card } from "../objects/Card";
-import type { GameSide } from "../types/GameTypes";
+import { ToonButton } from "../objects/ToonButton";
+import type { GameSide, TranslationStructure } from "../types/GameTypes";
 import type { TutorialElementId, ZoneConfig } from "../types/TutorialType";
 import { DeckView } from "../view/DeckView";
 
 export class TutorialBoardScene extends Phaser.Scene {
+  private translationText!: TranslationStructure;
   private overlay!: Phaser.GameObjects.Rectangle;
   private uiElements: Map<
     TutorialElementId,
@@ -18,6 +23,11 @@ export class TutorialBoardScene extends Phaser.Scene {
   > = new Map();
   private dummyCards: Map<string, Card> = new Map();
   private currentFocusedCard: Card | null = null;
+  private updateHandlers: Partial<
+    Record<TutorialElementId, (textKey: string) => void>
+  > = {
+    PHASE_BUTTON: (textKey) => this.handlePhaseTextBtn(textKey),
+  };
 
   constructor() {
     super("TutorialBoardScene");
@@ -34,6 +44,9 @@ export class TutorialBoardScene extends Phaser.Scene {
     );
     bg.setDisplaySize(SCREEN.WIDTH, SCREEN.HEIGHT).setDepth(DEPTHS.BACKGROUND);
 
+    const lang = LanguageManager.getInstance().currentLang;
+    this.translationText = TRANSLATIONS[lang];
+
     this.createDummyMana("PLAYER", GAME_STATE.BASE_MANA);
     this.createDummyMana("OPPONENT", GAME_STATE.BASE_MANA);
 
@@ -46,6 +59,8 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.createDummyHand();
 
     this.createDummyField();
+
+    this.createDummyPhaseButton();
 
     this.overlay = this.add
       .rectangle(
@@ -70,6 +85,19 @@ export class TutorialBoardScene extends Phaser.Scene {
       this.events.off(TutorialEvent.FOCUS_CAMERA, this.handleCameraFocus, this);
       this.events.off(TutorialEvent.RESET_CAMERA, this.handleCameraReset, this);
     });
+
+    this.events.on(
+      TutorialEvent.ADVANCE_DIALOG,
+      (data: AdvanceDialogPayload) => {
+        if (!data.targetId) return;
+
+        const handler = this.updateHandlers[data.targetId];
+
+        if (handler) {
+          handler(data.textKey);
+        }
+      },
+    );
   }
 
   private createDummyDeck(side: GameSide): void {
@@ -353,6 +381,67 @@ export class TutorialBoardScene extends Phaser.Scene {
     });
 
     dummyCard.setDepth(DEPTHS.UI_BASE);
+  }
+
+  private createDummyPhaseButton(): void {
+    const { BATTLE } = LAYOUT_CONFIG;
+    const { COMPONENTS } = THEME_CONFIG;
+
+    const dummyPhaseBtn = new ToonButton(this, {
+      x: BATTLE.PHASE_BUTTON.x,
+      y: BATTLE.PHASE_BUTTON.y,
+      text: "DRAW",
+      fontSize: "18px",
+      textColor: "#fff",
+      color: COMPONENTS.BUTTONS.PHASE.color,
+      hoverColor: COMPONENTS.BUTTONS.PHASE.color,
+      width: BATTLE.PHASE_BUTTON.width,
+      height: BATTLE.PHASE_BUTTON.height,
+    });
+
+    dummyPhaseBtn.updatePhase(
+      `${this.translationText.battle_scene.turn_label} 1`,
+      "DRAW",
+      COMPONENTS.BUTTONS.PHASE.color,
+    );
+
+    dummyPhaseBtn.disableInteractive();
+
+    this.uiElements.set("PHASE_BUTTON", dummyPhaseBtn);
+  }
+
+  private handlePhaseTextBtn(textKey: string): void {
+    const dummyPhaseBtn = this.uiElements.get("PHASE_BUTTON") as ToonButton;
+    if (!dummyPhaseBtn) return;
+
+    const { COMPONENTS } = THEME_CONFIG;
+    const turnLabel = `${this.translationText.battle_scene.turn_label} 1`;
+
+    switch (textKey) {
+      case "step_7":
+      case "step_7a":
+        dummyPhaseBtn.updatePhase(
+          turnLabel,
+          "DRAW",
+          COMPONENTS.BUTTONS.PHASE.color,
+        );
+        break;
+      case "step_7b":
+      case "step_7c":
+        dummyPhaseBtn.updatePhase(
+          turnLabel,
+          "MAIN",
+          COMPONENTS.BUTTONS.PHASE.color,
+        );
+        break;
+      case "step_7d":
+        dummyPhaseBtn.updatePhase(
+          turnLabel,
+          "BATTLE",
+          COMPONENTS.BUTTONS.PHASE.color,
+        );
+        break;
+    }
   }
 
   private handleCameraFocus(targetData?: {

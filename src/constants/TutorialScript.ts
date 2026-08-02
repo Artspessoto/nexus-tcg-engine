@@ -1,7 +1,7 @@
 import type { TutorialStep } from "../types/TutorialType";
 import { LAYOUT_CONFIG } from "./LayoutConfig";
 
-const { UI, DECK, HAND, SCREEN } = LAYOUT_CONFIG;
+const { UI, DECK, HAND, SCREEN, BATTLE } = LAYOUT_CONFIG;
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
   { textKey: "step_1", layoutMode: "NARRATIVE" },
@@ -96,13 +96,58 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       id: "FIELD_SPELL_ZONES",
     },
   },
-    {
+  {
     textKey: "step_6c",
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 150,
       y: SCREEN.CENTER_Y,
       id: "FIELD_GRAVEYARD_ZONE",
+    },
+  },
+  {
+    textKey: "step_7",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: BATTLE.PHASE_BUTTON.x,
+      y: BATTLE.PHASE_BUTTON.y,
+      id: "PHASE_BUTTON",
+    },
+  },
+  {
+    textKey: "step_7a",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: BATTLE.PHASE_BUTTON.x,
+      y: BATTLE.PHASE_BUTTON.y,
+      id: "PHASE_BUTTON",
+    },
+  },
+  {
+    textKey: "step_7b",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: BATTLE.PHASE_BUTTON.x,
+      y: BATTLE.PHASE_BUTTON.y,
+      id: "PHASE_BUTTON",
+    },
+  },
+  {
+    textKey: "step_7c",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: BATTLE.PHASE_BUTTON.x,
+      y: BATTLE.PHASE_BUTTON.y,
+      id: "PHASE_BUTTON",
+    },
+  },
+  {
+    textKey: "step_7d",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: BATTLE.PHASE_BUTTON.x,
+      y: BATTLE.PHASE_BUTTON.y,
+      id: "PHASE_BUTTON",
     },
   },
 ];

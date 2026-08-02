@@ -8,7 +8,7 @@ export interface TutorialStep {
   dialogSize?: { width: number; height: number };
 }
 
-export type LayoutTargetCategory = "DEFAULT" | "FIELD" | "HAND" | "UI";
+export type LayoutTargetCategory = "DEFAULT" | "FIELD" | "HAND" | "BUTTON" | "UI";
 
 export type TutorialElementId =
   | "FIELD_MONSTER_ZONES"
@@ -18,7 +18,8 @@ export type TutorialElementId =
   | `LP_BAR_${GameSide}`
   | `HAND_CARD_${string}`
   | `${GameSide}_DECK`
-  | "PLAYER_HAND";
+  | "PLAYER_HAND"
+  | "PHASE_BUTTON";
 
 export interface ZoneConfig {
   type: "MONSTER" | "SPELL" | "GRAVEYARD";
@@ -26,6 +27,6 @@ export interface ZoneConfig {
   color: string | number;
   shrinkW: number;
   shrinkH: number;
-  offsetX?: number; 
+  offsetX?: number;
   offsetY?: number;
 }

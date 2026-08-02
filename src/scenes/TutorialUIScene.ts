@@ -35,7 +35,7 @@ export class TutorialUIScene extends Phaser.Scene {
   constructor() {
     super("TutorialUIScene");
 
-    const { SCREEN } = LAYOUT_CONFIG;
+    const { SCREEN, BATTLE } = LAYOUT_CONFIG;
 
     this.layoutHandlers = {
       DEFAULT: (_target, boxWidth, boxHeight) => ({
@@ -62,6 +62,25 @@ export class TutorialUIScene extends Phaser.Scene {
 
         return {
           x: Phaser.Math.Clamp(desiredX, 20, SCREEN.WIDTH - boxWidth - 20),
+          y: Phaser.Math.Clamp(desiredY, 30, SCREEN.HEIGHT - boxHeight - 30),
+        };
+      },
+      BUTTON: (target, boxWidth, boxHeight) => {
+        if (!target)
+          return this.layoutHandlers.DEFAULT(target, boxWidth, boxHeight);
+
+        const btnWidth = BATTLE.PHASE_BUTTON.width;
+        const btnHalfWidth = btnWidth / 2;
+
+        const targetX =
+          target.x > SCREEN.CENTER_X
+            ? target.x - btnHalfWidth - boxWidth - 20
+            : target.x + btnHalfWidth + 20;
+
+        const desiredY = target.y - boxHeight / 2;
+
+        return {
+          x: targetX,
           y: Phaser.Math.Clamp(desiredY, 30, SCREEN.HEIGHT - boxHeight - 30),
         };
       },
@@ -123,11 +142,11 @@ export class TutorialUIScene extends Phaser.Scene {
 
     //return to menu scene
     new ToonButton(this, {
-      x: 1130,
-      y: 30,
+      x: 1110,
+      y: 40,
       text: this.translationText.skip_btn,
-      width: 100,
-      height: 40,
+      width: 150,
+      height: 45,
       fontSize: "16px",
       textColor: "#fff",
       color: 0x1a1a1a,
@@ -220,6 +239,7 @@ export class TutorialUIScene extends Phaser.Scene {
     if (!id) return "DEFAULT";
     if (id.includes("FIELD")) return "FIELD";
     if (id.includes("HAND")) return "HAND";
+    if (id.includes("BUTTON")) return "BUTTON";
     return "UI"; //for lp, mana, deck
   }
 
@@ -316,9 +336,15 @@ export class TutorialUIScene extends Phaser.Scene {
     if (this.currentStepIndex < TUTORIAL_STEPS.length - 1) {
       this.currentStepIndex++;
       this.showCurrentStep();
+
+      const currentStep = TUTORIAL_STEPS[this.currentStepIndex];
+
       this.scene
         .get("TutorialBoardScene")
-        .events.emit(TutorialEvent.ADVANCE_DIALOG);
+        .events.emit(TutorialEvent.ADVANCE_DIALOG, {
+          textKey: currentStep.textKey,
+          targetId: currentStep.focusTarget?.id,
+        });
     }
   }
 

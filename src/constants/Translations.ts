@@ -39,10 +39,20 @@ export const TRANSLATIONS = {
         "Aqui é a zona de cartas de feitiço, onde você pode colocar cartas mágicas ou armadilhas, mas atenção: para ativar uma carta mágica da mão, precisa ter um espaço disponível na zona.",
       step_6c:
         "A zona de cemitério é onde as cartas usadas e destruídas em combate e/ou por efeito são enviadas.",
+      step_7:
+        "Este é o seu Controle de Fases. Cada turno no duelo é dividido em etapas, e você usará este botão para avançar entre elas.",
+      step_7a:
+        "Normalmente, o turno começa na Fase de Compra (DRAW). Para puxar sua carta, você deve clicar diretamente sobre o seu Deck ou apertar a tecla ESPAÇO.",
+      step_7b:
+        "Mas atenção à regra: para manter o duelo justo, quem joga o primeiro turno da partida não compra carta, começando direto na Fase Principal (MAIN)",
+      step_7c:
+        "A Fase Principal é o seu momento de preparação: é apenas nela que você pode invocar monstros, ativar mágicas e baixar suas armadilhas no campo.",
+      step_7d:
+        "Depois de se preparar, você avança para a Fase de Batalha (BATTLE), onde seus monstros atacam! Quando terminar, basta clicar novamente para passar o turno para o oponente.",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
-      skip_btn: "PULAR",
+      skip_btn: "PULAR TUTORIAL",
     },
     guide: {
       title: "A ASCENSÃO DA TORRE",
@@ -175,11 +185,27 @@ export const TRANSLATIONS = {
       step_5d:
         "This is a Trap Card. It doesn't have a quick activation. You need to set it on the field (face-down) and you can only activate it on the next turn, either in the Main Phase or during Battle, to surprise your opponent!",
       step_6:
-        "Here is the battlefield. It has 3 slots for monsters, and 3 slots right behind them for spells and traps.",
+        "Now let's head to the battlefield. It contains the spaces to summon your cards and the graveyard zone.",
+      step_6a:
+        "This is the monster zone, which has a limit of 3 summons (for both normal and effect monsters).",
+      step_6b:
+        "This is the spell card zone, where you can place magic or trap cards. But pay attention: to activate a spell card from your hand, you must have an available space in this zone.",
+      step_6c:
+        "The graveyard zone is where cards that are used, destroyed in battle, and/or sent by effects end up.",
+      step_7:
+        "This is your Phase Control. Each turn in the duel is divided into phases, and you'll use this button to advance through them.",
+      step_7a:
+        "Normally, a turn starts in the Draw Phase (DRAW). To draw your card, you must click directly on your Deck or press the SPACEBAR.",
+      step_7b:
+        "But pay attention to this rule: to keep the duel fair, the player who goes first doesn't draw a card, starting straight in the Main Phase (MAIN).",
+      step_7c:
+        "The Main Phase is your preparation time: this is the only phase where you can summon monsters, activate spells, and set your traps on the field.",
+      step_7d:
+        "After preparing, you advance to the Battle Phase (BATTLE), where your monsters attack! Once you're done, simply click the button again to pass the turn to your opponent.",
       next_btn: "NEXT",
       menu_btn: "BACK TO MENU",
       play_btn: "PLAY NOW",
-      skip_btn: "SKIP",
+      skip_btn: "SKIP TUTORIAL",
     },
     guide: {
       title: "THE TOWER ASCENSION",
