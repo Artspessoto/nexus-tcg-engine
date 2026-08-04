@@ -430,17 +430,23 @@ export class TutorialBoardScene extends Phaser.Scene {
       case "step_7c":
         dummyPhaseBtn.updatePhase(
           turnLabel,
-          "MAIN",
+          this.translationText.battle_scene.main_phase,
           COMPONENTS.BUTTONS.PHASE.color,
         );
         break;
       case "step_7d":
         dummyPhaseBtn.updatePhase(
           turnLabel,
-          "BATTLE",
+          this.translationText.battle_scene.battle_buttons.to_battle,
           COMPONENTS.BUTTONS.PHASE.color,
         );
         break;
+      case "step_7e":
+        dummyPhaseBtn.updatePhase(
+          turnLabel,
+          this.translationText.battle_scene.battle_buttons.end_turn,
+          COMPONENTS.BUTTONS.PHASE.color,
+        );
     }
   }
 

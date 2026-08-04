@@ -48,7 +48,9 @@ export const TRANSLATIONS = {
       step_7c:
         "A Fase Principal é o seu momento de preparação: é apenas nela que você pode invocar monstros, ativar mágicas e baixar suas armadilhas no campo.",
       step_7d:
-        "Depois de se preparar, você avança para a Fase de Batalha (BATTLE), onde seus monstros atacam! Quando terminar, basta clicar novamente para passar o turno para o oponente.",
+        "Depois de se preparar, você avança para a Fase de Batalha (BATTLE), onde seus monstros atacam!",
+      step_7e:
+        "Quando terminar, basta clicar novamente para passar o turno para o oponente.",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
@@ -201,7 +203,9 @@ export const TRANSLATIONS = {
       step_7c:
         "The Main Phase is your preparation time: this is the only phase where you can summon monsters, activate spells, and set your traps on the field.",
       step_7d:
-        "After preparing, you advance to the Battle Phase (BATTLE), where your monsters attack! Once you're done, simply click the button again to pass the turn to your opponent.",
+        "After preparing, you advance to the Battle Phase (BATTLE), where your monsters attack!",
+      step_7e:
+        "Once you're done, simply click the button again to pass the turn to your opponent.",
       next_btn: "NEXT",
       menu_btn: "BACK TO MENU",
       play_btn: "PLAY NOW",

@@ -150,4 +150,13 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       id: "PHASE_BUTTON",
     },
   },
+  {
+    textKey: "step_7e",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: BATTLE.PHASE_BUTTON.x,
+      y: BATTLE.PHASE_BUTTON.y,
+      id: "PHASE_BUTTON",
+    },
+  },
 ];
