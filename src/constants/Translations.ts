@@ -51,6 +51,10 @@ export const TRANSLATIONS = {
         "Depois de se preparar, você avança para a Fase de Batalha (BATTLE), onde seus monstros atacam!",
       step_7e:
         "Quando terminar, basta clicar novamente para passar o turno para o oponente.",
+      step_8:
+        "Agora que você já conhece a teoria, vamos para a prática! Como este é o nosso primeiro turno, estamos na Fase Principal.",
+      step_8a:
+        "Vamos reforçar nossas defesas. Clique e arraste a sua Carta de Monstro até uma das Zonas de Monstro disponíveis no campo para invocá-la.",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
@@ -206,6 +210,10 @@ export const TRANSLATIONS = {
         "After preparing, you advance to the Battle Phase (BATTLE), where your monsters attack!",
       step_7e:
         "Once you're done, simply click the button again to pass the turn to your opponent.",
+      step_8:
+        "Now that you know the theory, let's put it into practice! Since this is our first turn, we are in the Main Phase.",
+      step_8a:
+        "Let's bolster our defenses. Click and drag your Monster Card to one of the available Monster Zones on the field to summon it.",
       next_btn: "NEXT",
       menu_btn: "BACK TO MENU",
       play_btn: "PLAY NOW",

@@ -159,4 +159,22 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       id: "PHASE_BUTTON",
     },
   },
+  {
+    textKey: "step_8",
+    layoutMode: "NARRATIVE",
+    focusTarget: {
+      x: 0,
+      y: 0,
+      id: "PHASE_BUTTON",
+    },
+  },
+  {
+    textKey: "step_8a",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: 200,
+      y: HAND.PLAYER.NORMAL_Y,
+      id: "HAND_CARD_TOON_KNIGHT",
+    },
+  },
 ];

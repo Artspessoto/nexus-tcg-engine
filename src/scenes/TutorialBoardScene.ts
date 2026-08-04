@@ -27,6 +27,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     Record<TutorialElementId, (textKey: string) => void>
   > = {
     PHASE_BUTTON: (textKey) => this.handlePhaseTextBtn(textKey),
+    HAND_CARD_TOON_KNIGHT: () => this.setupDragCard(),
   };
 
   constructor() {
@@ -428,6 +429,7 @@ export class TutorialBoardScene extends Phaser.Scene {
         break;
       case "step_7b":
       case "step_7c":
+      case "step_8":
         dummyPhaseBtn.updatePhase(
           turnLabel,
           this.translationText.battle_scene.main_phase,
@@ -448,6 +450,96 @@ export class TutorialBoardScene extends Phaser.Scene {
           COMPONENTS.BUTTONS.PHASE.color,
         );
     }
+  }
+
+  private setupDragCard(): void {
+    const card = this.dummyCards.get("HAND_CARD_TOON_KNIGHT");
+    if (!card) return;
+
+    card.setInteractive({ draggable: true });
+    this.input.setDraggable(card);
+
+    //hover effect
+    card.on("pointerover", () => this.handleDummyHover(card));
+    card.on("pointerout", () => this.handleDummyOut(card));
+
+    this.setupDragEvents(card);
+  }
+
+  private setupDragEvents(card: Card): void {
+    const { ANIMATIONS, DEPTHS, COMPONENTS } = THEME_CONFIG;
+
+    card.on("dragstart", (_pointer: Phaser.Input.Pointer) => {
+      //remove overlay
+      this.handleCameraReset(300);
+
+      card.off("pointerover");
+      card.off("pointerout");
+
+      this.tweens.killTweensOf(card);
+      this.tweens.killTweensOf(card.visualElements);
+      card.visualElements.setY(0);
+
+      this.tweens.add({
+        targets: card,
+        scale: COMPONENTS.CARD.SCALES.DEFAULT_HAND,
+        duration: ANIMATIONS.DURATIONS.UI_POP,
+        ease: ANIMATIONS.EASING.SMOOTH,
+      });
+      card.setDepth(DEPTHS.DRAGGING_CARD);
+    });
+
+    card.on(
+      "drag",
+      (_pointer: Phaser.Input.Pointer, dragX: number, dragY: number) => {
+        card.visualElements.setY(0);
+        card.visualElements.setScale(1);
+        card.setPosition(dragX, dragY);
+      },
+    );
+
+    card.on("dragend", (_pointer: Phaser.Input.Pointer, dropped: boolean) => {
+      if (!dropped) {
+        //if drops outside of zone apply hover
+        card.on("pointerover", () => this.handleDummyHover(card));
+        card.on("pointerout", () => this.handleDummyOut(card));
+
+        this.tweens.add({
+          targets: card,
+          y: LAYOUT_CONFIG.HAND.PLAYER.NORMAL_Y,
+          duration: ANIMATIONS.DURATIONS.PREVIEW,
+          ease: ANIMATIONS.EASING.BOUNCE,
+        });
+      }
+    });
+
+    card.on(
+      "drop",
+      (_pointer: Phaser.Input.Pointer, targetZone: Phaser.GameObjects.Zone) => {
+        if (targetZone.getData("type") === "MONSTER") {
+          card.x = targetZone.x;
+          card.y = targetZone.y;
+
+          card.visualElements.setY(0);
+          card.visualElements.setScale(1);
+
+          card.disableInteractive();
+
+          card.off("dragstart");
+          card.off("drag");
+          card.off("dragend");
+          card.off("drop");
+
+          card.off("pointerover");
+          card.off("pointerout");
+
+          this.events.emit(TutorialEvent.ADVANCE_DIALOG, {
+            targetId: "MANA_PLAYER",
+            textKey: "step_3",
+          });
+        }
+      },
+    );
   }
 
   private handleCameraFocus(targetData?: {
@@ -483,12 +575,16 @@ export class TutorialBoardScene extends Phaser.Scene {
         this.dummyCards.forEach((card) => {
           card.setDepth(DEPTHS.UI_BASE);
         });
+        this.showDummyHand();
       } else {
         const element = this.uiElements.get(targetData.id);
         if (element) {
           element.setDepth(DEPTHS.UI_BASE);
 
-          if (targetData.id.includes("FIELD")) {
+          if (
+            targetData.id.includes("FIELD") ||
+            targetData.id == "PHASE_BUTTON"
+          ) {
             this.tweens.killTweensOf(element);
             this.hideDummyHand();
 
@@ -499,6 +595,8 @@ export class TutorialBoardScene extends Phaser.Scene {
               ease: ANIMATIONS.EASING.SMOOTH,
             });
           }
+        } else {
+          this.showDummyHand();
         }
 
         //if element is card, apply hover effect
