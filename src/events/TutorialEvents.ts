@@ -11,6 +11,7 @@ export type CameraFocusPayload = {
   x: number;
   y: number;
   id: TutorialElementId;
+  disabled_hover?: boolean
 };
 export type AdvanceDialogPayload = { textKey: string, targetId?: TutorialElementId };
 

@@ -234,6 +234,42 @@ export class TutorialBoardScene extends Phaser.Scene {
     });
   }
 
+  public reorganizeDummyHand() {
+    const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
+    const { SCREEN, HAND } = LAYOUT_CONFIG;
+    const spacing = HAND.SPACING; // cards gap between
+    const centerX = SCREEN.CENTER_X; // center of the screen
+
+    const tutorialCards = [
+      "TOON_KNIGHT",
+      "MAGE_APPRENTICE",
+      "FIRE_BALL",
+      "DARK_TRAP",
+    ];
+
+    const totalHandWidth = (tutorialCards.length - 1) * spacing; //460
+    const startX = centerX - totalHandWidth / 2; //410
+
+    tutorialCards.forEach((cardKey, index) => {
+      const card = this.dummyCards.get(`HAND_CARD_${cardKey}`);
+      if (!card) return;
+
+      const targetX = startX + index * spacing;
+      const cardScale = COMPONENTS.CARD.SCALES;
+
+      this.tweens.add({
+        targets: card,
+        x: targetX,
+        y: HAND.PLAYER.NORMAL_Y,
+        angle: 0,
+        scale: cardScale.PLAYER_HAND,
+        duration: ANIMATIONS.DURATIONS.SLOW, // 0.5s
+        // ease: "Power2",
+        ease: ANIMATIONS.EASING.BOUNCE,
+      });
+    });
+  }
+
   private hideDummyHand(): void {
     const { HAND } = LAYOUT_CONFIG;
     const { ANIMATIONS } = THEME_CONFIG;
@@ -453,7 +489,8 @@ export class TutorialBoardScene extends Phaser.Scene {
   }
 
   private setupDragCard(): void {
-    const card = this.dummyCards.get("HAND_CARD_TOON_KNIGHT");
+    const cardName = "HAND_CARD_TOON_KNIGHT";
+    const card = this.dummyCards.get(cardName);
     if (!card) return;
 
     card.setInteractive({ draggable: true });
@@ -469,9 +506,23 @@ export class TutorialBoardScene extends Phaser.Scene {
   private setupDragEvents(card: Card): void {
     const { ANIMATIONS, DEPTHS, COMPONENTS } = THEME_CONFIG;
 
+    card.off("dragstart");
+    card.off("drag");
+    card.off("dragend");
+    card.off("drop");
+
     card.on("dragstart", (_pointer: Phaser.Input.Pointer) => {
       //remove overlay
       this.handleCameraReset(300);
+
+      const monsterZones = this.uiElements.get("FIELD_MONSTER_ZONES");
+      if (monsterZones) {
+        this.tweens.add({
+          targets: monsterZones,
+          alpha: 1,
+          duration: 300,
+        });
+      }
 
       card.off("pointerover");
       card.off("pointerout");
@@ -498,20 +549,35 @@ export class TutorialBoardScene extends Phaser.Scene {
       },
     );
 
-    card.on("dragend", (_pointer: Phaser.Input.Pointer, dropped: boolean) => {
-      if (!dropped) {
-        //if drops outside of zone apply hover
-        card.on("pointerover", () => this.handleDummyHover(card));
-        card.on("pointerout", () => this.handleDummyOut(card));
+    const returnToHand = () => {
+      card.setDepth(DEPTHS.UI_BASE);
+      this.reorganizeDummyHand();
 
-        this.tweens.add({
-          targets: card,
-          y: LAYOUT_CONFIG.HAND.PLAYER.NORMAL_Y,
-          duration: ANIMATIONS.DURATIONS.PREVIEW,
-          ease: ANIMATIONS.EASING.BOUNCE,
-        });
-      }
-    });
+      this.handleCameraFocus({
+        x: 200,
+        y: 600,
+        id: "HAND_CARD_TOON_KNIGHT",
+        disabled_hover: true,
+      });
+
+      card.on("pointerover", () => this.handleDummyHover(card));
+      card.on("pointerout", () => this.handleDummyOut(card));
+    };
+
+    card.on(
+      "dragend",
+      (
+        _pointer: Phaser.Input.Pointer,
+        _dragX: number,
+        _dragY: number,
+        dropped: boolean,
+      ) => {
+        if (!dropped) {
+          //if drops outside of zone apply hover
+          returnToHand();
+        }
+      },
+    );
 
     card.on(
       "drop",
@@ -537,16 +603,14 @@ export class TutorialBoardScene extends Phaser.Scene {
             targetId: "MANA_PLAYER",
             textKey: "step_3",
           });
+        } else {
+          returnToHand();
         }
       },
     );
   }
 
-  private handleCameraFocus(targetData?: {
-    id?: TutorialElementId;
-    x: number;
-    y: number;
-  }): void {
+  private handleCameraFocus(targetData?: CameraFocusPayload): void {
     const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
 
     if (this.currentFocusedCard) {
@@ -602,8 +666,10 @@ export class TutorialBoardScene extends Phaser.Scene {
         //if element is card, apply hover effect
         const card = this.dummyCards.get(targetData.id);
         if (card) {
-          this.handleDummyHover(card);
-          this.currentFocusedCard = card;
+          if (!targetData.disabled_hover) {
+            this.handleDummyHover(card);
+            this.currentFocusedCard = card;
+          }
         }
       }
     }

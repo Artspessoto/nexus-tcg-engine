@@ -8,7 +8,12 @@ export interface TutorialStep {
   dialogSize?: { width: number; height: number };
 }
 
-export type LayoutTargetCategory = "DEFAULT" | "FIELD" | "HAND" | "BUTTON" | "UI";
+export type LayoutTargetCategory =
+  | "DEFAULT"
+  | "FIELD"
+  | "HAND"
+  | "BUTTON"
+  | "UI";
 
 export type TutorialElementId =
   | "FIELD_MONSTER_ZONES"
