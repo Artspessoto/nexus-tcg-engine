@@ -16,18 +16,16 @@ import type {
 } from "../../types/GameTypes";
 import { CardDetailsModal } from "../../objects/CardDetailsModal";
 import { PlayerStatsView } from "../../view/PlayerStatsView";
+import { NoticeBannerView } from "../../view/NoticeBannerView";
 
 export class UIManager implements IUIManager {
   private context: IBattleContext;
   private side: GameSide;
   private translations!: TranslationStructure;
-  private bannerText!: Phaser.GameObjects.Text;
-  private bannerBg!: Phaser.GameObjects.Rectangle;
-  private manaText!: Phaser.GameObjects.Text;
-  private manaAura!: Phaser.GameObjects.Image;
   private inputBlocker?: Phaser.GameObjects.Rectangle;
-  private bannerTimer?: Phaser.Time.TimerEvent;
+
   private statsView!: PlayerStatsView;
+  private noticeBannerView!: NoticeBannerView;
 
   private selectionButtons: ToonButton[] = [];
 
@@ -122,9 +120,6 @@ export class UIManager implements IUIManager {
   }
 
   public setupUI() {
-    const { SCREEN } = LAYOUT_CONFIG;
-    const { COLORS, FONTS, DEPTHS } = THEME_CONFIG;
-
     const initialMana = this.context.gameState.getMana(this.side);
     const initialLP = this.context.gameState.getHP(this.side);
     const playerName =
@@ -138,23 +133,7 @@ export class UIManager implements IUIManager {
       scene: this.context.engine,
     });
 
-    this.bannerBg = this.context.add
-      .rectangle(
-        SCREEN.CENTER_X,
-        SCREEN.CENTER_Y,
-        SCREEN.WIDTH,
-        THEME_CONFIG.COMPONENTS.UI.PHASE_BANNER_HEIGHT,
-        COLORS.OVERLAY_BLACK,
-        0.85,
-      )
-      .setVisible(false)
-      .setDepth(DEPTHS.BANNERS);
-
-    this.bannerText = this.context.add
-      .text(SCREEN.CENTER_X, SCREEN.CENTER_Y, "", FONTS.STYLES.BANNER_TEXT)
-      .setOrigin(0.5)
-      .setVisible(false)
-      .setDepth(DEPTHS.BANNERS + 1);
+    this.noticeBannerView = new NoticeBannerView(this.context.engine);
   }
 
   public animateLPChange(amount: number, startLP: number, targetLP: number) {
@@ -190,93 +169,7 @@ export class UIManager implements IUIManager {
   }
 
   public showNotice(message: string, type: Notice) {
-    if (!this.bannerBg || !this.bannerText) return;
-    const { COLORS } = THEME_CONFIG;
-
-    const colorMap: Record<Notice, number> = {
-      PHASE: COLORS.NOTICE_PHASE,
-      WARNING: COLORS.NOTICE_WARNING,
-      TURN: COLORS.NOTICE_TURN,
-      NEUTRAL: COLORS.NOTICE_NEUTRAL,
-    };
-
-    const targetColor = colorMap[type] || COLORS.NOTICE_PHASE;
-
-    this.bannerBg.setStrokeStyle(4, targetColor);
-
-    this.animateBanner(message, type);
-  }
-
-  private animateBanner(message: string, type: Notice) {
-    const { SCREEN } = LAYOUT_CONFIG;
-    const { ANIMATIONS } = THEME_CONFIG;
-    this.context.tweens.killTweensOf([this.bannerText, this.bannerBg]);
-
-    if (this.bannerTimer) {
-      this.bannerTimer.remove();
-      this.bannerTimer = undefined;
-    }
-
-    this.bannerText
-      .setText(message.toUpperCase())
-      .setAlpha(1)
-      .setVisible(true)
-      .setScale(0.5)
-      .setY(SCREEN.CENTER_Y)
-      .setX(SCREEN.CENTER_X);
-    this.bannerBg
-      .setY(SCREEN.CENTER_Y)
-      .setX(SCREEN.CENTER_X)
-      .setAlpha(1)
-      .setVisible(true)
-      .setScale(1, 0);
-
-    // start animation
-    this.context.tweens.add({
-      targets: this.bannerBg,
-      scaleY: 1,
-      alpha: 1,
-      duration: ANIMATIONS.DURATIONS.FAST,
-      ease: ANIMATIONS.EASING.QUART_OUT,
-    });
-
-    // pop animation
-    this.context.tweens.add({
-      targets: this.bannerText,
-      scale: 1,
-      duration: ANIMATIONS.DURATIONS.UI_POP,
-      ease: ANIMATIONS.EASING.BOUNCE,
-      onComplete: () => {
-        //shake effect
-        if (type === "WARNING") {
-          this.context.tweens.add({
-            targets: [this.bannerText, this.bannerBg],
-            x: "+=3",
-            yoyo: true,
-            duration: 40,
-            repeat: 3,
-          });
-        }
-      },
-    });
-
-    this.bannerTimer = this.context.time.delayedCall(600, () => {
-      this.context.tweens.add({
-        targets: [this.bannerText, this.bannerBg],
-        alpha: 0,
-        y: "-=30",
-        duration: ANIMATIONS.DURATIONS.PREVIEW,
-        ease: ANIMATIONS.EASING.POWER_OUT,
-        onComplete: () => {
-          this.bannerText.setVisible(false).setY(SCREEN.CENTER_Y);
-          this.bannerBg.setVisible(false).setY(SCREEN.CENTER_Y);
-
-          this.bannerText.setX(SCREEN.CENTER_X);
-          this.bannerBg.setX(SCREEN.CENTER_X);
-          this.bannerTimer = undefined;
-        },
-      });
-    });
+    this.noticeBannerView.showNotice(message, type);
   }
 
   public showSelectionMenu(

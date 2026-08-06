@@ -13,6 +13,7 @@ import { ToonButton } from "../objects/ToonButton";
 import type { GameSide, TranslationStructure } from "../types/GameTypes";
 import type { TutorialElementId, ZoneConfig } from "../types/TutorialType";
 import { DeckView } from "../view/DeckView";
+import { PlayerStatsView } from "../view/PlayerStatsView";
 
 export class TutorialBoardScene extends Phaser.Scene {
   private translationText!: TranslationStructure;
@@ -48,11 +49,27 @@ export class TutorialBoardScene extends Phaser.Scene {
     const lang = LanguageManager.getInstance().currentLang;
     this.translationText = TRANSLATIONS[lang];
 
-    this.createDummyMana("PLAYER", GAME_STATE.BASE_MANA);
-    this.createDummyMana("OPPONENT", GAME_STATE.BASE_MANA);
+    const playerStats = new PlayerStatsView({
+      scene: this,
+      side: "PLAYER",
+      initialLP: GAME_STATE.BASE_LP,
+      initialMana: GAME_STATE.BASE_MANA,
+      playerName: "PLAYER",
+    });
 
-    this.createDummyLPBar("PLAYER", GAME_STATE.BASE_LP);
-    this.createDummyLPBar("OPPONENT", GAME_STATE.BASE_LP);
+    const npcStats = new PlayerStatsView({
+      scene: this,
+      side: "OPPONENT",
+      initialLP: GAME_STATE.BASE_LP,
+      initialMana: GAME_STATE.BASE_MANA,
+      playerName: "CPU",
+    });
+
+    this.uiElements.set("LP_BAR_PLAYER", playerStats.lpContainer);
+    this.uiElements.set("MANA_PLAYER", playerStats.manaContainer);
+
+    this.uiElements.set("LP_BAR_OPPONENT", npcStats.lpContainer);
+    this.uiElements.set("MANA_OPPONENT", npcStats.manaContainer);
 
     this.createDummyDeck("PLAYER");
     this.createDummyDeck("OPPONENT");
@@ -113,87 +130,6 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     dummyDeck.container.setDepth(0);
     this.uiElements.set(`${side}_DECK`, dummyDeck.container);
-  }
-
-  private createDummyMana(side: GameSide, amount: number): void {
-    const { FONTS } = THEME_CONFIG;
-    const position = LAYOUT_CONFIG.UI.MANA[side];
-
-    const container = this.add.container(position.x, position.y).setDepth(0);
-
-    const icon = this.add.image(0, 0, "battle_ui", "mana_icon").setScale(0.4);
-
-    const text = this.add
-      .text(0, 0, `${amount}`, FONTS.STYLES.MANA_DISPLAY)
-      .setOrigin(0.5);
-
-    container.add([icon, text]);
-
-    this.uiElements.set(`MANA_${side}`, container);
-  }
-
-  private createDummyLPBar(side: GameSide, initialHP: number): void {
-    const { UI } = LAYOUT_CONFIG;
-    const { COLORS, FONTS } = THEME_CONFIG;
-    const { HEIGHT, RADIUS, WIDTH, X, Y_OPPONENT, Y_PLAYER } = UI.LP_BAR;
-    const isPlayer = side == "PLAYER";
-
-    const yPos = isPlayer ? Y_PLAYER : Y_OPPONENT;
-    const xPos = X;
-    const playerName = isPlayer ? "PLAYER" : "NPC";
-
-    const container = this.add.container(xPos, yPos).setDepth(0);
-
-    const bg = this.add.graphics();
-    bg.fillStyle(COLORS.OVERLAY_BLACK, 0.5);
-    bg.fillRoundedRect(4, 4, WIDTH, HEIGHT, RADIUS);
-
-    bg.fillStyle(COLORS.STONE_DARK, 1);
-    bg.fillRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
-
-    bg.lineStyle(4, COLORS.GOLD_METAL, 1);
-    bg.strokeRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
-
-    bg.lineStyle(2, COLORS.OVERLAY_BLACK, 0.3);
-    bg.strokeRoundedRect(3, 3, WIDTH - 6, HEIGHT - 6, RADIUS - 2);
-    container.add(bg);
-
-    const nameText = this.add
-      .text(20, 8, playerName, {
-        fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
-        fontSize: "16px",
-        color: "#EAEAEA",
-      })
-      .setOrigin(0.0);
-    container.add(nameText);
-
-    const labelLP = this.add
-      .text(20, 45, "LP", {
-        fontFamily: FONTS.FAMILY_DISPLAY,
-        fontSize: "18px",
-        color: COLORS.GOLD_GLOW,
-      })
-      .setOrigin(0, 0.5);
-    container.add(labelLP);
-
-    const textStyle = {
-      fontFamily: FONTS.FAMILY_DISPLAY,
-      fontSize: "36px",
-      color: COLORS.GOLD_GLOW,
-    };
-
-    const hpText = this.add
-      .text(55, 45, `${initialHP}`, textStyle)
-      .setOrigin(0, 0.5)
-      .setShadow(2, 2, "#000000", 4, true, false);
-
-    container.add(hpText);
-
-    if (isPlayer) {
-      container.setY(yPos - 10);
-    }
-
-    this.uiElements.set(`LP_BAR_${side}`, container);
   }
 
   private createDummyHand(): void {
