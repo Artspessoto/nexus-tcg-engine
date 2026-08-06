@@ -20,16 +20,6 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       id: "MANA_PLAYER",
     },
   },
-    {
-    textKey: "step_8a",
-    layoutMode: "TOOLTIP",
-    focusTarget: {
-      x: 200,
-      y: HAND.PLAYER.NORMAL_Y,
-      id: "HAND_CARD_TOON_KNIGHT",
-      disabled_hover: true
-    },
-  },
   {
     textKey: "step_4",
     layoutMode: "TOOLTIP",
@@ -176,6 +166,16 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       x: 0,
       y: 0,
       id: "PHASE_BUTTON",
+    },
+  },
+  {
+    textKey: "step_8a",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: 200,
+      y: HAND.PLAYER.NORMAL_Y,
+      id: "HAND_CARD_TOON_KNIGHT",
+      disabled_hover: true,
     },
   },
 ];

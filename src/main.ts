@@ -37,6 +37,9 @@ const config: Phaser.Types.Core.GameConfig = {
   dom: {
     createContainer: true,
   },
+  input: {
+    gamepad: true,
+  },
   scene: [
     MenuScene,
     TutorialBoardScene,

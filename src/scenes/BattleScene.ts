@@ -138,9 +138,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.opponentUI.setTranslations(currentTranslations);
 
     this.playerUI.setupUI();
-    this.playerUI.setupLifePoints();
     this.opponentUI.setupUI();
-    this.opponentUI.setupLifePoints();
 
     this.playerDeck.createDeckVisual();
     this.opponentDeck.createDeckVisual();

@@ -8,7 +8,6 @@ import type {
 export interface IUIManager {
   setTranslations(translations: TranslationStructure): void;
   setupUI(): void;
-  setupLifePoints(): void;
   showNotice(message: string, type: Notice): void;
   animateLPChange(amount: number, startLP: number, targetLP: number): void;
   animateManaChange(amount: number): void;

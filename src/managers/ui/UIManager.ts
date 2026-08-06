@@ -15,6 +15,7 @@ import type {
   TranslationStructure,
 } from "../../types/GameTypes";
 import { CardDetailsModal } from "../../objects/CardDetailsModal";
+import { PlayerStatsView } from "../../view/PlayerStatsView";
 
 export class UIManager implements IUIManager {
   private context: IBattleContext;
@@ -23,20 +24,16 @@ export class UIManager implements IUIManager {
   private bannerText!: Phaser.GameObjects.Text;
   private bannerBg!: Phaser.GameObjects.Rectangle;
   private manaText!: Phaser.GameObjects.Text;
-  private manaIcon!: Phaser.GameObjects.Image;
   private manaAura!: Phaser.GameObjects.Image;
-  private manaPosition: { x: number; y: number };
-  private hpText!: Phaser.GameObjects.Text;
   private inputBlocker?: Phaser.GameObjects.Rectangle;
   private bannerTimer?: Phaser.Time.TimerEvent;
+  private statsView!: PlayerStatsView;
 
   private selectionButtons: ToonButton[] = [];
 
   constructor(context: IBattleContext, side: GameSide) {
     this.context = context;
     this.side = side;
-
-    this.manaPosition = LAYOUT_CONFIG.UI.MANA[this.side];
 
     if (this.side == "PLAYER") {
       EventBus.on(GameEvent.PHASE_CHANGED, (data) => {
@@ -127,29 +124,19 @@ export class UIManager implements IUIManager {
   public setupUI() {
     const { SCREEN } = LAYOUT_CONFIG;
     const { COLORS, FONTS, DEPTHS } = THEME_CONFIG;
+
     const initialMana = this.context.gameState.getMana(this.side);
+    const initialLP = this.context.gameState.getHP(this.side);
+    const playerName =
+      this.side == "PLAYER" ? this.context.playerDisplayName : "CPU";
 
-    this.manaAura = this.context.add
-      .image(this.manaPosition.x, this.manaPosition.y, "battle_ui", "mana_icon")
-      .setScale(0.5)
-      .setAlpha(0)
-      .setTint(0xffffff)
-      .setDepth(DEPTHS.UI_BASE - 1);
-
-    this.manaIcon = this.context.add
-      .image(this.manaPosition.x, this.manaPosition.y, "battle_ui", "mana_icon")
-      .setScale(0.4)
-      .setDepth(DEPTHS.UI_BASE);
-
-    this.manaText = this.context.add
-      .text(
-        this.manaIcon.x,
-        this.manaIcon.y,
-        `${initialMana}`,
-        FONTS.STYLES.MANA_DISPLAY,
-      )
-      .setOrigin(0.5)
-      .setDepth(DEPTHS.UI_BASE + 1);
+    this.statsView = new PlayerStatsView({
+      initialLP,
+      initialMana,
+      playerName,
+      side: this.side,
+      scene: this.context.engine,
+    });
 
     this.bannerBg = this.context.add
       .rectangle(
@@ -170,48 +157,12 @@ export class UIManager implements IUIManager {
       .setDepth(DEPTHS.BANNERS + 1);
   }
 
-  public setupLifePoints() {
-    const { UI } = LAYOUT_CONFIG;
-    const currentHP = this.context.gameState.getHP(this.side);
-    const yPos =
-      this.side == "PLAYER" ? UI.LP_BAR.Y_PLAYER : UI.LP_BAR.Y_OPPONENT;
-
-    this.createLPBar(UI.LP_BAR.X, yPos, currentHP);
-  }
-
   public animateLPChange(amount: number, startLP: number, targetLP: number) {
-    const { ANIMATIONS } = THEME_CONFIG;
-
-    this.animateLPImpact(amount);
-
-    const lpCounter = { value: startLP };
-
-    this.context.tweens.add({
-      targets: lpCounter,
-      value: targetLP,
-      duration: ANIMATIONS.DURATIONS.LP_ROLL,
-      ease: ANIMATIONS.EASING.SMOOTH,
-      onUpdate: () => {
-        this.hpText.setText(Math.floor(lpCounter.value).toString());
-      },
-    });
+    this.statsView.animateLPChange(amount, startLP, targetLP);
   }
 
   public animateManaChange(amount: number) {
-    const { ANIMATIONS } = THEME_CONFIG;
-    
-    this.manaText.setText(`${amount}`);
-
-    this.context.tweens.add({
-      targets: this.manaAura,
-      alpha: { from: 0.8, to: 0 },
-      scale: { from: 0.5, to: 0.8 }, //shock wave effect
-      duration: ANIMATIONS.DURATIONS.NORMAL,
-      ease: ANIMATIONS.EASING.QUART_OUT,
-      onComplete: () => {
-        this.manaAura.setScale(0.5).setAlpha(0);
-      },
-    });
+    this.statsView.animateManaChange(amount);
   }
 
   private handlePhaseNotice(phase: GamePhase, activePlayer: GameSide) {
@@ -326,65 +277,6 @@ export class UIManager implements IUIManager {
         },
       });
     });
-  }
-
-  private createLPBar(x: number, y: number, initialHP: number) {
-    const { HEIGHT, RADIUS, WIDTH } = LAYOUT_CONFIG.UI.LP_BAR;
-    const { COLORS } = THEME_CONFIG;
-    const playerName =
-      this.side == "PLAYER" ? this.context.playerDisplayName : "CPU";
-
-    const container = this.context.add.container(x, y);
-    const bg = this.context.add.graphics();
-
-    bg.fillStyle(COLORS.OVERLAY_BLACK, 0.5);
-    bg.fillRoundedRect(4, 4, WIDTH, HEIGHT, RADIUS);
-
-    bg.fillStyle(COLORS.STONE_DARK, 1);
-    bg.fillRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
-
-    bg.lineStyle(4, COLORS.GOLD_METAL, 1);
-    bg.strokeRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
-
-    bg.lineStyle(2, COLORS.OVERLAY_BLACK, 0.3);
-    bg.strokeRoundedRect(3, 3, WIDTH - 6, HEIGHT - 6, RADIUS - 2);
-
-    container.add(bg);
-
-    const nameText = this.context.add
-      .text(20, 8, playerName, {
-        fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
-        fontSize: "16px",
-        color: "#EAEAEA",
-      })
-      .setOrigin(0.0);
-    container.add(nameText);
-
-    const labelLP = this.context.add
-      .text(20, 45, "LP", {
-        fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
-        fontSize: "18px",
-        color: COLORS.GOLD_GLOW,
-      })
-      .setOrigin(0, 0.5);
-    container.add(labelLP);
-
-    const textStyle = {
-      fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
-      fontSize: "36px",
-      color: COLORS.GOLD_GLOW,
-    };
-
-    this.hpText = this.context.add
-      .text(55, 45, `${initialHP}`, textStyle)
-      .setOrigin(0, 0.5)
-      .setShadow(2, 2, "#000000", 4, true, false);
-
-    container.add(this.hpText);
-
-    if (this.side === "PLAYER") {
-      container.setY(y - 10);
-    }
   }
 
   public showSelectionMenu(
@@ -682,33 +574,6 @@ export class UIManager implements IUIManager {
       this.context.cameras.main.shake(LIGHT.duration, LIGHT.intensity);
       this.context.getHand(card.owner).showHand();
     });
-  }
-
-  private animateLPImpact(amount: number) {
-    const { COLORS, ANIMATIONS } = THEME_CONFIG;
-    const isDamage = amount < 0; //take dmg is negative value
-    const impactColor = isDamage ? COLORS.LP_DAMAGE : COLORS.LP_HEAL;
-
-    this.hpText.setColor(impactColor);
-
-    this.context.tweens.add({
-      targets: this.hpText,
-      scale: 1.4,
-      duration: ANIMATIONS.DURATIONS.UI_POP,
-      yoyo: true,
-      ease: ANIMATIONS.EASING.BOUNCE,
-      onComplete: () => {
-        this.hpText.setColor(COLORS.GOLD_GLOW);
-        this.hpText.setScale(1);
-      },
-    });
-
-    if (isDamage) {
-      this.context.cameras.main.shake(
-        ANIMATIONS.SHAKES.STRONG.duration,
-        ANIMATIONS.SHAKES.STRONG.intensity,
-      );
-    }
   }
 
   public async showTrapResponseAction(): Promise<boolean> {
