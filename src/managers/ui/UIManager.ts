@@ -6,7 +6,6 @@ import type { IBattleContext } from "../../interfaces/IBattleContext";
 import type { IUIManager } from "./IUIManager";
 import type { Card } from "../../objects/Card";
 import { DecisionModal } from "../../objects/DecisionModal";
-import { ToonButton } from "../../objects/ToonButton";
 import type {
   GamePhase,
   GameSide,
@@ -17,17 +16,16 @@ import type {
 import { CardDetailsModal } from "../../objects/CardDetailsModal";
 import { PlayerStatsView } from "../../view/PlayerStatsView";
 import { NoticeBannerView } from "../../view/NoticeBannerView";
+import { ActionMenuView, type MenuOption } from "../../view/ActionMenuView";
 
 export class UIManager implements IUIManager {
   private context: IBattleContext;
   private side: GameSide;
   private translations!: TranslationStructure;
-  private inputBlocker?: Phaser.GameObjects.Rectangle;
 
   private statsView!: PlayerStatsView;
   private noticeBannerView!: NoticeBannerView;
-
-  private selectionButtons: ToonButton[] = [];
+  private actionMenuView!: ActionMenuView;
 
   constructor(context: IBattleContext, side: GameSide) {
     this.context = context;
@@ -134,6 +132,8 @@ export class UIManager implements IUIManager {
     });
 
     this.noticeBannerView = new NoticeBannerView(this.context.engine);
+
+    this.actionMenuView = new ActionMenuView(this.context.engine);
   }
 
   public animateLPChange(amount: number, startLP: number, targetLP: number) {
@@ -180,84 +180,69 @@ export class UIManager implements IUIManager {
     onCancel?: () => void,
   ) {
     this.context.clearAllMenus();
-    const { COMPONENTS, DEPTHS } = THEME_CONFIG;
     const cardType = card.getType();
     const isMonster = cardType.includes("MONSTER");
     const buttonTexts = this.translations.battle_scene.battle_buttons;
 
-    this.inputBlocker = this.context.add
-      .rectangle(640, 360, 1280, 720, 0x000000, 0.4)
-      .setInteractive()
-      .setDepth(THEME_CONFIG.DEPTHS.PREVIEW_CARD - 1);
-
-    this.inputBlocker.on("pointerdown", () => {
-      if (onCancel) onCancel();
-      else this.shakeButtons();
-    });
-
-    let leftConfig = null;
-    let rightConfig = null;
+    const options: MenuOption[] = [];
 
     if (isMonster) {
-      leftConfig = { text: "", icon: "crossed-swords", width: 70 };
-      rightConfig = { text: "", icon: "round-shield", width: 70 };
+      //atk btn
+      options.push({
+        label: "",
+        icon: "crossed-swords",
+        width: 70,
+        offsetX: -75,
+        offsetY: -100,
+        action: () => onSelect("ATK"),
+      });
+      //def btn
+      options.push({
+        label: "",
+        icon: "round-shield",
+        width: 70,
+        offsetX: 75,
+        offsetY: -100,
+        action: () => onSelect("DEF"),
+      });
     } else if (cardType === "SPELL") {
-      leftConfig = { text: buttonTexts.active, width: 90 };
-      rightConfig = { text: buttonTexts.set, width: 110 };
+      options.push({
+        label: buttonTexts.active,
+        width: 90,
+        offsetX: -75,
+        offsetY: -100,
+        isLeft: true,
+        action: () => onSelect("FACE_UP"),
+      });
+      options.push({
+        label: buttonTexts.set,
+        width: 110,
+        offsetX: 75,
+        offsetY: -100,
+        action: () => onSelect("SET"),
+      });
     } else if (cardType === "TRAP") {
-      rightConfig = { text: buttonTexts.set, width: 110 };
+      options.push({
+        label: buttonTexts.set,
+        width: 110,
+        offsetX: 75,
+        offsetY: -100,
+        action: () => onSelect("SET"),
+      });
     }
 
-    const createBtn = (
-      config: { text: string; width: number; icon?: string },
-      isLeft: boolean,
-    ) => {
-      const btn = new ToonButton(this.context.engine, {
-        x: x + (isLeft ? (rightConfig ? -75 : 0) : 75),
-        y: y - 100,
-        height: 42,
-        fontSize: isLeft ? "18px" : "16px",
-        ...COMPONENTS.BUTTONS.PRIMARY,
-        ...config,
-      }).setDepth(DEPTHS.SELECTION_MENU);
-
-      this.selectionButtons.push(btn);
-      btn.on("pointerdown", () => {
-        this.context.clearAllMenus();
-        onSelect(
-          isMonster ? (isLeft ? "ATK" : "DEF") : isLeft ? "FACE_UP" : "SET",
-        );
-      });
-    };
-
-    if (leftConfig) createBtn(leftConfig, true);
-    if (rightConfig) createBtn(rightConfig, false);
+    this.actionMenuView.renderMenu(x, y, options, onCancel);
   }
 
-  private shakeButtons() {
-    this.selectionButtons.forEach((btn) => {
-      this.context.tweens.add({
-        targets: btn,
-        x: btn.x + 5,
-        duration: 50,
-        yoyo: true,
-        repeat: 3,
-        ease: "Power1",
-      });
-    });
-  }
-
-  public clearSelectionMenu() {
-    this.inputBlocker?.destroy();
-    this.selectionButtons.forEach((btn) => btn.destroy());
-    this.selectionButtons = [];
+  public clearSelectionMenu(): void {
+    this.actionMenuView.clearMenu();
   }
 
   public showFieldCardMenu(x: number, y: number, card: Card) {
     this.context.clearAllMenus();
 
-    const buttons: ToonButton[] = [];
-    const buttonArgs: ButtonParams = { card, buttons, x, y };
+    const options: MenuOption[] = [];
+    const menuArgs: MenuOptionParams = { card, options };
 
     const isPlayerCard = card.owner === "PLAYER";
     const myTurn = this.context.gameState.activePlayer == "PLAYER";
@@ -267,42 +252,46 @@ export class UIManager implements IUIManager {
     if (isPlayerCard) {
       if (myTurn) {
         if (currentPhase == "MAIN") {
-          this.addPositionButtons(buttonArgs);
-          this.addActivationButton(buttonArgs);
+          this.addPositionButtons(menuArgs);
+          this.addActivationButton(menuArgs);
         }
 
         if (currentPhase == "BATTLE") {
-          this.addAttackButton(buttonArgs);
+          this.addAttackButton(menuArgs);
         }
       } else if (isResponseWindow) {
-        this.addActivationButton(buttonArgs);
+        this.addActivationButton(menuArgs);
       }
     }
 
-    this.addDetailsButton(buttonArgs);
-    this.selectionButtons = buttons;
+    this.addDetailsButton(menuArgs);
+    this.actionMenuView.renderMenu(x, y, options);
   }
 
   public showGraveyardMenu(graveyardCards: Card[], x: number, y: number) {
     this.context.clearAllMenus();
 
-    const battleTexts = this.translations["battle_scene"];
-    const buttonTexts = battleTexts.battle_buttons;
+    const buttonTexts = this.translations["battle_scene"].battle_buttons;
 
-    this.selectionButtons.push(
-      this.createMenuButton(buttonTexts.details, x + 70, y - 35, () => {
-        this.context.engine.scene.launch("GraveyardScene", graveyardCards);
-      }),
-    );
+    const options: MenuOption[] = [
+      {
+        label: buttonTexts.details,
+        offsetX: 70,
+        action: () => {
+          this.context.engine.scene.launch("GraveyardScene", graveyardCards);
+        },
+      },
+    ];
+
+    this.actionMenuView.renderMenu(x, y, options);
   }
 
-  private addPositionButtons({ card, buttons, x, y }: ButtonParams) {
+  private addPositionButtons({ card, options }: MenuOptionParams) {
     const mainPhase = this.context.currentPhase == "MAIN";
     const currentTurn = this.context.gameState.currentTurn;
     const hasWaited = currentTurn > card.setTurn;
     const monsterCard = card.getType().includes("MONSTER");
-    const battleTexts = this.translations["battle_scene"];
-    const buttonTexts = battleTexts.battle_buttons;
+    const buttonTexts = this.translations["battle_scene"].battle_buttons;
 
     const canChangePos =
       mainPhase &&
@@ -314,32 +303,33 @@ export class UIManager implements IUIManager {
     if (!canChangePos) return;
 
     if (card.isFaceDown) {
-      buttons.push(
-        this.createMenuButton(buttonTexts.flip, x + 70, y - 35, () =>
-          // this.handleFlipSummon(card),
+      options.push({
+        label: buttonTexts.flip,
+        offsetX: 70,
+        action: () =>
           EventBus.emit(GameEvent.CARD_POSITION_CHANGED, {
             card: card,
             newMode: "FACE_UP",
             isFlip: true,
           }),
-        ),
-      );
+      });
     } else {
       const label = buttonTexts.change_pos;
       const newMode = card.angle === 0 ? "DEF" : "ATK";
-      buttons.push(
-        this.createMenuButton(label, x + 70, y - 35, () =>
+      options.push({
+        label,
+        offsetX: 70,
+        action: () =>
           EventBus.emit(GameEvent.CARD_POSITION_CHANGED, {
             card: card,
             newMode,
             isFlip: false,
           }),
-        ),
-      );
+      });
     }
   }
 
-  private addAttackButton({ card, buttons, x, y }: ButtonParams) {
+  private addAttackButton({ card, options }: MenuOptionParams) {
     const currentPhase = this.context.currentPhase;
     const cardData = card.getCardData();
     const battleTexts = this.translations["battle_scene"];
@@ -355,15 +345,17 @@ export class UIManager implements IUIManager {
       !card.hasAttacked;
     //atk btn
     if (currentPhase === "BATTLE" && canAttack) {
-      buttons.push(
-        this.createMenuButton(buttonTexts.attack, x + 70, y - 35, async () => {
+      options.push({
+        label: buttonTexts.attack,
+        offsetX: 70,
+        action: async () => {
           await this.context.onAttackDeclared(card);
-        }),
-      );
+        },
+      });
     }
   }
 
-  private addActivationButton({ card, buttons, x, y }: ButtonParams) {
+  private addActivationButton({ card, options }: MenuOptionParams) {
     if (card.owner !== "PLAYER") return;
 
     const battleTexts = this.translations["battle_scene"];
@@ -384,38 +376,37 @@ export class UIManager implements IUIManager {
     }
 
     if (canActivate) {
-      this.pushActiveButton(buttons, x, y, buttonTexts.active, card);
+      this.pushActiveButton(options, buttonTexts.active, card);
     }
   }
 
-  private pushActiveButton(
-    buttons: ToonButton[],
-    x: number,
-    y: number,
-    label: string,
-    card: Card,
-  ) {
+  private pushActiveButton(options: MenuOption[], label: string, card: Card) {
     //right button verify
-    const offsetY = buttons.length > 0 ? 85 : 35;
-    const offsetX = buttons.length > 0 ? 0 : 70;
+    const offsetY = options.length > 0 ? -85 : -35;
+    const offsetX = options.length > 0 ? 0 : 70;
 
-    buttons.push(
-      this.createMenuButton(label, x + offsetX, y - offsetY, async () => {
+    options.push({
+      label,
+      offsetX,
+      offsetY,
+      action: async () => {
         await this.context.cardActivation(card, this.side);
 
         EventBus.emit(GameEvent.ACTION_FINALIZED, { card });
-      }),
-    );
+      },
+    });
   }
 
-  private addDetailsButton({ card, buttons, x, y }: ButtonParams) {
+  private addDetailsButton({ card, options }: MenuOptionParams) {
     const battleTexts = this.translations["battle_scene"];
     const buttonTexts = battleTexts.battle_buttons;
 
     //details btn always visible
     if (!card.isFaceDown || card.owner === "PLAYER") {
-      buttons.push(
-        this.createMenuButton(buttonTexts.details, x - 70, y - 35, () => {
+      options.push({
+        label: buttonTexts.details,
+        offsetX: -70,
+        action: () => {
           this.context.getHand("PLAYER").showHand();
           new CardDetailsModal(this.context.engine, {
             cardData: card.getCardData(),
@@ -423,33 +414,9 @@ export class UIManager implements IUIManager {
             originalOwner: card.originalOwner,
             location: card.location,
           });
-        }),
-      );
+        },
+      });
     }
-  }
-
-  private createMenuButton(
-    text: string,
-    x: number,
-    y: number,
-    callback: () => void,
-  ): ToonButton {
-    const btn = new ToonButton(this.context.engine, {
-      text: text.toUpperCase(),
-      x,
-      y,
-      ...THEME_CONFIG.COMPONENTS.BUTTONS.PRIMARY,
-      height: 40,
-      width: 120,
-      fontSize: "14px",
-    }).setDepth(THEME_CONFIG.DEPTHS.SELECTION_MENU);
-
-    btn.on("pointerdown", () => {
-      this.context.clearAllMenus();
-      callback();
-    });
-
-    return btn;
   }
 
   public handleFlipSummon(card: Card) {
@@ -477,7 +444,7 @@ export class UIManager implements IUIManager {
         this.translations.battle_scene.effect_notices;
 
       //opacity block background
-      this.inputBlocker = this.context.add
+      const inputBlocker = this.context.add
         .rectangle(
           SCREEN.CENTER_X,
           SCREEN.CENTER_Y,
@@ -498,7 +465,7 @@ export class UIManager implements IUIManager {
           cancelText: cancel_btn,
         },
         (result) => {
-          this.inputBlocker?.destroy();
+          inputBlocker?.destroy();
           resolve(result);
         },
       ).setDepth(THEME_CONFIG.DEPTHS.BANNERS);
@@ -506,9 +473,7 @@ export class UIManager implements IUIManager {
   }
 }
 
-export interface ButtonParams {
+export interface MenuOptionParams {
   card: Card;
-  x: number;
-  y: number;
-  buttons: ToonButton[];
+  options: MenuOption[];
 }
