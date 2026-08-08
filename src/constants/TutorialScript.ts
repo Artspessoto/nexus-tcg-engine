@@ -195,4 +195,57 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     requireAction: true,
     skipCameraSync: true,
   },
+  {
+    textKey: "step_10",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: UI.MANA.PLAYER.x,
+      y: UI.MANA.PLAYER.y,
+      id: ["MANA_PLAYER"],
+    },
+  },
+  {
+    textKey: "step_11",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: SCREEN.CENTER_X - 50,
+      y: SCREEN.CENTER_Y + 50,
+      id: ["FIELD_TOON_KNIGHT"],
+      disabled_hover: true,
+    },
+    requireAction: true,
+  },
+  {
+    textKey: "step_11a",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: SCREEN.CENTER_X - 50,
+      y: SCREEN.CENTER_Y + 50,
+      id: ["FIELD_TOON_KNIGHT"],
+      disabled_hover: true,
+    },
+    requireAction: true,
+  },
+  {
+    textKey: "step_11b",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: SCREEN.CENTER_X - 50,
+      y: SCREEN.CENTER_Y + 50,
+      id: ["FIELD_TOON_KNIGHT"],
+      disabled_hover: true,
+    },
+    requireAction: true,
+  },
+  // {
+  //   textKey: "step_12",
+  //   layoutMode: "TOOLTIP",
+  //   focusTarget: {
+  //     x: 200,
+  //     y: HAND.PLAYER.NORMAL_Y,
+  //     id: ["HAND_CARD_FIRE_BALL", "FIELD_SPELL_ZONES"],
+  //     disabled_hover: true,
+  //   },
+  //   requireAction: true,
+  // },
 ];

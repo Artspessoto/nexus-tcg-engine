@@ -9,6 +9,7 @@ import {
 } from "../events/TutorialEvents";
 import { LanguageManager } from "../managers/language/LanguageManager";
 import { Card } from "../objects/Card";
+import { CardDetailsModal } from "../objects/CardDetailsModal";
 import { ToonButton } from "../objects/ToonButton";
 import type {
   GameSide,
@@ -29,10 +30,14 @@ export class TutorialBoardScene extends Phaser.Scene {
   > = new Map();
   private dummyCards: Map<string, Card> = new Map();
   private currentFocusedCard: Card[] = [];
+
+  private playerStatsView!: PlayerStatsView;
+  private npcStatsView!: PlayerStatsView;
   private actionMenuView!: ActionMenuView;
 
   private stepHandlers: Record<string, () => void> = {
     step_8a: () => this.setupDragCard(),
+    step_11: () => this.setupFieldCardInteractions(),
   };
 
   constructor() {
@@ -53,7 +58,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     const lang = LanguageManager.getInstance().currentLang;
     this.translationText = TRANSLATIONS[lang];
 
-    const playerStats = new PlayerStatsView({
+    this.playerStatsView = new PlayerStatsView({
       scene: this,
       side: "PLAYER",
       initialLP: GAME_STATE.BASE_LP,
@@ -61,7 +66,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       playerName: "PLAYER",
     });
 
-    const npcStats = new PlayerStatsView({
+    this.npcStatsView = new PlayerStatsView({
       scene: this,
       side: "OPPONENT",
       initialLP: GAME_STATE.BASE_LP,
@@ -71,11 +76,11 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     this.actionMenuView = new ActionMenuView(this);
 
-    this.uiElements.set("LP_BAR_PLAYER", playerStats.lpContainer);
-    this.uiElements.set("MANA_PLAYER", playerStats.manaContainer);
+    this.uiElements.set("LP_BAR_PLAYER", this.playerStatsView.lpContainer);
+    this.uiElements.set("MANA_PLAYER", this.playerStatsView.manaContainer);
 
-    this.uiElements.set("LP_BAR_OPPONENT", npcStats.lpContainer);
-    this.uiElements.set("MANA_OPPONENT", npcStats.manaContainer);
+    this.uiElements.set("LP_BAR_OPPONENT", this.npcStatsView.lpContainer);
+    this.uiElements.set("MANA_OPPONENT", this.npcStatsView.manaContainer);
 
     this.createDummyDeck("PLAYER");
     this.createDummyDeck("OPPONENT");
@@ -540,6 +545,59 @@ export class TutorialBoardScene extends Phaser.Scene {
     );
   }
 
+  private setupFieldCardInteractions(): void {
+    const card = this.dummyCards.get("HAND_CARD_TOON_KNIGHT");
+    if (!card) return;
+
+    card.setInteractive({ useHandCursor: true });
+
+    card.once("pointerdown", () => {
+      const translationText = this.translationText.battle_scene.battle_buttons;
+
+      const options: MenuOption[] = [
+        {
+          label: translationText.details,
+          offsetX: -70,
+          action: () => {
+            this.scene
+              .get("TutorialUIScene")
+              .events.emit(TutorialEvent.FORCE_UI_STEP, {
+                targetTextKey: "step_11b",
+              });
+            const modal = new CardDetailsModal(this, {
+              cardData: card.getCardData(),
+              owner: "PLAYER",
+              originalOwner: "PLAYER",
+              location: "FIELD",
+            });
+
+            modal.once("destroy", () => {
+              //TODO
+              // this.scene
+              //   .get("TutorialUIScene")
+              //   .events.emit(TutorialEvent.FORCE_UI_STEP, {
+              //     targetTextKey: "step_12",
+              //   });
+
+              console.log("modal destroyed and calling step_12");
+            });
+          },
+        },
+      ];
+
+      this.actionMenuView.renderMenu(card.x, card.y, options, () => {
+        //if clicks outside listen the same method
+        this.setupFieldCardInteractions();
+      });
+
+      this.scene
+        .get("TutorialUIScene")
+        .events.emit(TutorialEvent.FORCE_UI_STEP, {
+          targetTextKey: "step_11a",
+        });
+    });
+  }
+
   private previewDummyPlacement(card: Card, targetX: number, targetY: number) {
     const { ANIMATIONS, COMPONENTS, DEPTHS } = THEME_CONFIG;
 
@@ -573,7 +631,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       targets: this.overlay,
       alpha: 1,
       duration: 300,
-      ease: THEME_CONFIG.ANIMATIONS.EASING.SMOOTH
+      ease: THEME_CONFIG.ANIMATIONS.EASING.SMOOTH,
     });
 
     this.hideDummyHand(card);
@@ -639,10 +697,12 @@ export class TutorialBoardScene extends Phaser.Scene {
 
   private confirmTutorialPlacement(card: Card, mode: PlacementMode) {
     const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
+    const { GAME_STATE } = LAYOUT_CONFIG;
 
     const isDefense = mode === "DEF";
     const isSet = mode === "SET";
     const cardType = card.getType();
+    const cardId = card.getCardData().id;
 
     const finalAngle = isDefense ? 270 : 0;
     const finalScale = isDefense
@@ -651,6 +711,8 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     this.tweens.killTweensOf(card);
     card.setDepth(10);
+
+    card.setFieldVisuals();
 
     if (isSet || (isDefense && cardType.includes("MONSTER"))) {
       card.setFaceDown();
@@ -686,10 +748,14 @@ export class TutorialBoardScene extends Phaser.Scene {
     card.off("pointerover");
     card.off("pointerout");
 
-    //TO DO
-    // this.scene
-    //   .get("TutorialUIScene")
-    //   .events.emit(TutorialEvent.FORCE_UI_STEP, { targetTextKey: "step_10" });
+    this.scene
+      .get("TutorialUIScene")
+      .events.emit(TutorialEvent.FORCE_UI_STEP, { targetTextKey: "step_10" });
+    this.playerStatsView.animateManaChange(
+      GAME_STATE.BASE_MANA - card.getCardData().manaCost,
+    );
+
+    this.uiElements.set(`FIELD_${cardId}`, card);
   }
 
   private handleCameraFocus(targetData?: CameraFocusPayload): void {

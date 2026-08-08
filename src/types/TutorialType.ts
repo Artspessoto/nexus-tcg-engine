@@ -26,7 +26,7 @@ export type TutorialElementId =
   | `${GameSide}_DECK`
   | "PLAYER_HAND"
   | "PHASE_BUTTON"
-  | "FIELD_TOON_KNIGHT_CARD"
+  | `FIELD_${string}`
 
 export interface ZoneConfig {
   type: "MONSTER" | "SPELL" | "GRAVEYARD";

@@ -22,7 +22,7 @@ export const TRANSLATIONS = {
       step_4:
         "Este é o seu deck. Você possui 20 cartas e compra uma a cada turno. Se suas cartas acabarem, você sofre um 'Deck Out' e perde a partida.",
       step_5:
-        "Você inicia o duelo com 5 cartas do seu deck, mas atenção: o limite da sua mão é 6. As cartas são divididas em 4 classes: monstro, monstro de efeito, magia e armadilha.",
+        "Você inicia o duelo com 5 cartas do seu deck, mas atenção: o limite da sua mão é 6. Para jogar qualquer carta no campo, você precisará pagar com seu custo de mana. Vamos conhecer cada tipo de carta",
       step_5a:
         "Esta é uma Carta de Monstro. Ela possui pontos de Ataque (ATK) e Defesa (DEF). Você pode invocá-la no campo em Modo de Ataque (face para cima) ou em Modo de Defesa (face para baixo).",
       step_5b:
@@ -34,21 +34,21 @@ export const TRANSLATIONS = {
       step_6:
         "Agora vamos para o campo de batalha, nele tem os espaços para invocar suas cartas e a zona de cemitério.",
       step_6a:
-        "Aqui é onde fica localizado a zona de monstros, onde tem um limite de 3 invocações (tanto para monstros comuns quanto de efeito)",
+        "Aqui é onde fica localizado a Zona de Monstros, onde tem um limite de 3 invocações (tanto para monstros comuns quanto de efeito)",
       step_6b:
-        "Aqui é a zona de cartas de feitiço, onde você pode colocar cartas mágicas ou armadilhas, mas atenção: para ativar uma carta mágica da mão, precisa ter um espaço disponível na zona.",
+        "Aqui é a Zona de Feitiços, onde você pode colocar cartas mágicas ou armadilhas, mas atenção: para ativar uma carta mágica da mão, precisa ter um espaço disponível na zona.",
       step_6c:
-        "A zona de cemitério é onde as cartas usadas e destruídas em combate e/ou por efeito são enviadas.",
+        "A Zona de Cemitério é onde as cartas usadas e destruídas em combate e/ou por efeito são enviadas.",
       step_7:
         "Este é o seu Controle de Fases. Cada turno no duelo é dividido em etapas, e você usará este botão para avançar entre elas.",
       step_7a:
-        "Normalmente, o turno começa na Fase de Compra (DRAW). Para puxar sua carta, você deve clicar diretamente sobre o seu Deck ou apertar a tecla ESPAÇO.",
+        "Normalmente, o turno começa na Fase de Compra (DRAW PHASE). Para puxar sua carta, você deve clicar diretamente sobre o seu Deck ou apertar a tecla ESPAÇO.",
       step_7b:
-        "Mas atenção à regra: para manter o duelo justo, quem joga o primeiro turno da partida não compra carta, começando direto na Fase Principal (MAIN)",
+        "Mas atenção à regra: para manter o duelo justo, quem joga o primeiro turno da partida não compra carta, começando direto na Fase Principal (MAIN PHASE)",
       step_7c:
         "A Fase Principal é o seu momento de preparação: é apenas nela que você pode invocar monstros, ativar mágicas e baixar suas armadilhas no campo.",
       step_7d:
-        "Depois de se preparar, você avança para a Fase de Batalha (BATTLE), onde seus monstros atacam!",
+        "Depois de se preparar, você avança para a Fase de Batalha (BATTLE PHASE), onde seus monstros atacam!",
       step_7e:
         "Quando terminar, basta clicar novamente para passar o turno para o oponente.",
       step_8:
@@ -57,6 +57,22 @@ export const TRANSLATIONS = {
         "Vamos reforçar nossas defesas. Clique e arraste a sua Carta de Monstro até uma das Zonas de Monstro disponíveis no campo para invocá-la.",
       step_9:
         "Excelente! Agora defina a posição de batalha do seu monstro:\n\nAtaque: Face para cima, pronto para lutar.\nDefesa: Face para baixo, protegendo seus LP.\n\nAviso: A posição só poderá ser alterada no seu próximo turno!",
+      step_10:
+        "Ao invocar a carta, o seu custo de mana é automaticamente deduzido da sua reserva!",
+      step_11:
+        "Sempre que precisar, você pode clicar sobre qualquer carta no campo para inspecioná-la ou usar suas ações. Clique no seu monstro agora",
+      step_11a:
+        "Clique no botão 'DETALHES' para abrir a ficha completa da carta.",
+      step_11b:
+        "Aqui você pode verificar os pontos de Ataque, Defesa, Descrição e habilidades da carta em detalhes. Feche a janela para continuar.",
+      step_12:
+        "Agora vamos aprender a usar uma Carta Mágica. Arraste a 'Bola de fogo' da sua mão para a Zona de Magias no campo para ativá-la!",
+      step_12a:
+        "Cartas mágicas aplicam seu efeito de forma imediata. Como o seu efeito já foi aplicado, ela é enviada diretamente para o Cemitério.",
+      step_13:
+        "O Cemitério armazena todas as cartas descartadas, destruídas ou mágicas resolvidas. Você pode clicar nele a qualquer momento para ver a lista de cartas.",
+      step_14:
+        "Com seu campo de batalha pronto, clique no botão de Fases para avançar à Fase de Batalha (BATTLE PHASE)",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
@@ -183,7 +199,7 @@ export const TRANSLATIONS = {
       step_4:
         "This is your deck. You have 20 cards and draw one every turn. If you run out of cards, you 'Deck Out' and lose the match.",
       step_5:
-        "You start the duel with 5 cards, but pay attention: your hand limit is 6. Cards are divided into 4 types: Monster, Effect Monster, Spell, and Trap.",
+        "You start the duel with 5 cards from your deck, but pay attention: your hand limit is 6. To play any card on the field, you must pay its mana cost. Let's learn about each card type.",
       step_5a:
         "This is a Monster Card. It has Attack (ATK) and Defense (DEF) points. You can summon it to the field in Attack Mode (face-up) or Defense Mode (face-down).",
       step_5b:
@@ -193,23 +209,23 @@ export const TRANSLATIONS = {
       step_5d:
         "This is a Trap Card. It doesn't have a quick activation. You need to set it on the field (face-down) and you can only activate it on the next turn, either in the Main Phase or during Battle, to surprise your opponent!",
       step_6:
-        "Now let's head to the battlefield. It contains the spaces to summon your cards and the graveyard zone.",
+        "Now let's head to the battlefield. It contains the spaces to summon your cards and the Graveyard zone.",
       step_6a:
-        "This is the monster zone, which has a limit of 3 summons (for both normal and effect monsters).",
+        "This is where the Monster Zone is located, which has a limit of 3 summons (for both normal and effect monsters).",
       step_6b:
-        "This is the spell card zone, where you can place magic or trap cards. But pay attention: to activate a spell card from your hand, you must have an available space in this zone.",
+        "This is Spell Zone, where you can place Spell or Trap cards. But pay attention: to activate a Spell card from your hand, you must have an available space in this zone.",
       step_6c:
-        "The graveyard zone is where cards that are used, destroyed in battle, and/or sent by effects end up.",
+        "The Graveyard Zone is where used cards are those destroyed in combat and/or by effects are sent.",
       step_7:
         "This is your Phase Control. Each turn in the duel is divided into phases, and you'll use this button to advance through them.",
       step_7a:
-        "Normally, a turn starts in the Draw Phase (DRAW). To draw your card, you must click directly on your Deck or press the SPACEBAR.",
+        "Normally, a turn starts in the Draw Phase (DRAW PHASE). To draw your card, you must click directly on your Deck or press the SPACEBAR.",
       step_7b:
-        "But pay attention to this rule: to keep the duel fair, the player who goes first doesn't draw a card, starting straight in the Main Phase (MAIN).",
+        "But pay attention to this rule: to keep the duel fair, the player who goes first doesn't draw a card, starting straight in the Main Phase (MAIN PHASE).",
       step_7c:
         "The Main Phase is your preparation time: this is the only phase where you can summon monsters, activate spells, and set your traps on the field.",
       step_7d:
-        "After preparing, you advance to the Battle Phase (BATTLE), where your monsters attack!",
+        "After preparing, you advance to the Battle Phase (BATTLE PHASE), where your monsters attack!",
       step_7e:
         "Once you're done, simply click the button again to pass the turn to your opponent.",
       step_8:
@@ -218,6 +234,21 @@ export const TRANSLATIONS = {
         "Let's bolster our defenses. Click and drag your Monster Card to one of the available Monster Zones on the field to summon it.",
       step_9:
         "Excellent! Now set your monster's battle position:\n\nAttack: Face-up, ready to fight.\nDefense: Face-down, protecting your LP.\n\nNote: The position can only be changed on your next turn!",
+      step_10:
+        "When summoning the card, its mana cost is automatically deducted from your pool!",
+      step_11:
+        "Whenever needed, you can click on any card on the field to inspect it or use its actions. Click on your monster now.",
+      step_11a: "Click the 'DETAILS' button to open the card's full profile.",
+      step_11b:
+        "Here you can check the card's Attack, Defense, Description, and abilities in detail. Close the window to continue.",
+      step_12:
+        "Now let's learn how to use a Spell Card. Drag the 'Fireball' from your hand to the Spell Zone on the field to activate it!",
+      step_12a:
+        "Spell Cards apply their effect immediately. Since its effect has already been applied, it is sent directly to the Graveyard.",
+      step_13:
+        "The Graveyard stores all discarded, destroyed, or resolved spell cards. You can click on it at any time to view the list of cards.",
+      step_14:
+        "With your battlefield ready, click the Phase button to advance to the Battle Phase (BATTLE PHASE).",
       next_btn: "NEXT",
       menu_btn: "BACK TO MENU",
       play_btn: "PLAY NOW",
