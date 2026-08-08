@@ -5,6 +5,7 @@ import { TUTORIAL_STEPS } from "../constants/TutorialScript";
 import {
   TutorialEvent,
   type CameraFocusPayload,
+  type ForceUIStepPayload,
 } from "../events/TutorialEvents";
 import { LanguageManager } from "../managers/language/LanguageManager";
 import { ToonButton } from "../objects/ToonButton";
@@ -116,6 +117,20 @@ export class TutorialUIScene extends Phaser.Scene {
 
     this.buildBaseUI();
     this.showCurrentStep();
+
+    this.events.on(
+      TutorialEvent.FORCE_UI_STEP,
+      (payload: ForceUIStepPayload) => {
+        const stepIndex = TUTORIAL_STEPS.findIndex(
+          (step) => step.textKey == payload.targetTextKey,
+        );
+
+        if (stepIndex !== -1) {
+          this.currentStepIndex = stepIndex;
+          this.showCurrentStep();
+        }
+      },
+    );
   }
 
   private buildBaseUI() {
@@ -207,16 +222,23 @@ export class TutorialUIScene extends Phaser.Scene {
       const coords = this.applyNarrativeLayout();
       targetX = coords.x;
       targetY = coords.y;
-      this.scene
-        .get("TutorialBoardScene")
-        .events.emit(TutorialEvent.RESET_CAMERA);
     } else {
       const coords = this.applyTooltipLayout(step.focusTarget);
       targetX = coords.x;
       targetY = coords.y;
-      this.scene
-        .get("TutorialBoardScene")
-        .events.emit(TutorialEvent.FOCUS_CAMERA, step.focusTarget);
+    }
+
+    //prevent UI interference on board camera
+    if (!step.skipCameraSync) {
+      if (mode == "NARRATIVE") {
+        this.scene
+          .get("TutorialBoardScene")
+          .events.emit(TutorialEvent.RESET_CAMERA);
+      } else {
+        this.scene
+          .get("TutorialBoardScene")
+          .events.emit(TutorialEvent.FOCUS_CAMERA, step.focusTarget);
+      }
     }
 
     this.tweens.killTweensOf(this.dialogContainer);
@@ -245,6 +267,7 @@ export class TutorialUIScene extends Phaser.Scene {
 
   private applyNarrativeLayout(): { x: number; y: number } {
     const { SCREEN } = LAYOUT_CONFIG;
+    const step = TUTORIAL_STEPS[this.currentStepIndex];
 
     //box dimensions
     const boxWidth = SCREEN.WIDTH - 240;
@@ -263,8 +286,13 @@ export class TutorialUIScene extends Phaser.Scene {
     const btnWidth = 100;
     const btnHeight = 45;
 
-    this.nextBtn.setVisible(true);
-    this.nextBtn.setPosition(boxWidth - btnWidth - 10, boxHeight - btnHeight);
+    //disable and set invisible (nextbtn) to lock dialog for user action
+    if (step.requireAction) {
+      this.nextBtn.setVisible(false);
+    } else {
+      this.nextBtn.setVisible(true);
+      this.nextBtn.setPosition(boxWidth - btnWidth - 10, boxHeight - btnHeight);
+    }
 
     this.tooltipHintText.setVisible(false);
     this.clickZone.disableInteractive();
@@ -282,6 +310,7 @@ export class TutorialUIScene extends Phaser.Scene {
     y: number;
   } {
     const boxWidth = 320;
+    const step = TUTORIAL_STEPS[this.currentStepIndex];
 
     this.dialogText.setOrigin(0, 0);
     this.dialogText.setStyle({
@@ -297,15 +326,22 @@ export class TutorialUIScene extends Phaser.Scene {
 
     //hidden the button and show the dialog text with click zone btn
     this.nextBtn.setVisible(false);
-    this.tooltipHintText.setVisible(true);
-    this.tooltipHintText.setPosition(boxWidth - 20, boxHeight - 15);
 
-    this.clickZone.setSize(boxWidth, boxHeight);
-    this.clickZone.setInteractive({ useHandCursor: true });
+    //requireAction blocks click zone (lock dialog for user action)
+    if (step.requireAction) {
+      this.tooltipHintText.setVisible(false);
+      this.clickZone.disableInteractive(false);
+    } else {
+      this.tooltipHintText.setVisible(true);
+      this.tooltipHintText.setPosition(boxWidth - 20, boxHeight - 15);
+
+      this.clickZone.setSize(boxWidth, boxHeight);
+      this.clickZone.setInteractive({ useHandCursor: true });
+    }
 
     this.drawPanelBackground(boxWidth, boxHeight);
 
-    const category = this.getLayoutCategory(focusTarget?.id);
+    const category = this.getLayoutCategory(focusTarget?.id[0]);
     const { x, y } = this.layoutHandlers[category](
       focusTarget,
       boxWidth,
@@ -333,17 +369,21 @@ export class TutorialUIScene extends Phaser.Scene {
   }
 
   private advanceStep(): void {
+    const currentStep = TUTORIAL_STEPS[this.currentStepIndex];
+
+    if (currentStep.requireAction) return; //block advance dialog click
+
     if (this.currentStepIndex < TUTORIAL_STEPS.length - 1) {
       this.currentStepIndex++;
       this.showCurrentStep();
 
-      const currentStep = TUTORIAL_STEPS[this.currentStepIndex];
+      const nextStep = TUTORIAL_STEPS[this.currentStepIndex];
 
       this.scene
         .get("TutorialBoardScene")
         .events.emit(TutorialEvent.ADVANCE_DIALOG, {
-          textKey: currentStep.textKey,
-          targetId: currentStep.focusTarget?.id,
+          textKey: nextStep.textKey,
+          targetId: nextStep.focusTarget?.id,
         });
     }
   }

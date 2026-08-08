@@ -9,7 +9,11 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   {
     textKey: "step_2",
     layoutMode: "TOOLTIP",
-    focusTarget: { x: UI.LP_BAR.X, y: UI.LP_BAR.Y_PLAYER, id: "LP_BAR_PLAYER" },
+    focusTarget: {
+      x: UI.LP_BAR.X,
+      y: UI.LP_BAR.Y_PLAYER,
+      id: ["LP_BAR_PLAYER"],
+    },
   },
   {
     textKey: "step_3",
@@ -17,7 +21,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: UI.MANA.PLAYER.x,
       y: UI.MANA.PLAYER.y,
-      id: "MANA_PLAYER",
+      id: ["MANA_PLAYER"],
     },
   },
   {
@@ -26,7 +30,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: DECK.PLAYER.x,
       y: DECK.PLAYER.y,
-      id: "PLAYER_DECK",
+      id: ["PLAYER_DECK"],
     },
   },
   {
@@ -35,7 +39,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 200,
       y: HAND.PLAYER.NORMAL_Y,
-      id: "PLAYER_HAND",
+      id: ["PLAYER_HAND"],
     },
   },
   {
@@ -44,7 +48,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 180,
       y: HAND.PLAYER.NORMAL_Y,
-      id: "HAND_CARD_TOON_KNIGHT",
+      id: ["HAND_CARD_TOON_KNIGHT"],
     },
   },
   {
@@ -53,7 +57,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 300,
       y: HAND.PLAYER.NORMAL_Y,
-      id: "HAND_CARD_MAGE_APPRENTICE",
+      id: ["HAND_CARD_MAGE_APPRENTICE"],
     },
   },
   {
@@ -62,7 +66,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 420,
       y: HAND.PLAYER.NORMAL_Y,
-      id: "HAND_CARD_FIRE_BALL",
+      id: ["HAND_CARD_FIRE_BALL"],
     },
   },
   {
@@ -71,7 +75,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 530,
       y: HAND.PLAYER.NORMAL_Y,
-      id: "HAND_CARD_DARK_TRAP",
+      id: ["HAND_CARD_DARK_TRAP"],
     },
   },
   {
@@ -84,7 +88,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 70,
       y: SCREEN.CENTER_Y + 50,
-      id: "FIELD_MONSTER_ZONES",
+      id: ["FIELD_MONSTER_ZONES"],
     },
   },
   {
@@ -93,7 +97,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 70,
       y: SCREEN.CENTER_Y + 200,
-      id: "FIELD_SPELL_ZONES",
+      id: ["FIELD_SPELL_ZONES"],
     },
   },
   {
@@ -102,7 +106,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 150,
       y: SCREEN.CENTER_Y,
-      id: "FIELD_GRAVEYARD_ZONE",
+      id: ["FIELD_GRAVEYARD_ZONE"],
     },
   },
   {
@@ -111,7 +115,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
       y: BATTLE.PHASE_BUTTON.y,
-      id: "PHASE_BUTTON",
+      id: ["PHASE_BUTTON"],
     },
   },
   {
@@ -120,7 +124,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
       y: BATTLE.PHASE_BUTTON.y,
-      id: "PHASE_BUTTON",
+      id: ["PHASE_BUTTON"],
     },
   },
   {
@@ -129,7 +133,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
       y: BATTLE.PHASE_BUTTON.y,
-      id: "PHASE_BUTTON",
+      id: ["PHASE_BUTTON"],
     },
   },
   {
@@ -138,7 +142,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
       y: BATTLE.PHASE_BUTTON.y,
-      id: "PHASE_BUTTON",
+      id: ["PHASE_BUTTON"],
     },
   },
   {
@@ -147,7 +151,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
       y: BATTLE.PHASE_BUTTON.y,
-      id: "PHASE_BUTTON",
+      id: ["PHASE_BUTTON"],
     },
   },
   {
@@ -156,7 +160,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
       y: BATTLE.PHASE_BUTTON.y,
-      id: "PHASE_BUTTON",
+      id: ["PHASE_BUTTON"],
     },
   },
   {
@@ -165,7 +169,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 0,
       y: 0,
-      id: "PHASE_BUTTON",
+      id: ["PHASE_BUTTON"],
     },
   },
   {
@@ -174,8 +178,21 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 200,
       y: HAND.PLAYER.NORMAL_Y,
-      id: "HAND_CARD_TOON_KNIGHT",
+      id: ["HAND_CARD_TOON_KNIGHT", "FIELD_MONSTER_ZONES"],
       disabled_hover: true,
     },
+    requireAction: true,
+  },
+  {
+    textKey: "step_9",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: SCREEN.CENTER_X,
+      y: SCREEN.CENTER_Y + 50,
+      id: ["FIELD_MONSTER_ZONES"],
+      disabled_hover: true,
+    },
+    requireAction: true,
+    skipCameraSync: true,
   },
 ];

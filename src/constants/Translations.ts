@@ -55,6 +55,8 @@ export const TRANSLATIONS = {
         "Agora que você já conhece a teoria, vamos para a prática! Como este é o nosso primeiro turno, estamos na Fase Principal.",
       step_8a:
         "Vamos reforçar nossas defesas. Clique e arraste a sua Carta de Monstro até uma das Zonas de Monstro disponíveis no campo para invocá-la.",
+      step_9:
+        "Excelente! Agora defina a posição de batalha do seu monstro:\n\nAtaque: Face para cima, pronto para lutar.\nDefesa: Face para baixo, protegendo seus LP.\n\nAviso: A posição só poderá ser alterada no seu próximo turno!",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
@@ -214,6 +216,8 @@ export const TRANSLATIONS = {
         "Now that you know the theory, let's put it into practice! Since this is our first turn, we are in the Main Phase.",
       step_8a:
         "Let's bolster our defenses. Click and drag your Monster Card to one of the available Monster Zones on the field to summon it.",
+      step_9:
+        "Excellent! Now set your monster's battle position:\n\nAttack: Face-up, ready to fight.\nDefense: Face-down, protecting your LP.\n\nNote: The position can only be changed on your next turn!",
       next_btn: "NEXT",
       menu_btn: "BACK TO MENU",
       play_btn: "PLAY NOW",

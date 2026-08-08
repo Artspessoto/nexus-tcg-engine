@@ -5,7 +5,8 @@ export interface TutorialStep {
   textKey: string;
   layoutMode: "NARRATIVE" | "TOOLTIP";
   focusTarget?: CameraFocusPayload;
-  dialogSize?: { width: number; height: number };
+  requireAction?: boolean; //to block advance btn in some cases
+  skipCameraSync?: boolean; //prevents UI interfering with board camera
 }
 
 export type LayoutTargetCategory =
@@ -24,7 +25,8 @@ export type TutorialElementId =
   | `HAND_CARD_${string}`
   | `${GameSide}_DECK`
   | "PLAYER_HAND"
-  | "PHASE_BUTTON";
+  | "PHASE_BUTTON"
+  | "FIELD_TOON_KNIGHT_CARD"
 
 export interface ZoneConfig {
   type: "MONSTER" | "SPELL" | "GRAVEYARD";
