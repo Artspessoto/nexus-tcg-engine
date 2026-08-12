@@ -36,8 +36,9 @@ export class TutorialBoardScene extends Phaser.Scene {
   private actionMenuView!: ActionMenuView;
 
   private stepHandlers: Record<string, () => void> = {
-    step_8a: () => this.setupDragCard(),
+    step_8a: () => this.setupDragCard("TOON_KNIGHT"),
     step_11: () => this.setupFieldCardInteractions(),
+    step_12: () => this.setupDragCard("FIRE_BALL"),
   };
 
   constructor() {
@@ -208,8 +209,8 @@ export class TutorialBoardScene extends Phaser.Scene {
 
       this.tweens.add({
         targets: card,
-        x: targetX,
-        y: HAND.PLAYER.NORMAL_Y,
+        x: { from: card.x, to: targetX },
+        y: { from: card.y, to: HAND.PLAYER.NORMAL_Y },
         angle: 0,
         scale: cardScale.PLAYER_HAND,
         duration: ANIMATIONS.DURATIONS.SLOW, // 0.5s
@@ -437,8 +438,8 @@ export class TutorialBoardScene extends Phaser.Scene {
     }
   }
 
-  private setupDragCard(): void {
-    const cardName = "HAND_CARD_TOON_KNIGHT";
+  private setupDragCard(cardKey: string): void {
+    const cardName: TutorialElementId = `HAND_CARD_${cardKey}`;
     const card = this.dummyCards.get(cardName);
     if (!card) return;
 
@@ -449,10 +450,10 @@ export class TutorialBoardScene extends Phaser.Scene {
     card.on("pointerover", () => this.handleDummyHover(card));
     card.on("pointerout", () => this.handleDummyOut(card));
 
-    this.setupDragEvents(card);
+    this.setupDragEvents(card, cardName);
   }
 
-  private setupDragEvents(card: Card): void {
+  private setupDragEvents(card: Card, cardName: TutorialElementId): void {
     const { ANIMATIONS, DEPTHS, COMPONENTS } = THEME_CONFIG;
 
     card.off("dragstart");
@@ -499,16 +500,28 @@ export class TutorialBoardScene extends Phaser.Scene {
     );
 
     const returnToHand = () => {
+      this.input.setDraggable(card, false);
+
       card.setDepth(DEPTHS.UI_BASE);
+
+      //TODO: find race condition problem (needed delayedCall uses for urgency)
+      this.time.delayedCall(0, () => {
+        this.reorganizeDummyHand();
+
+        card.setInteractive({ draggable: true });
+        this.input.setDraggable(card, true);
+      });
+
+      const targetZoneKey = card.getType().includes("MONSTER")
+        ? "FIELD_MONSTER_ZONES"
+        : "FIELD_SPELL_ZONES";
 
       this.handleCameraFocus({
         x: 200,
         y: 600,
-        id: ["HAND_CARD_TOON_KNIGHT", "FIELD_MONSTER_ZONES"],
+        id: [cardName, targetZoneKey],
         disabled_hover: true,
       });
-
-      this.reorganizeDummyHand();
 
       card.on("pointerover", () => this.handleDummyHover(card));
       card.on("pointerout", () => this.handleDummyOut(card));
@@ -536,7 +549,10 @@ export class TutorialBoardScene extends Phaser.Scene {
     card.on(
       "drop",
       (_pointer: Phaser.Input.Pointer, targetZone: Phaser.GameObjects.Zone) => {
-        if (targetZone.getData("type") === "MONSTER") {
+        const expectedZoneType = card.getType().includes("MONSTER")
+          ? "MONSTER"
+          : "SPELL";
+        if (targetZone.getData("type") === expectedZoneType) {
           this.showSelectMenu(card, targetZone, returnToHand);
         } else {
           returnToHand();
@@ -546,55 +562,65 @@ export class TutorialBoardScene extends Phaser.Scene {
   }
 
   private setupFieldCardInteractions(): void {
-    const card = this.dummyCards.get("HAND_CARD_TOON_KNIGHT");
-    if (!card) return;
+    const fieldCards: Card[] = [];
 
-    card.setInteractive({ useHandCursor: true });
+    this.uiElements.forEach((element, key) => {
+      if (key.startsWith("FIELD_") && element instanceof Card) {
+        fieldCards.push(element);
+      }
+    });
 
-    card.once("pointerdown", () => {
-      const translationText = this.translationText.battle_scene.battle_buttons;
+    if (fieldCards.length == 0) return;
 
-      const options: MenuOption[] = [
-        {
-          label: translationText.details,
-          offsetX: -70,
-          action: () => {
-            this.scene
-              .get("TutorialUIScene")
-              .events.emit(TutorialEvent.FORCE_UI_STEP, {
-                targetTextKey: "step_11b",
+    fieldCards.forEach((card) => {
+      card.off("pointerdown");
+      card.setInteractive({ useHandCursor: true });
+
+      card.once("pointerdown", () => {
+        const translationText =
+          this.translationText.battle_scene.battle_buttons;
+
+        const options: MenuOption[] = [
+          {
+            label: translationText.details,
+            offsetX: -70,
+            action: () => {
+              this.scene
+                .get("TutorialUIScene")
+                .events.emit(TutorialEvent.FORCE_UI_STEP, {
+                  targetTextKey: "step_11b",
+                });
+              const modal = new CardDetailsModal(this, {
+                cardData: card.getCardData(),
+                owner: "PLAYER",
+                originalOwner: "PLAYER",
+                location: "FIELD",
               });
-            const modal = new CardDetailsModal(this, {
-              cardData: card.getCardData(),
-              owner: "PLAYER",
-              originalOwner: "PLAYER",
-              location: "FIELD",
-            });
 
-            modal.once("destroy", () => {
-              //TODO
-              // this.scene
-              //   .get("TutorialUIScene")
-              //   .events.emit(TutorialEvent.FORCE_UI_STEP, {
-              //     targetTextKey: "step_12",
-              //   });
+              modal.once("destroy", () => {
+                this.scene
+                  .get("TutorialUIScene")
+                  .events.emit(TutorialEvent.FORCE_UI_STEP, {
+                    targetTextKey: "step_12",
+                  });
 
-              console.log("modal destroyed and calling step_12");
-            });
+                console.log("modal destroyed and calling step_12");
+              });
+            },
           },
-        },
-      ];
+        ];
 
-      this.actionMenuView.renderMenu(card.x, card.y, options, () => {
-        //if clicks outside listen the same method
-        this.setupFieldCardInteractions();
-      });
-
-      this.scene
-        .get("TutorialUIScene")
-        .events.emit(TutorialEvent.FORCE_UI_STEP, {
-          targetTextKey: "step_11a",
+        this.actionMenuView.renderMenu(card.x, card.y, options, () => {
+          //if clicks outside listen the same method
+          this.setupFieldCardInteractions();
         });
+
+        this.scene
+          .get("TutorialUIScene")
+          .events.emit(TutorialEvent.FORCE_UI_STEP, {
+            targetTextKey: "step_11a",
+          });
+      });
     });
   }
 
@@ -723,8 +749,6 @@ export class TutorialBoardScene extends Phaser.Scene {
     // Slot animation movement
     this.tweens.add({
       targets: card,
-      x: card.x,
-      y: card.y,
       angle: finalAngle,
       scale: finalScale,
       duration: ANIMATIONS.DURATIONS.FIELD_PLAY,
@@ -748,14 +772,15 @@ export class TutorialBoardScene extends Phaser.Scene {
     card.off("pointerover");
     card.off("pointerout");
 
+    this.dummyCards.delete(`HAND_CARD_${cardId}`);
+    this.uiElements.set(`FIELD_CARD_${cardId}`, card);
+
     this.scene
       .get("TutorialUIScene")
       .events.emit(TutorialEvent.FORCE_UI_STEP, { targetTextKey: "step_10" });
     this.playerStatsView.animateManaChange(
       GAME_STATE.BASE_MANA - card.getCardData().manaCost,
     );
-
-    this.uiElements.set(`FIELD_${cardId}`, card);
   }
 
   private handleCameraFocus(targetData?: CameraFocusPayload): void {
@@ -782,7 +807,9 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.uiElements.forEach((container, key) => {
       container.setDepth(0);
 
-      if (key.includes("FIELD") && !targets.includes(key)) {
+      const isFieldZone = key.includes("FIELD") && !key.includes("FIELD_CARD");
+
+      if (isFieldZone && !targets.includes(key)) {
         this.tweens.killTweensOf(container);
         this.tweens.add({
           targets: container,
