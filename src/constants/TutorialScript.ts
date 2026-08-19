@@ -1,7 +1,7 @@
 import type { TutorialStep } from "../types/TutorialType";
 import { LAYOUT_CONFIG } from "./LayoutConfig";
 
-const { UI, DECK, HAND, SCREEN, BATTLE } = LAYOUT_CONFIG;
+const { UI, DECK, HAND, SCREEN, BATTLE, FIELD } = LAYOUT_CONFIG;
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
   { textKey: "step_1", layoutMode: "NARRATIVE" },
@@ -244,6 +244,37 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       x: 200,
       y: HAND.PLAYER.NORMAL_Y,
       id: ["HAND_CARD_FIRE_BALL", "FIELD_SPELL_ZONES"],
+      disabled_hover: true,
+    },
+    requireAction: true,
+  },
+  {
+    textKey: "step_12a",
+    layoutMode: "TOOLTIP",
+    skipCameraSync: true,
+    focusTarget: {
+      x: 200,
+      y: HAND.PLAYER.NORMAL_Y,
+      id: ["HAND_CARD_FIRE_BALL"],
+      disabled_hover: true,
+    },
+  },
+  {
+    textKey: "step_13",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: FIELD.PLAYER.GRAVEYARD.x,
+      y: FIELD.PLAYER.GRAVEYARD.y,
+      id: ["GRAVEYARD_CARD_FIRE_BALL", "FIELD_GRAVEYARD_ZONE"],
+    },
+  },
+  {
+    textKey: "step_14",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: SCREEN.CENTER_X - 50,
+      y: SCREEN.CENTER_Y + 50,
+      id: ["FIELD_CARD_TOON_KNIGHT"],
       disabled_hover: true,
     },
     requireAction: true,

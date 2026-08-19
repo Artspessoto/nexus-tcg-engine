@@ -68,7 +68,7 @@ export const TRANSLATIONS = {
       step_12:
         "Agora vamos aprender a usar uma Carta Mágica. Arraste a 'Bola de fogo' da sua mão para a Zona de Magias no campo para ativá-la!",
       step_12a:
-        "Cartas mágicas aplicam seu efeito de forma imediata. Como o seu efeito já foi aplicado, ela é enviada diretamente para o Cemitério.",
+        "Cartas mágicas aplicam seu efeito de forma imediata. Assim que o seu efeito for aplicado, ela é enviada diretamente para o Cemitério.",
       step_13:
         "O Cemitério armazena todas as cartas descartadas, destruídas ou mágicas resolvidas. Você pode clicar nele a qualquer momento para ver a lista de cartas.",
       step_14:
@@ -244,7 +244,7 @@ export const TRANSLATIONS = {
       step_12:
         "Now let's learn how to use a Spell Card. Drag the 'Fireball' from your hand to the Spell Zone on the field to activate it!",
       step_12a:
-        "Spell Cards apply their effect immediately. Since its effect has already been applied, it is sent directly to the Graveyard.",
+        "Spell cards apply their effects immediately. As soon as their effect is applied, they are sent directly to the Graveyard.",
       step_13:
         "The Graveyard stores all discarded, destroyed, or resolved spell cards. You can click on it at any time to view the list of cards.",
       step_14:

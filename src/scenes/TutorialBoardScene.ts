@@ -39,6 +39,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     step_8a: () => this.setupDragCard("TOON_KNIGHT"),
     step_11: () => this.setupFieldCardInteractions(),
     step_12: () => this.setupDragCard("FIRE_BALL"),
+    step_13: () => this.setupGraveyardInteractions(),
   };
 
   constructor() {
@@ -526,9 +527,14 @@ export class TutorialBoardScene extends Phaser.Scene {
       card.on("pointerover", () => this.handleDummyHover(card));
       card.on("pointerout", () => this.handleDummyOut(card));
 
-      this.scene
-        .get("TutorialUIScene")
-        .events.emit(TutorialEvent.FORCE_UI_STEP, { targetTextKey: "step_8a" });
+      //fire ball no call next step here
+      if (targetZoneKey == "FIELD_MONSTER_ZONES") {
+        this.scene
+          .get("TutorialUIScene")
+          .events.emit(TutorialEvent.FORCE_UI_STEP, {
+            targetTextKey: "step_8a",
+          });
+      }
     };
 
     card.on(
@@ -603,8 +609,6 @@ export class TutorialBoardScene extends Phaser.Scene {
                   .events.emit(TutorialEvent.FORCE_UI_STEP, {
                     targetTextKey: "step_12",
                   });
-
-                console.log("modal destroyed and calling step_12");
               });
             },
           },
@@ -624,12 +628,62 @@ export class TutorialBoardScene extends Phaser.Scene {
     });
   }
 
+  private setupGraveyardInteractions(): void {
+    const graveyardCards: Card[] = [];
+
+    this.uiElements.forEach((element, key) => {
+      if (key.startsWith("GRAVEYARD_CARD_") && element instanceof Card) {
+        graveyardCards.push(element);
+      }
+    });
+
+    if (graveyardCards.length == 0) return;
+
+    graveyardCards.forEach((card) => {
+      card.setDepth(THEME_CONFIG.DEPTHS.UI_BASE + 5);
+      card.off("pointerdown");
+      card.setInteractive({ useHandCursor: true });
+
+      card.once("pointerdown", () => {
+        const translationText =
+          this.translationText.battle_scene.battle_buttons;
+        const options: MenuOption[] = [
+          {
+            label: translationText.details,
+            offsetX: 70,
+            action: () => {
+              const scene = this.scene.launch("GraveyardScene", {
+                cards: graveyardCards,
+              });
+
+              scene.stop("destroy", () => {
+                this.scene
+                  .get("TutorialUIScene")
+                  .events.emit(TutorialEvent.FORCE_UI_STEP, {
+                    targetTextKey: "step_14",
+                  });
+              });
+            },
+          },
+        ];
+
+        this.actionMenuView.renderMenu(card.x, card.y, options, () => {
+          //if clicks outside listen the same method
+          this.setupGraveyardInteractions();
+        });
+      });
+    });
+  }
+
   private previewDummyPlacement(card: Card, targetX: number, targetY: number) {
     const { ANIMATIONS, COMPONENTS, DEPTHS } = THEME_CONFIG;
 
     this.tweens.killTweensOf(card);
     card.visualElements.setY(0);
     card.visualElements.setScale(1);
+
+    card.setFaceUp();
+    card.setHandVisuals();
 
     //levitate card on field
     this.tweens.add({
@@ -650,14 +704,17 @@ export class TutorialBoardScene extends Phaser.Scene {
     targetZone: Phaser.GameObjects.Zone,
     onCancel: () => void,
   ): void {
+    const { ANIMATIONS } = THEME_CONFIG;
     this.previewDummyPlacement(card, targetZone.x, targetZone.y);
+
+    this.hideDummyHand(card);
 
     //create manual overlay effect (because skipCameraSync prevents FOCUS_CAMERA event)
     this.tweens.add({
       targets: this.overlay,
       alpha: 1,
       duration: 300,
-      ease: THEME_CONFIG.ANIMATIONS.EASING.SMOOTH,
+      ease: ANIMATIONS.EASING.SMOOTH,
     });
 
     this.hideDummyHand(card);
@@ -692,15 +749,15 @@ export class TutorialBoardScene extends Phaser.Scene {
         offsetX: -75,
         offsetY: -100,
         isLeft: true,
-        action: () => this.confirmTutorialPlacement(card, "FACE_UP"),
+        action: () => this.confirmSpellActivation(card),
       });
-      options.push({
-        label: translationText.set,
-        width: 110,
-        offsetX: 75,
-        offsetY: -100,
-        action: () => this.confirmTutorialPlacement(card, "SET"),
-      });
+      // options.push({
+      //   label: translationText.set,
+      //   width: 110,
+      //   offsetX: 75,
+      //   offsetY: -100,
+      //   action: () => this.confirmTutorialPlacement(card, "SET"),
+      // });
     } else if (cardType === "TRAP") {
       options.push({
         label: translationText.set,
@@ -716,13 +773,14 @@ export class TutorialBoardScene extends Phaser.Scene {
       onCancel();
     });
 
+    const nextStep = cardType.includes("MONSTER") ? "step_9" : "step_12a";
     this.scene
       .get("TutorialUIScene")
-      .events.emit(TutorialEvent.FORCE_UI_STEP, { targetTextKey: "step_9" });
+      .events.emit(TutorialEvent.FORCE_UI_STEP, { targetTextKey: nextStep });
   }
 
   private confirmTutorialPlacement(card: Card, mode: PlacementMode) {
-    const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
+    const { COMPONENTS, ANIMATIONS, DEPTHS } = THEME_CONFIG;
     const { GAME_STATE } = LAYOUT_CONFIG;
 
     const isDefense = mode === "DEF";
@@ -736,7 +794,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       : COMPONENTS.CARD.SCALES.FIELD_ATK;
 
     this.tweens.killTweensOf(card);
-    card.setDepth(10);
+    card.setDepth(DEPTHS.UI_BASE);
 
     card.setFieldVisuals();
 
@@ -759,7 +817,7 @@ export class TutorialBoardScene extends Phaser.Scene {
           ANIMATIONS.SHAKES.LIGHT.duration,
           ANIMATIONS.SHAKES.LIGHT.intensity,
         );
-        card.setDepth(10);
+        card.setDepth(DEPTHS.UI_BASE);
       },
     });
 
@@ -774,6 +832,7 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     this.dummyCards.delete(`HAND_CARD_${cardId}`);
     this.uiElements.set(`FIELD_CARD_${cardId}`, card);
+    card.setLocation("FIELD");
 
     this.scene
       .get("TutorialUIScene")
@@ -783,28 +842,168 @@ export class TutorialBoardScene extends Phaser.Scene {
     );
   }
 
-  private handleCameraFocus(targetData?: CameraFocusPayload): void {
+  private confirmSpellActivation(card: Card) {
+    const { GAME_STATE } = LAYOUT_CONFIG;
     const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
+    const cardId = card.getCardData().id;
+
+    this.actionMenuView.clearMenu();
+    this.handleCameraReset(300);
+
+    this.dummyCards.delete(`HAND_CARD_${cardId}`);
+    card.setLocation("GRAVEYARD");
+
+    card.setDepth(DEPTHS.OVERLAY_ACTIVATION || 20000);
+
+    this.tweens.add({
+      targets: card,
+      x: LAYOUT_CONFIG.SCREEN.CENTER_X,
+      y: LAYOUT_CONFIG.SCREEN.CENTER_Y,
+      scale: 1,
+      angle: 0,
+      duration: ANIMATIONS.DURATIONS.ACTIVATION,
+      ease: ANIMATIONS.EASING.BOUNCE,
+      onComplete: () => {
+        this.cameras.main.shake(
+          ANIMATIONS.SHAKES.MEDIUM.duration,
+          ANIMATIONS.SHAKES.MEDIUM.intensity,
+        );
+
+        this.playerStatsView.animateManaChange(
+          GAME_STATE.BASE_MANA - card.getCardData().manaCost,
+        );
+
+        //after effect move card in fade to graveyard
+        this.time.delayedCall(1000, () => {
+          this.sendToGraveyard(card, () => {
+            this.showDummyHand();
+            this.scene
+              .get("TutorialUIScene")
+              .events.emit(TutorialEvent.FORCE_UI_STEP, {
+                targetTextKey: "step_13",
+              });
+          });
+        });
+      },
+    });
+  }
+
+  private sendToGraveyard(card: Card, onCompleteCallback?: () => void): void {
+    const { FIELD } = LAYOUT_CONFIG;
+    const { COMPONENTS, ANIMATIONS, DEPTHS } = THEME_CONFIG;
+    const coords = FIELD.PLAYER.GRAVEYARD;
+
+    this.tweens.killTweensOf(card);
+    this.tweens.killTweensOf(card.visualElements);
+
+    card.setFieldVisuals();
+    card.setFaceUp();
+    card.visualElements.setPosition(0, 0);
+    card.visualElements.setScale(1);
+
+    this.tweens.add({
+      targets: card,
+      x: coords.x,
+      y: coords.y,
+      scale: COMPONENTS.CARD.SCALES.FIELD_ATK,
+      angle: 0,
+      duration: ANIMATIONS.DURATIONS.SLOW,
+      ease: ANIMATIONS.EASING.SMOOTH,
+      onStart: () => {
+        card.setDepth(DEPTHS.DRAGGING_CARD);
+      },
+      onComplete: () => {
+        card.setDepth(DEPTHS.FIELD_CARDS + 1);
+
+        this.uiElements.set(`GRAVEYARD_CARD_${card.getCardData().id}`, card);
+
+        if (onCompleteCallback) {
+          onCompleteCallback();
+        }
+      },
+    });
+  }
+
+  private handleCameraFocus(targetData?: CameraFocusPayload): void {
+    const { ANIMATIONS } = THEME_CONFIG;
     const targets = targetData?.id || [];
 
+    this.clearCurrentFocus();
+
+    this.updateHandVisibility(targets);
+
+    this.updateFieldZonesVisibility(targets);
+
+    this.highlightFocusTargets(targets, targetData);
+
+    //show overlay to focus object
+    this.tweens.add({
+      targets: this.overlay,
+      alpha: 1,
+      duration: 1000,
+      ease: ANIMATIONS.EASING.SMOOTH,
+    });
+  }
+
+  private clearCurrentFocus(): void {
     this.currentFocusedCard.forEach((card) => this.handleDummyOut(card));
     this.currentFocusedCard = [];
+  }
 
-    const focusesHand =
-      targets.includes("PLAYER_HAND") ||
-      targets.some((id) => id.includes("HAND_CARD"));
+  private updateHandVisibility(targets: TutorialElementId[]): void {
+    const { HAND } = LAYOUT_CONFIG;
+    const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
+    const specificHandCard = targets.find((id) => id.includes("HAND_CARD_"));
+    const focusesHandGroup = targets.includes("PLAYER_HAND");
+    const focusesSpellZone = targets.includes("FIELD_SPELL_ZONES");
+
+    if (focusesSpellZone && specificHandCard) {
+      this.dummyCards.forEach((card, key) => {
+        this.tweens.killTweensOf(card);
+
+        if (key === specificHandCard) {
+          this.tweens.add({
+            targets: card,
+            y: HAND.PLAYER.NORMAL_Y,
+            duration: ANIMATIONS.DURATIONS.SLOW,
+            ease: ANIMATIONS.EASING.SMOOTH,
+          });
+          card.setDepth(DEPTHS.DRAGGING_CARD);
+        } else {
+          //hide other hand cards to show the spell slot
+          this.tweens.add({
+            targets: card,
+            y: HAND.PLAYER.NORMAL_Y + 120,
+            duration: ANIMATIONS.DURATIONS.SLOW,
+            ease: ANIMATIONS.EASING.SMOOTH,
+          });
+          card.setDepth(0);
+        }
+      });
+      return;
+    }
+
     const focusesFieldOrPhase =
       targets.some((id) => id.includes("FIELD")) ||
       targets.includes("PHASE_BUTTON");
 
-    if (focusesHand) {
+    if (focusesHandGroup || specificHandCard) {
       this.showDummyHand();
     } else if (focusesFieldOrPhase) {
       this.hideDummyHand();
     }
+  }
+
+  private updateFieldZonesVisibility(targets: TutorialElementId[]): void {
+    const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
 
     //reset depth of all elements
     this.uiElements.forEach((container, key) => {
+      if (key.startsWith("FIELD_CARD_")) {
+        container.setDepth(DEPTHS.UI_BASE);
+        return;
+      }
+
       container.setDepth(0);
 
       const isFieldZone = key.includes("FIELD") && !key.includes("FIELD_CARD");
@@ -819,6 +1018,13 @@ export class TutorialBoardScene extends Phaser.Scene {
         });
       }
     });
+  }
+
+  private highlightFocusTargets(
+    targets: TutorialElementId[],
+    targetData?: CameraFocusPayload,
+  ): void {
+    const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
 
     //turns element front of the overlay
     targets.forEach((id) => {
@@ -847,33 +1053,36 @@ export class TutorialBoardScene extends Phaser.Scene {
       //if element is card, apply hover effect
       const card = this.dummyCards.get(id);
       if (card) {
+        //need card high depth than fields
+        card.setDepth(DEPTHS.DRAGGING_CARD);
+
         if (!targetData?.disabled_hover) {
           this.handleDummyHover(card);
           this.currentFocusedCard.push(card);
         }
       }
     });
-
-    //show overlay to focus object
-    this.tweens.add({
-      targets: this.overlay,
-      alpha: 1,
-      duration: 1000,
-      ease: ANIMATIONS.EASING.SMOOTH,
-    });
   }
 
   private handleCameraReset(duration: number = 1000): void {
-    const { ANIMATIONS } = THEME_CONFIG;
+    const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
 
     this.currentFocusedCard.forEach((card) => this.handleDummyOut(card));
     this.currentFocusedCard = [];
 
     //return all elements behind overlay
     this.uiElements.forEach((container, key) => {
+      if (key.startsWith("FIELD_CARD_")) {
+        container.setDepth(DEPTHS.UI_BASE);
+        return;
+      }
+
       container.setDepth(0);
 
-      if (key.includes("FIELD")) {
+      const isFieldZoneGroup =
+        key.includes("FIELD") && !key.includes("FIELD_CARD");
+
+      if (isFieldZoneGroup) {
         this.tweens.killTweensOf(container);
         this.showDummyHand();
 

@@ -128,6 +128,14 @@ export class TutorialUIScene extends Phaser.Scene {
         if (stepIndex !== -1) {
           this.currentStepIndex = stepIndex;
           this.showCurrentStep();
+
+          const currentStep = TUTORIAL_STEPS[this.currentStepIndex];
+          this.scene
+            .get("TutorialBoardScene")
+            .events.emit(TutorialEvent.ADVANCE_DIALOG, {
+              textKey: currentStep.textKey,
+              targetId: currentStep.focusTarget?.id,
+            });
         }
       },
     );
