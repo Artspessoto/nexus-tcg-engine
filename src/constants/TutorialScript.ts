@@ -266,17 +266,17 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       x: FIELD.PLAYER.GRAVEYARD.x,
       y: FIELD.PLAYER.GRAVEYARD.y,
       id: ["GRAVEYARD_CARD_FIRE_BALL", "FIELD_GRAVEYARD_ZONE"],
-    },
-  },
-  {
-    textKey: "step_14",
-    layoutMode: "TOOLTIP",
-    focusTarget: {
-      x: SCREEN.CENTER_X - 50,
-      y: SCREEN.CENTER_Y + 50,
-      id: ["FIELD_CARD_TOON_KNIGHT"],
       disabled_hover: true,
     },
     requireAction: true,
+  },
+  {
+    textKey: "step_14",
+    layoutMode: "NARRATIVE",
+    focusTarget: {
+      x: 0,
+      y: 0,
+      id: ["PHASE_BUTTON"],
+    },
   },
 ];

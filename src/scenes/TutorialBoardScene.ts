@@ -640,7 +640,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     if (graveyardCards.length == 0) return;
 
     graveyardCards.forEach((card) => {
-      card.setDepth(THEME_CONFIG.DEPTHS.UI_BASE + 5);
+      card.setDepth(THEME_CONFIG.DEPTHS.DRAGGING_CARD);
       card.off("pointerdown");
       card.setInteractive({ useHandCursor: true });
 
@@ -652,11 +652,14 @@ export class TutorialBoardScene extends Phaser.Scene {
             label: translationText.details,
             offsetX: 70,
             action: () => {
-              const scene = this.scene.launch("GraveyardScene", {
+              this.actionMenuView.clearMenu();
+
+              this.scene.launch("GraveyardScene", {
                 cards: graveyardCards,
               });
 
-              scene.stop("destroy", () => {
+              const graveyardScene = this.scene.get("GraveyardScene");
+              graveyardScene.events.once("shutdown", () => {
                 this.scene
                   .get("TutorialUIScene")
                   .events.emit(TutorialEvent.FORCE_UI_STEP, {
@@ -677,6 +680,8 @@ export class TutorialBoardScene extends Phaser.Scene {
 
   private previewDummyPlacement(card: Card, targetX: number, targetY: number) {
     const { ANIMATIONS, COMPONENTS, DEPTHS } = THEME_CONFIG;
+
+    card.disableInteractive();
 
     this.tweens.killTweensOf(card);
     card.visualElements.setY(0);
@@ -768,10 +773,13 @@ export class TutorialBoardScene extends Phaser.Scene {
       });
     }
 
-    this.actionMenuView.renderMenu(targetZone.x, targetZone.y, options, () => {
+    //callback
+    const handleMenuCancel = () => {
       this.actionMenuView.clearMenu();
       onCancel();
-    });
+    };
+
+    this.actionMenuView.renderMenu(targetZone.x, targetZone.y, options, handleMenuCancel);
 
     const nextStep = cardType.includes("MONSTER") ? "step_9" : "step_12a";
     this.scene
@@ -849,6 +857,10 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     this.actionMenuView.clearMenu();
     this.handleCameraReset(300);
+
+    //disable drag listeners
+    card.removeAllListeners();
+    card.disableInteractive();
 
     this.dummyCards.delete(`HAND_CARD_${cardId}`);
     card.setLocation("GRAVEYARD");
@@ -999,23 +1011,31 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     //reset depth of all elements
     this.uiElements.forEach((container, key) => {
-      if (key.startsWith("FIELD_CARD_")) {
-        container.setDepth(DEPTHS.UI_BASE);
+      if (key.startsWith("FIELD_CARD_") || key.startsWith("GRAVEYARD_CARD_")) {
+        container.setDepth(DEPTHS.UI_BASE + 10);
+        container.setAlpha(1);
         return;
       }
 
-      container.setDepth(0);
+      const isFieldZoneGroup =
+        key === "FIELD_MONSTER_ZONES" ||
+        key === "FIELD_SPELL_ZONES" ||
+        key === "FIELD_GRAVEYARD_ZONE";
 
-      const isFieldZone = key.includes("FIELD") && !key.includes("FIELD_CARD");
-
-      if (isFieldZone && !targets.includes(key)) {
+      if (isFieldZoneGroup) {
         this.tweens.killTweensOf(container);
-        this.tweens.add({
-          targets: container,
-          alpha: 0,
-          duration: ANIMATIONS.DURATIONS.SLOW,
-          ease: ANIMATIONS.EASING.SMOOTH,
-        });
+
+        if (!targets.includes(key)) {
+          container.setDepth(0);
+          (container as Phaser.GameObjects.Container).setAlpha(0);
+        } else {
+          this.tweens.add({
+            targets: container,
+            alpha: 0,
+            duration: ANIMATIONS.DURATIONS.SLOW,
+            ease: ANIMATIONS.EASING.SMOOTH,
+          });
+        }
       }
     });
   }
@@ -1072,19 +1092,21 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     //return all elements behind overlay
     this.uiElements.forEach((container, key) => {
-      if (key.startsWith("FIELD_CARD_")) {
-        container.setDepth(DEPTHS.UI_BASE);
+      if (key.startsWith("FIELD_CARD_") || key.startsWith("GRAVEYARD_CARD_")) {
+        container.setDepth(DEPTHS.UI_BASE + 10);
         return;
       }
 
       container.setDepth(0);
 
       const isFieldZoneGroup =
-        key.includes("FIELD") && !key.includes("FIELD_CARD");
+        key === "FIELD_MONSTER_ZONES" ||
+        key === "FIELD_SPELL_ZONES" ||
+        key === "FIELD_GRAVEYARD_ZONE";
 
       if (isFieldZoneGroup) {
         this.tweens.killTweensOf(container);
-        this.showDummyHand();
+        // this.showDummyHand();
 
         this.tweens.add({
           targets: container,
