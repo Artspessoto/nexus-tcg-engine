@@ -7,7 +7,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   { textKey: "step_1", layoutMode: "NARRATIVE" },
   { textKey: "step_1b", layoutMode: "NARRATIVE" },
   {
-    textKey: "step_2",
+    textKey: "step_2",  //LP_BAR focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: UI.LP_BAR.X,
@@ -16,7 +16,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_3",
+    textKey: "step_3", //MANA_PLAYER focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: UI.MANA.PLAYER.x,
@@ -25,7 +25,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_4",
+    textKey: "step_4", //DECK focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: DECK.PLAYER.x,
@@ -34,7 +34,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_5",
+    textKey: "step_5", //player hand focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 200,
@@ -43,7 +43,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_5a",
+    textKey: "step_5a", //monster card focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 180,
@@ -52,7 +52,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_5b",
+    textKey: "step_5b", //effect monster card focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 300,
@@ -61,7 +61,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_5c",
+    textKey: "step_5c", //spell card focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 420,
@@ -70,7 +70,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_5d",
+    textKey: "step_5d", //trap card focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 530,
@@ -83,7 +83,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     layoutMode: "NARRATIVE",
   },
   {
-    textKey: "step_6a",
+    textKey: "step_6a", //field monster zones focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 70,
@@ -92,7 +92,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_6b",
+    textKey: "step_6b", //field spell zones focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 70,
@@ -101,7 +101,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_6c",
+    textKey: "step_6c", //field graveyard zone focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 150,
@@ -110,7 +110,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_7",
+    textKey: "step_7", //phase btn focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
@@ -119,7 +119,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_7a",
+    textKey: "step_7a", //draw phase focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
@@ -128,7 +128,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_7b",
+    textKey: "step_7b", //draw phase notes text focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
@@ -137,7 +137,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_7c",
+    textKey: "step_7c", //main phase focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
@@ -146,7 +146,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_7d",
+    textKey: "step_7d", //battle phase focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
@@ -155,7 +155,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_7e",
+    textKey: "step_7e", //end phase focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
@@ -164,7 +164,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_8",
+    textKey: "step_8", //back to main phase
     layoutMode: "NARRATIVE",
     focusTarget: {
       x: 0,
@@ -173,7 +173,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_8a",
+    textKey: "step_8a", //send monster card to zone focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 200,
@@ -184,7 +184,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     requireAction: true,
   },
   {
-    textKey: "step_9",
+    textKey: "step_9", //monster battle position (attack or defense)
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: SCREEN.CENTER_X,
@@ -196,7 +196,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     skipCameraSync: true,
   },
   {
-    textKey: "step_10",
+    textKey: "step_10", //mana update
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: UI.MANA.PLAYER.x,
@@ -205,7 +205,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_11",
+    textKey: "step_11", //monster click action to open menu
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: SCREEN.CENTER_X - 50,
@@ -216,7 +216,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     requireAction: true,
   },
   {
-    textKey: "step_11a",
+    textKey: "step_11a", //monster details btn option
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: SCREEN.CENTER_X - 50,
@@ -227,7 +227,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     requireAction: true,
   },
   {
-    textKey: "step_11b",
+    textKey: "step_11b", //details modal
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: SCREEN.CENTER_X - 50,
@@ -238,7 +238,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     requireAction: true,
   },
   {
-    textKey: "step_12",
+    textKey: "step_12", //send spell card to zone (need drag)
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 200,
@@ -249,7 +249,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     requireAction: true,
   },
   {
-    textKey: "step_12a",
+    textKey: "step_12a", //spell card menu action (active)
     layoutMode: "TOOLTIP",
     skipCameraSync: true,
     focusTarget: {
@@ -260,7 +260,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_13",
+    textKey: "step_13", //graveyard introduction (click on graveyard)
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: FIELD.PLAYER.GRAVEYARD.x,
@@ -272,11 +272,12 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     textKey: "step_14",
-    layoutMode: "NARRATIVE",
+    layoutMode: "TOOLTIP",
     focusTarget: {
-      x: 0,
-      y: 0,
+      x: BATTLE.PHASE_BUTTON.x,
+      y: BATTLE.PHASE_BUTTON.y,
       id: ["PHASE_BUTTON"],
     },
+    requireAction: true,
   },
 ];

@@ -40,6 +40,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     step_11: () => this.setupFieldCardInteractions(),
     step_12: () => this.setupDragCard("FIRE_BALL"),
     step_13: () => this.setupGraveyardInteractions(),
+    step_14: () => this.setupBattlePhase(),
   };
 
   constructor() {
@@ -323,13 +324,11 @@ export class TutorialBoardScene extends Phaser.Scene {
     positions.forEach((pos, index) => {
       //graveyard dont need zone
       if (type !== "GRAVEYARD") {
-        const zone = this.add
+        this.add
           .zone(pos.x, pos.y, FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
           .setRectangleDropZone(FIELD.ZONE_SIZE.W, FIELD.ZONE_SIZE.H)
           .setData("type", type)
           .setData("index", index);
-
-        container.add(zone);
       }
 
       graphics.strokeRoundedRect(
@@ -342,6 +341,11 @@ export class TutorialBoardScene extends Phaser.Scene {
     });
 
     return container;
+  }
+
+  private getFirstSlotCoords(type: "MONSTER" | "SPELL"): { x: number; y: number } {
+    const { FIELD } = LAYOUT_CONFIG;
+    return type === "MONSTER" ? FIELD.PLAYER.MONSTER[0] : FIELD.PLAYER.SPELL[0];
   }
 
   private handleDummyHover(dummyCard: Card): void {
@@ -559,7 +563,8 @@ export class TutorialBoardScene extends Phaser.Scene {
           ? "MONSTER"
           : "SPELL";
         if (targetZone.getData("type") === expectedZoneType) {
-          this.showSelectMenu(card, targetZone, returnToHand);
+          const availableSlot = this.getFirstSlotCoords(expectedZoneType);
+          this.showSelectMenu(card, availableSlot.x, availableSlot.y, returnToHand);
         } else {
           returnToHand();
         }
@@ -678,6 +683,34 @@ export class TutorialBoardScene extends Phaser.Scene {
     });
   }
 
+  private setupBattlePhase(): void {
+    const { COMPONENTS } = THEME_CONFIG;
+    const dummyPhaseBtn = this.uiElements.get("PHASE_BUTTON") as ToonButton;
+    const translations = this.translationText.battle_scene.battle_buttons;
+
+    if (!dummyPhaseBtn) return;
+
+    const turnLabel = `${this.translationText.battle_scene.turn_label} 2`;
+
+    dummyPhaseBtn.updatePhase(
+      turnLabel,
+      translations.to_battle,
+      COMPONENTS.BUTTONS.PHASE.color,
+    );
+
+    dummyPhaseBtn.setInteractive({ useHandCursor: true });
+
+    dummyPhaseBtn.on("pointerdown", () => {
+      dummyPhaseBtn.updatePhase(
+        turnLabel,
+        translations.end_turn,
+        COMPONENTS.BUTTONS.PHASE.color,
+      );
+
+      //step 15
+    });
+  }
+
   private previewDummyPlacement(card: Card, targetX: number, targetY: number) {
     const { ANIMATIONS, COMPONENTS, DEPTHS } = THEME_CONFIG;
 
@@ -706,11 +739,12 @@ export class TutorialBoardScene extends Phaser.Scene {
 
   private showSelectMenu(
     card: Card,
-    targetZone: Phaser.GameObjects.Zone,
+    targetX: number,
+    targetY: number,
     onCancel: () => void,
   ): void {
     const { ANIMATIONS } = THEME_CONFIG;
-    this.previewDummyPlacement(card, targetZone.x, targetZone.y);
+    this.previewDummyPlacement(card, targetX, targetY);
 
     this.hideDummyHand(card);
 
@@ -779,7 +813,12 @@ export class TutorialBoardScene extends Phaser.Scene {
       onCancel();
     };
 
-    this.actionMenuView.renderMenu(targetZone.x, targetZone.y, options, handleMenuCancel);
+    this.actionMenuView.renderMenu(
+      targetX,
+      targetY,
+      options,
+      handleMenuCancel,
+    );
 
     const nextStep = cardType.includes("MONSTER") ? "step_9" : "step_12a";
     this.scene
