@@ -343,7 +343,10 @@ export class TutorialBoardScene extends Phaser.Scene {
     return container;
   }
 
-  private getFirstSlotCoords(type: "MONSTER" | "SPELL"): { x: number; y: number } {
+  private getFirstSlotCoords(type: "MONSTER" | "SPELL"): {
+    x: number;
+    y: number;
+  } {
     const { FIELD } = LAYOUT_CONFIG;
     return type === "MONSTER" ? FIELD.PLAYER.MONSTER[0] : FIELD.PLAYER.SPELL[0];
   }
@@ -564,7 +567,12 @@ export class TutorialBoardScene extends Phaser.Scene {
           : "SPELL";
         if (targetZone.getData("type") === expectedZoneType) {
           const availableSlot = this.getFirstSlotCoords(expectedZoneType);
-          this.showSelectMenu(card, availableSlot.x, availableSlot.y, returnToHand);
+          this.showSelectMenu(
+            card,
+            availableSlot.x,
+            availableSlot.y,
+            returnToHand,
+          );
         } else {
           returnToHand();
         }
@@ -588,6 +596,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       card.setInteractive({ useHandCursor: true });
 
       card.once("pointerdown", () => {
+        card.setDepth(THEME_CONFIG.DEPTHS.PREVIEW_CARD || 2000);
         const translationText =
           this.translationText.battle_scene.battle_buttons;
 
@@ -609,6 +618,10 @@ export class TutorialBoardScene extends Phaser.Scene {
               });
 
               modal.once("destroy", () => {
+                card.setDepth(THEME_CONFIG.DEPTHS.UI_BASE);
+                if (card.visualElements)
+                  card.visualElements.setDepth(THEME_CONFIG.DEPTHS.UI_BASE);
+
                 this.scene
                   .get("TutorialUIScene")
                   .events.emit(TutorialEvent.FORCE_UI_STEP, {
@@ -621,6 +634,7 @@ export class TutorialBoardScene extends Phaser.Scene {
 
         this.actionMenuView.renderMenu(card.x, card.y, options, () => {
           //if clicks outside listen the same method
+          card.setDepth(THEME_CONFIG.DEPTHS.UI_BASE);
           this.setupFieldCardInteractions();
         });
 
@@ -813,12 +827,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       onCancel();
     };
 
-    this.actionMenuView.renderMenu(
-      targetX,
-      targetY,
-      options,
-      handleMenuCancel,
-    );
+    this.actionMenuView.renderMenu(targetX, targetY, options, handleMenuCancel);
 
     const nextStep = cardType.includes("MONSTER") ? "step_9" : "step_12a";
     this.scene
@@ -827,7 +836,7 @@ export class TutorialBoardScene extends Phaser.Scene {
   }
 
   private confirmTutorialPlacement(card: Card, mode: PlacementMode) {
-    const { COMPONENTS, ANIMATIONS, DEPTHS } = THEME_CONFIG;
+    const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
     const { GAME_STATE } = LAYOUT_CONFIG;
 
     const isDefense = mode === "DEF";
@@ -841,7 +850,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       : COMPONENTS.CARD.SCALES.FIELD_ATK;
 
     this.tweens.killTweensOf(card);
-    card.setDepth(DEPTHS.UI_BASE);
+    card.setDepth(0);
 
     card.setFieldVisuals();
 
@@ -864,7 +873,7 @@ export class TutorialBoardScene extends Phaser.Scene {
           ANIMATIONS.SHAKES.LIGHT.duration,
           ANIMATIONS.SHAKES.LIGHT.intensity,
         );
-        card.setDepth(DEPTHS.UI_BASE);
+        // card.setDepth(DEPTHS.UI_BASE);
       },
     });
 
@@ -1050,12 +1059,27 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     //reset depth of all elements
     this.uiElements.forEach((container, key) => {
-      if (key.startsWith("FIELD_CARD_") || key.startsWith("GRAVEYARD_CARD_")) {
-        container.setDepth(DEPTHS.UI_BASE + 10);
+      const isCardOnField =
+        key.startsWith("FIELD_CARD_") || key.startsWith("GRAVEYARD_CARD_");
+
+      //if is a summoned card
+      if (isCardOnField) {
+        //if is target at this step, the card is above the overlay
+        if (targets.includes(key)) {
+          container.setDepth(DEPTHS.UI_BASE + 10);
+        } else {
+          container.setDepth(0);
+        }
         container.setAlpha(1);
         return;
       }
 
+      //if element isn`t target at this step, it remains beneath the overlay
+      if (!targets.includes(key)) {
+        container.setDepth(0);
+      }
+
+      //zone key
       const isFieldZoneGroup =
         key === "FIELD_MONSTER_ZONES" ||
         key === "FIELD_SPELL_ZONES" ||
@@ -1065,7 +1089,6 @@ export class TutorialBoardScene extends Phaser.Scene {
         this.tweens.killTweensOf(container);
 
         if (!targets.includes(key)) {
-          container.setDepth(0);
           (container as Phaser.GameObjects.Container).setAlpha(0);
         } else {
           this.tweens.add({

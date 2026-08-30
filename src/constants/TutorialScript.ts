@@ -218,6 +218,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   {
     textKey: "step_11a", //monster details btn option
     layoutMode: "TOOLTIP",
+    skipCameraSync: true,
     focusTarget: {
       x: SCREEN.CENTER_X - 50,
       y: SCREEN.CENTER_Y + 50,
