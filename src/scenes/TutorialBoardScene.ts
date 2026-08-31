@@ -186,37 +186,37 @@ export class TutorialBoardScene extends Phaser.Scene {
     });
   }
 
-  public reorganizeDummyHand() {
+  public reorganizeDummyHand(excludedCardKey?: string) {
     const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
     const { SCREEN, HAND } = LAYOUT_CONFIG;
+
+    const activeHandEntries = Array.from(this.dummyCards.entries()).filter(
+      ([key, card]) => key.startsWith("HAND_CARD") && card.active,
+    );
+
+    if (activeHandEntries.length == 0) return;
+
     const spacing = HAND.SPACING; // cards gap between
-    const centerX = SCREEN.CENTER_X; // center of the screen
+    const totalHandWidth = (activeHandEntries.length - 1) * spacing; //460
+    const startX = SCREEN.CENTER_X - totalHandWidth / 2; //410
 
-    const tutorialCards = [
-      "TOON_KNIGHT",
-      "MAGE_APPRENTICE",
-      "FIRE_BALL",
-      "DARK_TRAP",
-    ];
-
-    const totalHandWidth = (tutorialCards.length - 1) * spacing; //460
-    const startX = centerX - totalHandWidth / 2; //410
-
-    tutorialCards.forEach((cardKey, index) => {
-      const card = this.dummyCards.get(`HAND_CARD_${cardKey}`);
-      if (!card) return;
-
+    activeHandEntries.forEach(([key, card], index) => {
       const targetX = startX + index * spacing;
-      const cardScale = COMPONENTS.CARD.SCALES;
+      const shouldHide = excludedCardKey && key !== excludedCardKey;
+      const targetY = shouldHide
+        ? HAND.PLAYER.HIDDEN_Y
+        : HAND.PLAYER.NORMAL_Y;
+      const targetAlpha = shouldHide ? 0 : 1;
 
+      this.tweens.killTweensOf(card);
       this.tweens.add({
         targets: card,
         x: { from: card.x, to: targetX },
-        y: { from: card.y, to: HAND.PLAYER.NORMAL_Y },
+        y: targetY,
+        alpha: targetAlpha,
         angle: 0,
-        scale: cardScale.PLAYER_HAND,
+        scale: COMPONENTS.CARD.SCALES.PLAYER_HAND,
         duration: ANIMATIONS.DURATIONS.SLOW, // 0.5s
-        // ease: "Power2",
         ease: ANIMATIONS.EASING.BOUNCE,
       });
     });
@@ -512,17 +512,19 @@ export class TutorialBoardScene extends Phaser.Scene {
 
       card.setDepth(DEPTHS.UI_BASE);
 
+      const targetZoneKey = card.getType().includes("MONSTER")
+        ? "FIELD_MONSTER_ZONES"
+        : "FIELD_SPELL_ZONES";
+
+      const spellFocusKey =
+        targetZoneKey === "FIELD_SPELL_ZONES" ? cardName : undefined;
       //TODO: find race condition problem (needed delayedCall uses for urgency)
       this.time.delayedCall(0, () => {
-        this.reorganizeDummyHand();
+        this.reorganizeDummyHand(spellFocusKey);
 
         card.setInteractive({ draggable: true });
         this.input.setDraggable(card, true);
       });
-
-      const targetZoneKey = card.getType().includes("MONSTER")
-        ? "FIELD_MONSTER_ZONES"
-        : "FIELD_SPELL_ZONES";
 
       this.handleCameraFocus({
         x: 200,
@@ -860,7 +862,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       card.setFaceUp();
     }
 
-    // Slot animation movement
+    //slot animation movement
     this.tweens.add({
       targets: card,
       angle: finalAngle,
@@ -868,12 +870,11 @@ export class TutorialBoardScene extends Phaser.Scene {
       duration: ANIMATIONS.DURATIONS.FIELD_PLAY,
       ease: ANIMATIONS.EASING.BOUNCE,
       onComplete: () => {
-        // card impact animation effect
+        //card impact animation effect
         this.cameras.main.shake(
           ANIMATIONS.SHAKES.LIGHT.duration,
           ANIMATIONS.SHAKES.LIGHT.intensity,
         );
-        // card.setDepth(DEPTHS.UI_BASE);
       },
     });
 
