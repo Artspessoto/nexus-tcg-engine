@@ -7,7 +7,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   { textKey: "step_1", layoutMode: "NARRATIVE" },
   { textKey: "step_1b", layoutMode: "NARRATIVE" },
   {
-    textKey: "step_2",  //LP_BAR focus
+    textKey: "step_2", //LP_BAR focus
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: UI.LP_BAR.X,
@@ -267,6 +267,28 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       x: 150,
       y: SCREEN.CENTER_Y,
       id: ["FIELD_GRAVEYARD_ZONE", "GRAVEYARD_CARD_FIRE_BALL"],
+      disabled_hover: true,
+    },
+    requireAction: true,
+  },
+  {
+    textKey: "step_13a", //graveyard details btn
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: 180,
+      y: SCREEN.CENTER_Y - 50,
+      id: ["FIELD_GRAVEYARD_ZONE", "GRAVEYARD_CARD_FIRE_BALL"],
+      disabled_hover: true,
+    },
+    requireAction: true,
+  },
+  {
+    textKey: "step_13b", //graveyard modal list
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: 240,
+      y: SCREEN.CENTER_Y + 70,
+      id: ["FIELD_GRAVEYARD_ZONE"],
       disabled_hover: true,
     },
     requireAction: true,

@@ -44,7 +44,7 @@ export const TRANSLATIONS = {
       step_7a:
         "Normalmente, o turno começa na Fase de Compra (DRAW PHASE). Para puxar sua carta, você deve clicar diretamente sobre o seu Deck ou apertar a tecla ESPAÇO.",
       step_7b:
-        "Mas atenção à regra: para manter o duelo justo, quem joga o primeiro turno da partida não compra carta, começando direto na Fase Principal (MAIN PHASE)",
+        "Mas atenção à regra: para manter o duelo justo, quem joga o primeiro turno da partida não compra carta, começando direto na Fase Principal (MAIN PHASE).",
       step_7c:
         "A Fase Principal é o seu momento de preparação: é apenas nela que você pode invocar monstros, ativar mágicas e baixar suas armadilhas no campo.",
       step_7d:
@@ -60,19 +60,19 @@ export const TRANSLATIONS = {
       step_10:
         "Ao invocar a carta, o seu custo de mana é automaticamente deduzido da sua reserva!",
       step_11:
-        "Sempre que precisar, você pode clicar sobre qualquer carta no campo para inspecioná-la ou usar suas ações. Clique no seu monstro agora",
+        "Sempre que precisar, você pode clicar sobre qualquer carta no campo para inspecioná-la ou usar suas ações. Clique no seu monstro agora!",
       step_11a:
         "Clique no botão 'DETALHES' para abrir a ficha completa da carta.",
       step_11b:
         "Aqui você pode verificar os pontos de Ataque, Defesa, Descrição e habilidades da carta em detalhes. Feche a janela para continuar.",
       step_12:
-        "Agora vamos aprender a usar uma Carta Mágica. Arraste a 'Bola de fogo' da sua mão para a Zona de Magias no campo para ativá-la!",
-      step_12a:
-        "Cartas mágicas aplicam seu efeito de forma imediata. Assim que o seu efeito for aplicado, ela é enviada diretamente para o Cemitério.",
-      step_13:
-        "O Cemitério armazena todas as cartas descartadas, destruídas ou mágicas resolvidas. Você pode clicar nele a qualquer momento para ver a lista de cartas.",
+        "Agora vamos aprender a usar uma Carta Mágica. Arraste a 'Bola de fogo' da sua mão para a Zona de Magias no campo!",
+      step_12a: "Clique no botão 'ATIVAR' para conjurar o efeito da carta imediatamente e enviá-la para o Cemitério.",
+      step_13: "O Cemitério armazena todas as cartas descartadas, destruídas ou mágicas resolvidas. Clique sobre a pilha do Cemitério para interagir.",
+      step_13a: "Clique no botão 'DETALHES' para abrir o registro do Cemitério e ver a carta mágica recém-utilizada.",
+      step_13b: "Aqui você pode inspecionar todas as cartas descartadas na partida. Feche a janela para continuar.",
       step_14:
-        "Com seu campo de batalha pronto, clique no botão de Fases para avançar à Fase de Batalha (BATTLE PHASE)",
+        "Agora que estamos com o campo de batalha pronto, clique no botão de Fases para avançar à Fase de Batalha (BATTLE PHASE)",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
@@ -242,13 +242,17 @@ export const TRANSLATIONS = {
       step_11b:
         "Here you can check the card's Attack, Defense, Description, and abilities in detail. Close the window to continue.",
       step_12:
-        "Now let's learn how to use a Spell Card. Drag the 'Fireball' from your hand to the Spell Zone on the field to activate it!",
+        "Now let's learn how to use a Spell Card. Drag 'Fireball' from your hand to the Spell Zone on the field!",
       step_12a:
-        "Spell cards apply their effects immediately. As soon as their effect is applied, they are sent directly to the Graveyard.",
+        "Click the 'ACTIVATE' button to cast the card's effect immediately and send it to the Graveyard.",
       step_13:
-        "The Graveyard stores all discarded, destroyed, or resolved spell cards. You can click on it at any time to view the list of cards.",
+        "The Graveyard stores all discarded, destroyed, or resolved Spell cards. Click on the Graveyard pile to interact with it.",
+      step_13a:
+        "Click the 'DETAILS' button to open the Graveyard view and see the recently used Spell Card.",
+      step_13b:
+        "Here you can inspect all cards discarded during the match. Close the window to continue.",
       step_14:
-        "With your battlefield ready, click the Phase button to advance to the Battle Phase (BATTLE PHASE).",
+        "Now that our battlefield is set, click the Phase button to advance to the BATTLE PHASE.",
       next_btn: "NEXT",
       menu_btn: "BACK TO MENU",
       play_btn: "PLAY NOW",

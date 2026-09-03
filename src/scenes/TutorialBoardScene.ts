@@ -203,9 +203,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     activeHandEntries.forEach(([key, card], index) => {
       const targetX = startX + index * spacing;
       const shouldHide = excludedCardKey && key !== excludedCardKey;
-      const targetY = shouldHide
-        ? HAND.PLAYER.HIDDEN_Y
-        : HAND.PLAYER.NORMAL_Y;
+      const targetY = shouldHide ? HAND.PLAYER.HIDDEN_Y : HAND.PLAYER.NORMAL_Y;
       const targetAlpha = shouldHide ? 0 : 1;
 
       this.tweens.killTweensOf(card);
@@ -675,9 +673,19 @@ export class TutorialBoardScene extends Phaser.Scene {
             action: () => {
               this.actionMenuView.clearMenu();
 
+              this.scene
+                .get("TutorialUIScene")
+                .events.emit(TutorialEvent.FORCE_UI_STEP, {
+                  targetTextKey: "step_13b",
+                });
+
               this.scene.launch("GraveyardScene", {
                 cards: graveyardCards,
               });
+
+              //keep TutorialUIScene on top so the dialogue tooltip renders above the newly launched GraveyardScene
+              //without this, the text box appears below the scene.
+              this.scene.bringToTop("TutorialUIScene");
 
               const graveyardScene = this.scene.get("GraveyardScene");
               graveyardScene.events.once("shutdown", () => {
@@ -695,6 +703,12 @@ export class TutorialBoardScene extends Phaser.Scene {
           //if clicks outside listen the same method
           this.setupGraveyardInteractions();
         });
+
+        this.scene
+          .get("TutorialUIScene")
+          .events.emit(TutorialEvent.FORCE_UI_STEP, {
+            targetTextKey: "step_13a",
+          });
       });
     });
   }
