@@ -295,11 +295,36 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     textKey: "step_14",
+    layoutMode: "NARRATIVE",
+  },
+  {
+    textKey: "step_15", //advance to battle phase
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: BATTLE.PHASE_BUTTON.x,
       y: BATTLE.PHASE_BUTTON.y,
       id: ["PHASE_BUTTON"],
+    },
+    requireAction: true,
+  },
+  {
+    textKey: "step_16",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: SCREEN.CENTER_X - 40,
+      y: 270,
+      id: ["OPPONENT_FIELD_CARD_MAGE_APPRENTICE"],
+      disabled_hover: true,
+    },
+  },
+  {
+    textKey: "step_16a",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: SCREEN.CENTER_X - 50,
+      y: SCREEN.CENTER_Y + 50,
+      id: ["FIELD_CARD_TOON_KNIGHT"],
+      disabled_hover: true,
     },
     requireAction: true,
   },

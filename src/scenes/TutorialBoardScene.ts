@@ -34,13 +34,16 @@ export class TutorialBoardScene extends Phaser.Scene {
   private playerStatsView!: PlayerStatsView;
   private npcStatsView!: PlayerStatsView;
   private actionMenuView!: ActionMenuView;
+  private playerBaseMana: number = LAYOUT_CONFIG.GAME_STATE.BASE_MANA;
 
   private stepHandlers: Record<string, () => void> = {
     step_8a: () => this.setupDragCard("TOON_KNIGHT"),
     step_11: () => this.setupFieldCardInteractions(),
     step_12: () => this.setupDragCard("FIRE_BALL"),
     step_13: () => this.setupGraveyardInteractions(),
-    step_14: () => this.setupBattlePhase(),
+    step_15: () => this.setupBattlePhase(),
+    step_16: () => this.setupBattleStep(),
+    step_16a: () => console.log("setupPlayerAttackInteraction")
   };
 
   constructor() {
@@ -713,6 +716,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     });
   }
 
+  //step 15
   private setupBattlePhase(): void {
     const { COMPONENTS } = THEME_CONFIG;
     const dummyPhaseBtn = this.uiElements.get("PHASE_BUTTON") as ToonButton;
@@ -737,8 +741,65 @@ export class TutorialBoardScene extends Phaser.Scene {
         COMPONENTS.BUTTONS.PHASE.color,
       );
 
-      //step 15
+      this.scene
+        .get("TutorialUIScene")
+        .events.emit(TutorialEvent.FORCE_UI_STEP, {
+          targetTextKey: "step_16",
+        });
     });
+  }
+
+  //step 16
+  private setupBattleStep(): void {
+    this.spawnOpponentMonster("MAGE_APPRENTICE", 0);
+  }
+
+  private spawnOpponentMonster(cardKey: string, slotIndex: number = 0): Card {
+    const cardData = CARD_DATABASE[cardKey];
+    const targetKey: TutorialElementId = `OPPONENT_FIELD_CARD_${cardData.id}`;
+
+    if (this.uiElements.has(targetKey)) {
+      return this.uiElements.get(targetKey) as Card;
+    }
+
+    const { FIELD } = LAYOUT_CONFIG;
+    const { COMPONENTS, ANIMATIONS, DEPTHS } = THEME_CONFIG;
+    const targetPos = FIELD.OPPONENT.MONSTER[slotIndex];
+
+    const opponentCard = new Card(
+      this,
+      targetPos.x,
+      targetPos.y,
+      cardData,
+      "OPPONENT",
+      "OPPONENT",
+    );
+
+    opponentCard.setFieldVisuals();
+    opponentCard.setScale(COMPONENTS.CARD.SCALES.FIELD_ATK);
+    opponentCard.setFaceUp();
+    opponentCard.setAlpha(0);
+    opponentCard.setDepth(DEPTHS.FIELD_CARDS || DEPTHS.UI_BASE);
+
+    this.tweens.add({
+      targets: opponentCard,
+      y: targetPos.y,
+      alpha: 1,
+      duration: ANIMATIONS.DURATIONS.FIELD_PLAY,
+      ease: ANIMATIONS.EASING.BOUNCE,
+      onComplete: () => {
+        this.cameras.main.shake(
+          ANIMATIONS.SHAKES.LIGHT.duration,
+          ANIMATIONS.SHAKES.LIGHT.intensity,
+        );
+      },
+    });
+
+    this.uiElements.set(targetKey, opponentCard);
+    this.dummyCards.set(targetKey, opponentCard);
+    opponentCard.setLocation("FIELD");
+
+    return opponentCard;
   }
 
   private previewDummyPlacement(card: Card, targetX: number, targetY: number) {
@@ -820,13 +881,6 @@ export class TutorialBoardScene extends Phaser.Scene {
         isLeft: true,
         action: () => this.confirmSpellActivation(card),
       });
-      // options.push({
-      //   label: translationText.set,
-      //   width: 110,
-      //   offsetX: 75,
-      //   offsetY: -100,
-      //   action: () => this.confirmTutorialPlacement(card, "SET"),
-      // });
     } else if (cardType === "TRAP") {
       options.push({
         label: translationText.set,
@@ -853,7 +907,6 @@ export class TutorialBoardScene extends Phaser.Scene {
 
   private confirmTutorialPlacement(card: Card, mode: PlacementMode) {
     const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
-    const { GAME_STATE } = LAYOUT_CONFIG;
 
     const isDefense = mode === "DEF";
     const isSet = mode === "SET";
@@ -908,13 +961,14 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.scene
       .get("TutorialUIScene")
       .events.emit(TutorialEvent.FORCE_UI_STEP, { targetTextKey: "step_10" });
+
+    this.playerBaseMana -= card.getCardData().manaCost;
     this.playerStatsView.animateManaChange(
-      GAME_STATE.BASE_MANA - card.getCardData().manaCost,
+      this.playerBaseMana
     );
   }
 
   private confirmSpellActivation(card: Card) {
-    const { GAME_STATE } = LAYOUT_CONFIG;
     const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
     const cardId = card.getCardData().id;
 
@@ -944,8 +998,9 @@ export class TutorialBoardScene extends Phaser.Scene {
           ANIMATIONS.SHAKES.MEDIUM.intensity,
         );
 
+        this.playerBaseMana -= card.getCardData().manaCost
         this.playerStatsView.animateManaChange(
-          GAME_STATE.BASE_MANA - card.getCardData().manaCost,
+          this.playerBaseMana,
         );
 
         //after effect move card in fade to graveyard
@@ -1075,7 +1130,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     //reset depth of all elements
     this.uiElements.forEach((container, key) => {
       const isCardOnField =
-        key.startsWith("FIELD_CARD_") || key.startsWith("GRAVEYARD_CARD_");
+        key.includes("FIELD_CARD_") || key.includes("GRAVEYARD_CARD_");
 
       //if is a summoned card
       if (isCardOnField) {
@@ -1153,7 +1208,8 @@ export class TutorialBoardScene extends Phaser.Scene {
         //need card high depth than fields
         card.setDepth(DEPTHS.DRAGGING_CARD);
 
-        if (!targetData?.disabled_hover) {
+        const isFieldCard = id.includes("FIELD_CARD_");
+        if (!targetData?.disabled_hover && !isFieldCard) {
           this.handleDummyHover(card);
           this.currentFocusedCard.push(card);
         }
@@ -1169,7 +1225,7 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     //return all elements behind overlay
     this.uiElements.forEach((container, key) => {
-      if (key.startsWith("FIELD_CARD_") || key.startsWith("GRAVEYARD_CARD_")) {
+      if (key.includes("FIELD_CARD_") || key.includes("GRAVEYARD_CARD_")) {
         container.setDepth(DEPTHS.UI_BASE + 10);
         return;
       }

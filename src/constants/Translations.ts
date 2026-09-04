@@ -72,7 +72,10 @@ export const TRANSLATIONS = {
       step_13a: "Clique no botão 'DETALHES' para abrir o registro do Cemitério e ver a carta mágica recém-utilizada.",
       step_13b: "Aqui você pode inspecionar todas as cartas descartadas na partida. Feche a janela para continuar.",
       step_14:
-        "Agora que estamos com o campo de batalha pronto, clique no botão de Fases para avançar à Fase de Batalha (BATTLE PHASE)",
+        "Agora que estamos com o campo preparado, vamos nos preparar para batalhar!",
+      step_15: "Clique no botão de Fases para avançar à Fase de Batalha (BATTLE PHASE).",
+      step_16: "O oponente invocou um monstro! Enquanto ele estiver em campo, os Pontos de Vida do adversário estão protegidos.",
+      step_16a: "Selecione o seu monstro em campo e declare um ataque para destruí-lo!",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
@@ -252,7 +255,10 @@ export const TRANSLATIONS = {
       step_13b:
         "Here you can inspect all cards discarded during the match. Close the window to continue.",
       step_14:
-        "Now that our battlefield is set, click the Phase button to advance to the BATTLE PHASE.",
+        "Now that field is set, let's get ready for battle!",
+      step_15: "Click the Phase button to advance to the BATTLE PHASE.",
+      step_16: "The opponent summoned a monster! As long as it is on the field, the opponent's Life Points are protected.",
+      step_16a: "Select your monster on the field and declare an attack to destroy it!",
       next_btn: "NEXT",
       menu_btn: "BACK TO MENU",
       play_btn: "PLAY NOW",

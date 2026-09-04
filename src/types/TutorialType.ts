@@ -28,6 +28,7 @@ export type TutorialElementId =
   | "PHASE_BUTTON"
   | `FIELD_CARD_${string}`
   | `GRAVEYARD_CARD_${string}`
+  | `OPPONENT_FIELD_CARD_${string}`
 
 export interface ZoneConfig {
   type: "MONSTER" | "SPELL" | "GRAVEYARD";
