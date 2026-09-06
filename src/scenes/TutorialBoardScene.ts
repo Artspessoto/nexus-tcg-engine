@@ -35,15 +35,17 @@ export class TutorialBoardScene extends Phaser.Scene {
   private npcStatsView!: PlayerStatsView;
   private actionMenuView!: ActionMenuView;
   private playerBaseMana: number = LAYOUT_CONFIG.GAME_STATE.BASE_MANA;
+  private npcBaseLP: number = LAYOUT_CONFIG.GAME_STATE.BASE_LP;
 
   private stepHandlers: Record<string, () => void> = {
     step_8a: () => this.setupDragCard("TOON_KNIGHT"),
     step_11: () => this.setupFieldCardInteractions(),
     step_12: () => this.setupDragCard("FIRE_BALL"),
     step_13: () => this.setupGraveyardInteractions(),
+    step_13c: () => this.setupChangePositionInteraction(),
     step_15: () => this.setupBattlePhase(),
     step_16: () => this.setupBattleStep(),
-    step_16a: () => console.log("setupPlayerAttackInteraction")
+    step_16a: () => this.setupPlayerAttackInteraction(),
   };
 
   constructor() {
@@ -75,7 +77,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.npcStatsView = new PlayerStatsView({
       scene: this,
       side: "OPPONENT",
-      initialLP: GAME_STATE.BASE_LP,
+      initialLP: this.npcBaseLP,
       initialMana: GAME_STATE.BASE_MANA,
       playerName: "CPU",
     });
@@ -537,12 +539,18 @@ export class TutorialBoardScene extends Phaser.Scene {
       card.on("pointerover", () => this.handleDummyHover(card));
       card.on("pointerout", () => this.handleDummyOut(card));
 
-      //fire ball no call next step here
+      //step callback for spell and monster card
       if (targetZoneKey == "FIELD_MONSTER_ZONES") {
         this.scene
           .get("TutorialUIScene")
           .events.emit(TutorialEvent.FORCE_UI_STEP, {
             targetTextKey: "step_8a",
+          });
+      } else {
+        this.scene
+          .get("TutorialUIScene")
+          .events.emit(TutorialEvent.FORCE_UI_STEP, {
+            targetTextKey: "step_12",
           });
       }
     };
@@ -650,16 +658,19 @@ export class TutorialBoardScene extends Phaser.Scene {
     });
   }
 
+  //step 13
   private setupGraveyardInteractions(): void {
     const graveyardCards: Card[] = [];
+    let fieldCard: Card | undefined;
 
     this.uiElements.forEach((element, key) => {
       if (key.startsWith("GRAVEYARD_CARD_") && element instanceof Card) {
         graveyardCards.push(element);
-      }
+      } else if (key.includes("TOON_KNIGHT") && element instanceof Card)
+        fieldCard = element;
     });
 
-    if (graveyardCards.length == 0) return;
+    if (graveyardCards.length == 0 || !fieldCard) return;
 
     graveyardCards.forEach((card) => {
       card.setDepth(THEME_CONFIG.DEPTHS.DRAGGING_CARD);
@@ -692,10 +703,11 @@ export class TutorialBoardScene extends Phaser.Scene {
 
               const graveyardScene = this.scene.get("GraveyardScene");
               graveyardScene.events.once("shutdown", () => {
+                const nextStep = fieldCard?.isFaceDown ? "step_13c" : "step_14";
                 this.scene
                   .get("TutorialUIScene")
                   .events.emit(TutorialEvent.FORCE_UI_STEP, {
-                    targetTextKey: "step_14",
+                    targetTextKey: nextStep,
                   });
               });
             },
@@ -713,6 +725,54 @@ export class TutorialBoardScene extends Phaser.Scene {
             targetTextKey: "step_13a",
           });
       });
+    });
+  }
+
+  //step 13c
+  private setupChangePositionInteraction(): void {
+    let playerCard: Card | undefined;
+    this.uiElements.forEach((element, key) => {
+      if (key.includes("TOON_KNIGHT") && element instanceof Card) {
+        playerCard = element;
+      }
+    });
+
+    if (!playerCard) return;
+    const selectedPlayerCard = playerCard;
+    selectedPlayerCard.setInteractive({ userHandCursor: true });
+
+    selectedPlayerCard.once("pointerdown", () => {
+      const translationText = this.translationText.battle_scene.battle_buttons;
+
+      const options: MenuOption[] = [
+        {
+          label: translationText.flip,
+          offsetX: 70,
+          action: async () => {
+            this.actionMenuView.clearMenu();
+
+            selectedPlayerCard.animateFlip(() => {
+              // card impact animation effect
+              this.cameras.main.shake(100, 0.002);
+            });
+
+            this.scene
+              .get("TutorialUIScene")
+              .events.emit(TutorialEvent.FORCE_UI_STEP, {
+                targetTextKey: "step_14",
+              });
+          },
+        },
+      ];
+      this.actionMenuView.renderMenu(
+        selectedPlayerCard.x,
+        selectedPlayerCard.y,
+        options,
+        () => {
+          //recursive action
+          this.setupChangePositionInteraction();
+        },
+      );
     });
   }
 
@@ -751,20 +811,14 @@ export class TutorialBoardScene extends Phaser.Scene {
 
   //step 16
   private setupBattleStep(): void {
-    this.spawnOpponentMonster("MAGE_APPRENTICE", 0);
-  }
-
-  private spawnOpponentMonster(cardKey: string, slotIndex: number = 0): Card {
-    const cardData = CARD_DATABASE[cardKey];
+    const cardData = CARD_DATABASE["MAGE_APPRENTICE"];
     const targetKey: TutorialElementId = `OPPONENT_FIELD_CARD_${cardData.id}`;
 
-    if (this.uiElements.has(targetKey)) {
-      return this.uiElements.get(targetKey) as Card;
-    }
+    if (this.uiElements.has(targetKey)) return;
 
     const { FIELD } = LAYOUT_CONFIG;
-    const { COMPONENTS, ANIMATIONS, DEPTHS } = THEME_CONFIG;
-    const targetPos = FIELD.OPPONENT.MONSTER[slotIndex];
+    const { COMPONENTS, ANIMATIONS } = THEME_CONFIG;
+    const targetPos = FIELD.OPPONENT.MONSTER[0];
 
     const opponentCard = new Card(
       this,
@@ -779,7 +833,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     opponentCard.setScale(COMPONENTS.CARD.SCALES.FIELD_ATK);
     opponentCard.setFaceUp();
     opponentCard.setAlpha(0);
-    opponentCard.setDepth(DEPTHS.FIELD_CARDS || DEPTHS.UI_BASE);
+    opponentCard.setDepth(0);
 
     this.tweens.add({
       targets: opponentCard,
@@ -798,8 +852,98 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.uiElements.set(targetKey, opponentCard);
     this.dummyCards.set(targetKey, opponentCard);
     opponentCard.setLocation("FIELD");
+  }
 
-    return opponentCard;
+  private setupPlayerAttackInteraction(): void {
+    let playerCard: Card | undefined;
+    this.uiElements.forEach((element, key) => {
+      if (key.includes("TOON_KNIGHT") && element instanceof Card) {
+        playerCard = element;
+      }
+    });
+
+    if (!playerCard) return;
+
+    const attacker = playerCard;
+    attacker.setInteractive({ useHandCursor: true });
+    attacker.once("pointerdown", () => {
+      const translationText = this.translationText.battle_scene.battle_buttons;
+
+      const options: MenuOption[] = [
+        {
+          label: translationText.attack || "ATK",
+          offsetX: 70,
+          action: async () => {
+            this.actionMenuView.clearMenu();
+
+            this.scene
+              .get("TutorialUIScene")
+              .events.emit(TutorialEvent.FORCE_UI_STEP, {
+                targetTextKey: "step_16b",
+              });
+            this.prepareOpponentTarget(attacker);
+          },
+        },
+      ];
+
+      this.actionMenuView.renderMenu(attacker.x, attacker.y, options, () => {
+        //recursive action
+        this.setupPlayerAttackInteraction();
+      });
+    });
+  }
+
+  private prepareOpponentTarget(attacker: Card): void {
+    const targetKey: TutorialElementId = "OPPONENT_FIELD_CARD_MAGE_APPRENTICE";
+    const targetCard: Card | undefined = this.dummyCards.get(targetKey);
+
+    if (!targetCard) return;
+
+    targetCard.setInteractive({ useHandCursor: true });
+    targetCard.once("pointerdown", () => {
+      targetCard.disableInteractive();
+      this.executeDummyAttack(attacker, targetCard);
+    });
+  }
+
+  private executeDummyAttack(attacker: Card, target: Card): void {
+    const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
+    attacker.setAlpha(0.7);
+    attacker.setDepth(DEPTHS.DRAGGING_CARD);
+
+    this.tweens.add({
+      targets: attacker,
+      x: target.x,
+      y: target.y,
+      duration: ANIMATIONS.DURATIONS.NORMAL,
+      ease: ANIMATIONS.EASING.BOUNCE,
+      yoyo: true, //attacker return into original pos
+      onYoyo: () => {
+        this.cameras.main.shake(
+          ANIMATIONS.SHAKES.MEDIUM.duration,
+          ANIMATIONS.SHAKES.MEDIUM.intensity,
+        );
+
+        const rawDamage =
+          (attacker.getCardData().atk ?? 0) - (target.getCardData().atk ?? 0);
+        const damage = Math.max(0, rawDamage);
+
+        const startLP = this.npcBaseLP;
+        const targetLP = Math.max(0, startLP - damage);
+
+        this.npcBaseLP = targetLP;
+
+        this.npcStatsView.animateLPChange(-damage, startLP, targetLP);
+
+        //TODO: send opponent's monster to graveyard
+        this.sendToGraveyard(target);
+      },
+      onComplete: () => {
+        attacker.setDepth(DEPTHS.UI_BASE + 10);
+
+        //advance to step 17
+      },
+    });
   }
 
   private previewDummyPlacement(card: Card, targetX: number, targetY: number) {
@@ -963,9 +1107,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       .events.emit(TutorialEvent.FORCE_UI_STEP, { targetTextKey: "step_10" });
 
     this.playerBaseMana -= card.getCardData().manaCost;
-    this.playerStatsView.animateManaChange(
-      this.playerBaseMana
-    );
+    this.playerStatsView.animateManaChange(this.playerBaseMana);
   }
 
   private confirmSpellActivation(card: Card) {
@@ -998,10 +1140,16 @@ export class TutorialBoardScene extends Phaser.Scene {
           ANIMATIONS.SHAKES.MEDIUM.intensity,
         );
 
-        this.playerBaseMana -= card.getCardData().manaCost
-        this.playerStatsView.animateManaChange(
-          this.playerBaseMana,
-        );
+        this.playerBaseMana -= card.getCardData().manaCost;
+        this.playerStatsView.animateManaChange(this.playerBaseMana);
+
+        const startLP = this.npcBaseLP;
+        const damage = card.getCardData().effects?.value ?? 0;
+        const targetLP = startLP - damage;
+
+        this.npcBaseLP = targetLP;
+
+        this.npcStatsView.animateLPChange(-damage, startLP, targetLP);
 
         //after effect move card in fade to graveyard
         this.time.delayedCall(1000, () => {
@@ -1021,7 +1169,7 @@ export class TutorialBoardScene extends Phaser.Scene {
   private sendToGraveyard(card: Card, onCompleteCallback?: () => void): void {
     const { FIELD } = LAYOUT_CONFIG;
     const { COMPONENTS, ANIMATIONS, DEPTHS } = THEME_CONFIG;
-    const coords = FIELD.PLAYER.GRAVEYARD;
+    const coords = FIELD[card.originalOwner].GRAVEYARD;
 
     this.tweens.killTweensOf(card);
     this.tweens.killTweensOf(card.visualElements);
@@ -1205,13 +1353,14 @@ export class TutorialBoardScene extends Phaser.Scene {
       //if element is card, apply hover effect
       const card = this.dummyCards.get(id);
       if (card) {
-        //need card high depth than fields
-        card.setDepth(DEPTHS.DRAGGING_CARD);
-
         const isFieldCard = id.includes("FIELD_CARD_");
-        if (!targetData?.disabled_hover && !isFieldCard) {
-          this.handleDummyHover(card);
-          this.currentFocusedCard.push(card);
+        if (!isFieldCard) {
+          //cards on hand needs high depth than fields
+          card.setDepth(DEPTHS.DRAGGING_CARD);
+          if (!targetData?.disabled_hover) {
+            this.handleDummyHover(card);
+            this.currentFocusedCard.push(card);
+          }
         }
       }
     });

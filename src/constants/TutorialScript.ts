@@ -294,6 +294,17 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     requireAction: true,
   },
   {
+    textKey: "step_13c", //change field monster pos to attack
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: 50,
+      y: SCREEN.CENTER_Y + 50,
+      id: ["FIELD_CARD_TOON_KNIGHT"],
+      disabled_hover: true,
+    },
+    requireAction: true,
+  },
+  {
     textKey: "step_14",
     layoutMode: "NARRATIVE",
   },
@@ -321,9 +332,20 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     textKey: "step_16a",
     layoutMode: "TOOLTIP",
     focusTarget: {
-      x: SCREEN.CENTER_X - 50,
+      x: 50,
       y: SCREEN.CENTER_Y + 50,
       id: ["FIELD_CARD_TOON_KNIGHT"],
+      disabled_hover: true,
+    },
+    requireAction: true,
+  },
+  {
+    textKey: "step_16b",
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: 50,
+      y: 270,
+      id: ["OPPONENT_FIELD_CARD_MAGE_APPRENTICE", "FIELD_CARD_TOON_KNIGHT"],
       disabled_hover: true,
     },
     requireAction: true,

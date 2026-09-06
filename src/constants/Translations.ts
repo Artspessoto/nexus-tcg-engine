@@ -67,15 +67,25 @@ export const TRANSLATIONS = {
         "Aqui você pode verificar os pontos de Ataque, Defesa, Descrição e habilidades da carta em detalhes. Feche a janela para continuar.",
       step_12:
         "Agora vamos aprender a usar uma Carta Mágica. Arraste a 'Bola de fogo' da sua mão para a Zona de Magias no campo!",
-      step_12a: "Clique no botão 'ATIVAR' para conjurar o efeito da carta imediatamente e enviá-la para o Cemitério.",
-      step_13: "O Cemitério armazena todas as cartas descartadas, destruídas ou mágicas resolvidas. Clique sobre a pilha do Cemitério para interagir.",
-      step_13a: "Clique no botão 'DETALHES' para abrir o registro do Cemitério e ver a carta mágica recém-utilizada.",
-      step_13b: "Aqui você pode inspecionar todas as cartas descartadas na partida. Feche a janela para continuar.",
+      step_12a:
+        "Clique no botão 'ATIVAR' para conjurar o efeito da carta imediatamente e enviá-la para o Cemitério.",
+      step_13:
+        "O Cemitério armazena todas as cartas descartadas, destruídas ou mágicas resolvidas. Clique sobre a pilha do Cemitério para interagir.",
+      step_13a:
+        "Clique no botão 'DETALHES' para abrir o registro do Cemitério e ver a carta mágica recém-utilizada.",
+      step_13b:
+        "Aqui você pode inspecionar todas as cartas descartadas na partida. Feche a janela para continuar.",
+      step_13c:
+        "Em partidas reais, você só pode mudar a posição de batalha no turno seguinte e atacar é sempre opcional. Mas como estamos no tutorial, vamos abrir uma exceção para você aprender a lutar: clique no seu monstro e mude-o para Modo de Ataque!",
       step_14:
         "Agora que estamos com o campo preparado, vamos nos preparar para batalhar!",
-      step_15: "Clique no botão de Fases para avançar à Fase de Batalha (BATTLE PHASE).",
-      step_16: "O oponente invocou um monstro! Enquanto ele estiver em campo, os Pontos de Vida do adversário estão protegidos.",
-      step_16a: "Selecione o seu monstro em campo e declare um ataque para destruí-lo!",
+      step_15:
+        "Clique no botão de Fases para avançar à Fase de Batalha (BATTLE PHASE).",
+      step_16:
+        "O oponente invocou um monstro! Enquanto ele estiver em campo, os Pontos de Vida do adversário estão protegidos.",
+      step_16a:
+        "Selecione o seu monstro em campo e declare um ataque para destruí-lo!",
+      step_16b: "Escolha o monstro oponente como alvo para efetuar o ataque!",
       next_btn: "PRÓXIMO",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
@@ -254,11 +264,15 @@ export const TRANSLATIONS = {
         "Click the 'DETAILS' button to open the Graveyard view and see the recently used Spell Card.",
       step_13b:
         "Here you can inspect all cards discarded during the match. Close the window to continue.",
-      step_14:
-        "Now that field is set, let's get ready for battle!",
+      step_13c:
+        "In standard matches, you can only change battle position on the following turn and attacking is always optional. However, since this is the tutorial, let's make an exception so you can learn how to fight: click on your monster and switch it to Attack Mode!",
+      step_14: "Now that field is set, let's get ready for battle!",
       step_15: "Click the Phase button to advance to the BATTLE PHASE.",
-      step_16: "The opponent summoned a monster! As long as it is on the field, the opponent's Life Points are protected.",
-      step_16a: "Select your monster on the field and declare an attack to destroy it!",
+      step_16:
+        "The opponent summoned a monster! As long as it is on the field, the opponent's Life Points are protected.",
+      step_16a:
+        "Select your monster on the field and declare an attack to destroy it!",
+      step_16b: "Target the opponent's monster to execute the attack!",
       next_btn: "NEXT",
       menu_btn: "BACK TO MENU",
       play_btn: "PLAY NOW",
