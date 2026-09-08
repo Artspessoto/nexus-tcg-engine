@@ -142,7 +142,7 @@ export class MenuScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true });
 
     btnPT.on("pointerdown", () => {
-      LanguageManager.getInstance().setLanguage("pt-br");
+      LanguageManager.getInstance().setLanguage("pt-BR");
       this.scene.restart();
     });
 
