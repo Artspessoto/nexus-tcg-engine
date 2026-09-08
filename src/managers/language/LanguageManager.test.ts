@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, vi, expect, beforeEach } from "vitest";
 import { LanguageManager } from "./LanguageManager";
 import type { Lang } from "../../types/GameTypes";
 
@@ -6,6 +6,8 @@ describe("LanguageManager", () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (LanguageManager as any).instance = undefined;
+    vi.spyOn(navigator, "language", "get").mockReturnValue("pt-BR");
+    vi.spyOn(navigator, "languages", "get").mockReturnValue(["pt-BR", "pt"]);
   });
 
   it("should create a singleton instance", () => {
@@ -18,8 +20,8 @@ describe("LanguageManager", () => {
   it("should initialize with default language pt-br", () => {
     const manager = LanguageManager.getInstance();
 
-    expect(manager.currentLang).toBe("pt-br");
-    expect(manager.currentLanguage).toBe("pt-br");
+    expect(manager.currentLang).toBe("pt-BR");
+    expect(manager.currentLanguage).toBe("pt-BR");
   });
 
   it("should return the current language using getter", () => {
@@ -27,7 +29,7 @@ describe("LanguageManager", () => {
 
     const lang = manager.currentLang;
 
-    expect(lang).toBe("pt-br");
+    expect(lang).toBe("pt-BR");
   });
 
   it("should change language when setLanguage is called", () => {
