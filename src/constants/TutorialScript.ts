@@ -319,7 +319,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     requireAction: true,
   },
   {
-    textKey: "step_16",
+    textKey: "step_16", //npc's monster was summoned
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: SCREEN.CENTER_X - 40,
@@ -329,7 +329,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     },
   },
   {
-    textKey: "step_16a",
+    textKey: "step_16a", //select their own monster and declared an attack
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 50,
@@ -340,7 +340,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     requireAction: true,
   },
   {
-    textKey: "step_16b",
+    textKey: "step_16b", //target enemy monster to execute attack
     layoutMode: "TOOLTIP",
     focusTarget: {
       x: 50,
@@ -349,5 +349,30 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       disabled_hover: true,
     },
     requireAction: true,
+  },
+  {
+    textKey: "step_16c", //own monster cannot attack 2x in same turn
+    layoutMode: "TOOLTIP",
+    skipCameraSync: true,
+    focusTarget: {
+      x: SCREEN.CENTER_X - 50,
+      y: SCREEN.CENTER_Y + 50,
+      id: ["FIELD_CARD_TOON_KNIGHT"],
+      disabled_hover: true,
+    },
+  },
+  {
+    textKey: "step_17", //end player turn action
+    layoutMode: "TOOLTIP",
+    focusTarget: {
+      x: BATTLE.PHASE_BUTTON.x,
+      y: BATTLE.PHASE_BUTTON.y,
+      id: ["PHASE_BUTTON"],
+    },
+    requireAction: true,
+  },
+  {
+    textKey: "step_18",
+    layoutMode: "NARRATIVE",
   },
 ];

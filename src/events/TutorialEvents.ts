@@ -5,19 +5,25 @@ export enum TutorialEvent {
   ADVANCE_DIALOG = "ADVANCE_DIALOG",
   FORCE_UI_STEP = "FORCE_UI_STEP",
   RESET_CAMERA = "RESET_CAMERA",
+  TUTORIAL_COMPLETE = "TUTORIAL_COMPLETE",
 }
 
 export type CameraFocusPayload = {
   x: number;
   y: number;
   id: TutorialElementId[];
-  disabled_hover?: boolean
+  disabled_hover?: boolean;
 };
-export type AdvanceDialogPayload = { textKey: string, targetId?: TutorialElementId[] };
+export type AdvanceDialogPayload = {
+  textKey: string;
+  targetId?: TutorialElementId[];
+};
 export type ForceUIStepPayload = { targetTextKey: string };
+export type TutorialCompletePayload = { textKey?: string };
 
 export interface TutorialEventMap {
   [TutorialEvent.FOCUS_CAMERA]: CameraFocusPayload;
   [TutorialEvent.ADVANCE_DIALOG]: AdvanceDialogPayload;
   [TutorialEvent.FORCE_UI_STEP]: ForceUIStepPayload;
+  [TutorialEvent.TUTORIAL_COMPLETE]: TutorialCompletePayload;
 }

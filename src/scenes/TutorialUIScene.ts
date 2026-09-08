@@ -213,8 +213,9 @@ export class TutorialUIScene extends Phaser.Scene {
     ]);
   }
 
-  private showCurrentStep() {
+  private showCurrentStep(): void {
     const step = TUTORIAL_STEPS[this.currentStepIndex];
+    const isLastStep = this.currentStepIndex == TUTORIAL_STEPS.length - 1;
     const { ANIMATIONS } = THEME_CONFIG;
 
     const translatedText =
@@ -228,6 +229,7 @@ export class TutorialUIScene extends Phaser.Scene {
 
     if (mode == "NARRATIVE") {
       const coords = this.applyNarrativeLayout();
+      if (isLastStep) this.nextBtn.setText(this.translationText.finish_btn);
       targetX = coords.x;
       targetY = coords.y;
     } else {
@@ -380,6 +382,13 @@ export class TutorialUIScene extends Phaser.Scene {
     const currentStep = TUTORIAL_STEPS[this.currentStepIndex];
 
     if (currentStep.requireAction) return; //block advance dialog click
+
+    if (currentStep.textKey === "step_18") {
+      this.scene
+        .get("TutorialBoardScene")
+        .events.emit(TutorialEvent.TUTORIAL_COMPLETE);
+      return;
+    }
 
     if (this.currentStepIndex < TUTORIAL_STEPS.length - 1) {
       this.currentStepIndex++;

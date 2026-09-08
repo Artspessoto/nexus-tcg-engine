@@ -1,5 +1,5 @@
 export const TRANSLATIONS = {
-  "pt-br": {
+  "pt-BR": {
     menu: {
       title: "TOON CASTLE",
       select_diff: "Selecione a Dificuldade:",
@@ -14,7 +14,7 @@ export const TRANSLATIONS = {
       step_1:
         "Bem-vindo ao Toon Castle, desafiante! Antes de você encarar os perigos reais do castelo, vamos conhecer os fundamentos básicos do duelo. Preste atenção aos recursos.",
       step_1b:
-        "Agora se você não é novo por aqui, se já conhece as regras ou quer voltar ao menu, clique no botão 'PULAR' no topo da tela. Agora vamos começar!",
+        "Caso já conheça as regras, você pode clicar em 'PULAR TUTORIAL' no topo da tela. Para avançar os diálogos a qualquer momento, clique no botão ou aperte ESPAÇO / ENTER no teclado. Vamos começar!",
       step_2:
         "Este são seus pontos de vida (LP). Se chegar a zero, você perde o duelo!",
       step_3:
@@ -86,7 +86,14 @@ export const TRANSLATIONS = {
       step_16a:
         "Selecione o seu monstro em campo e declare um ataque para destruí-lo!",
       step_16b: "Escolha o monstro oponente como alvo para efetuar o ataque!",
+      step_16c:
+        "Com o monstro inimigo destruído, o oponente fica vulnerável a ataques diretos! Mas lembre-se da regra: cada monstro só pode atacar uma vez por turno.",
+      step_17:
+        "Como não temos outros monstros aptos a atacar neste turno, sua Fase de Batalha terminou. Clique no botão de Fases para encerrar o seu turno.",
+      step_18:
+        "Treinamento concluído! Você dominou todos os fundamentos do duelo e agora está pronto para encarar os desafios do Toon Castle. Boa sorte!",
       next_btn: "PRÓXIMO",
+      finish_btn: "CONCLUIR",
       menu_btn: "VOLTAR AO MENU",
       play_btn: "JOGAR AGORA",
       skip_btn: "PULAR TUTORIAL",
@@ -204,7 +211,7 @@ export const TRANSLATIONS = {
       step_1:
         "Welcome to Toon Castle, challenger! Before you face the real dangers of the castle, let's go over the basics of dueling. Keep an eye on your resources.",
       step_1b:
-        "If you're not new around here, already know the rules, or just want to head back to the menu, hit the 'SKIP' button at the top of the screen. Now, let's get started!",
+        "If you already know the rules, you can click 'SKIP TUTORIAL' at the top of the screen. To advance dialogs at any time, click the button or press SPACE / ENTER on your keyboard. Let's begin!",
       step_2:
         "These are your Life Points (LP). If they hit zero, you lose the duel!",
       step_3:
@@ -273,7 +280,14 @@ export const TRANSLATIONS = {
       step_16a:
         "Select your monster on the field and declare an attack to destroy it!",
       step_16b: "Target the opponent's monster to execute the attack!",
+      step_16c:
+        "With the enemy monster destroyed, the opponent is open to direct attacks! However, remember the rule: each monster can only attack once per turn.",
+      step_17:
+        "Since we have no other monsters ready to attack, your Battle Phase is over. Click the Phase button to end your turn.",
+      step_18:
+        "Training complete! You have mastered the fundamentals of the duel and are now ready to face the challenges of Toon Castle. Good luck!",
       next_btn: "NEXT",
+      finish_btn: "FINISH",
       menu_btn: "BACK TO MENU",
       play_btn: "PLAY NOW",
       skip_btn: "SKIP TUTORIAL",

@@ -43,9 +43,10 @@ export class TutorialBoardScene extends Phaser.Scene {
     step_12: () => this.setupDragCard("FIRE_BALL"),
     step_13: () => this.setupGraveyardInteractions(),
     step_13c: () => this.setupChangePositionInteraction(),
-    step_15: () => this.setupBattlePhase(),
+    step_15: () => this.setupPhase("BATTLE"),
     step_16: () => this.setupBattleStep(),
     step_16a: () => this.setupPlayerAttackInteraction(),
+    step_17: () => this.setupPhase("END"),
   };
 
   constructor() {
@@ -117,6 +118,9 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.events.on(TutorialEvent.RESET_CAMERA, () => {
       this.handleCameraReset();
     });
+    this.events.once(TutorialEvent.TUTORIAL_COMPLETE, () => {
+      this.backToMenu();
+    });
 
     this.events.once("shutdown", () => {
       this.events.off(TutorialEvent.FOCUS_CAMERA, this.handleCameraFocus, this);
@@ -126,8 +130,6 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.events.on(
       TutorialEvent.ADVANCE_DIALOG,
       (data: AdvanceDialogPayload) => {
-        if (!data.targetId || !Array.isArray(data.targetId)) return;
-
         this.handlePhaseTextBtn(data.textKey);
 
         const handler = this.stepHandlers[data.textKey];
@@ -776,8 +778,8 @@ export class TutorialBoardScene extends Phaser.Scene {
     });
   }
 
-  //step 15
-  private setupBattlePhase(): void {
+  //step 15 and step 17
+  private setupPhase(phase: "BATTLE" | "END"): void {
     const { COMPONENTS } = THEME_CONFIG;
     const dummyPhaseBtn = this.uiElements.get("PHASE_BUTTON") as ToonButton;
     const translations = this.translationText.battle_scene.battle_buttons;
@@ -785,28 +787,47 @@ export class TutorialBoardScene extends Phaser.Scene {
     if (!dummyPhaseBtn) return;
 
     const turnLabel = `${this.translationText.battle_scene.turn_label} 2`;
-
-    dummyPhaseBtn.updatePhase(
-      turnLabel,
-      translations.to_battle,
-      COMPONENTS.BUTTONS.PHASE.color,
-    );
-
+    dummyPhaseBtn.off("pointerdown");
     dummyPhaseBtn.setInteractive({ useHandCursor: true });
 
-    dummyPhaseBtn.on("pointerdown", () => {
+    if (phase == "BATTLE") {
+      dummyPhaseBtn.updatePhase(
+        turnLabel,
+        translations.to_battle,
+        COMPONENTS.BUTTONS.PHASE.color,
+      );
+
+      dummyPhaseBtn.once("pointerdown", () => {
+        dummyPhaseBtn.disableInteractive(); //prevent double click action
+        dummyPhaseBtn.updatePhase(
+          turnLabel,
+          translations.end_turn,
+          COMPONENTS.BUTTONS.PHASE.color,
+        );
+
+        this.scene
+          .get("TutorialUIScene")
+          .events.emit(TutorialEvent.FORCE_UI_STEP, {
+            targetTextKey: "step_16",
+          });
+      });
+    } else {
       dummyPhaseBtn.updatePhase(
         turnLabel,
         translations.end_turn,
         COMPONENTS.BUTTONS.PHASE.color,
       );
 
-      this.scene
-        .get("TutorialUIScene")
-        .events.emit(TutorialEvent.FORCE_UI_STEP, {
-          targetTextKey: "step_16",
-        });
-    });
+      dummyPhaseBtn.once("pointerdown", () => {
+        dummyPhaseBtn.disableInteractive();
+
+        this.scene
+          .get("TutorialUIScene")
+          .events.emit(TutorialEvent.FORCE_UI_STEP, {
+            targetTextKey: "step_18",
+          });
+      });
+    }
   }
 
   //step 16
@@ -854,6 +875,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     opponentCard.setLocation("FIELD");
   }
 
+  //step 16_a
   private setupPlayerAttackInteraction(): void {
     let playerCard: Card | undefined;
     this.uiElements.forEach((element, key) => {
@@ -935,13 +957,16 @@ export class TutorialBoardScene extends Phaser.Scene {
 
         this.npcStatsView.animateLPChange(-damage, startLP, targetLP);
 
-        //TODO: send opponent's monster to graveyard
         this.sendToGraveyard(target);
       },
       onComplete: () => {
         attacker.setDepth(DEPTHS.UI_BASE + 10);
 
-        //advance to step 17
+        this.scene
+          .get("TutorialUIScene")
+          .events.emit(TutorialEvent.FORCE_UI_STEP, {
+            targetTextKey: "step_16c",
+          });
       },
     });
   }
@@ -1404,6 +1429,16 @@ export class TutorialBoardScene extends Phaser.Scene {
       alpha: 0,
       duration,
       ease: ANIMATIONS.EASING.SMOOTH,
+    });
+  }
+
+  private backToMenu(): void {
+    this.cameras.main.fadeOut(500, 0, 0, 0);
+
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+      this.scene.stop("TutorialBoardScene");
+      this.scene.stop("TutorialUIScene");
+      this.scene.start("MenuScene");
     });
   }
 }
