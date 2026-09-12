@@ -109,13 +109,11 @@ export const createMockBattleContext = (): IBattleContext => {
       .mockReturnValue({ ...createMockGameObject(), getData: undefined }),
     graphics: vi.fn().mockReturnValue(createMockGameObject()),
     existing: vi.fn(),
-    container: vi
-      .fn()
-      .mockReturnValue({
-        ...createMockGameObject(),
-        add: vi.fn(),
-        setY: vi.fn(),
-      }),
+    container: vi.fn().mockReturnValue({
+      ...createMockGameObject(),
+      add: vi.fn(),
+      setY: vi.fn(),
+    }),
     text: vi.fn().mockReturnValue(createMockGameObject()),
     image: vi.fn().mockReturnValue(createMockGameObject()),
     plane: vi.fn().mockImplementation((_x, y, texture) => {
@@ -169,10 +167,11 @@ export const createMockBattleContext = (): IBattleContext => {
     currentPhase: "MAIN",
     translationText: {
       lose_battle: "vitória",
+      draw_phase: "Fase de compra",
       win_battle: "derrota",
       opponent: "Oponente",
-      draw_phase: "Fase de compra",
-      opponent_draw: "Oponente comprou",
+      draw_notice: "Fase de compra",
+      opponent_draw_notice: "Oponente comprou",
       main_phase: "Fase principal",
       battle_phase: "Fase de batalha",
       turn_ended: "Turno finalizado",

@@ -390,7 +390,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     const dummyPhaseBtn = new ToonButton(this, {
       x: BATTLE.PHASE_BUTTON.x,
       y: BATTLE.PHASE_BUTTON.y,
-      text: "DRAW",
+      text: this.translationText.battle_scene.draw_phase,
       fontSize: "18px",
       textColor: "#fff",
       color: COMPONENTS.BUTTONS.PHASE.color,
@@ -401,7 +401,7 @@ export class TutorialBoardScene extends Phaser.Scene {
 
     dummyPhaseBtn.updatePhase(
       `${this.translationText.battle_scene.turn_label} 1`,
-      "DRAW",
+      this.translationText.battle_scene.draw_phase,
       COMPONENTS.BUTTONS.PHASE.color,
     );
 
@@ -418,30 +418,27 @@ export class TutorialBoardScene extends Phaser.Scene {
     const turnLabel = `${this.translationText.battle_scene.turn_label} 1`;
 
     switch (textKey) {
+      //explain draw phase
       case "step_7":
       case "step_7a":
         dummyPhaseBtn.updatePhase(
           turnLabel,
-          "DRAW",
+          this.translationText.battle_scene.draw_phase,
           COMPONENTS.BUTTONS.PHASE.color,
         );
         break;
+      //explain main phase
       case "step_7b":
       case "step_7c":
       case "step_8":
-        dummyPhaseBtn.updatePhase(
-          turnLabel,
-          this.translationText.battle_scene.main_phase,
-          COMPONENTS.BUTTONS.PHASE.color,
-        );
-        break;
-      case "step_7d":
         dummyPhaseBtn.updatePhase(
           turnLabel,
           this.translationText.battle_scene.battle_buttons.to_battle,
           COMPONENTS.BUTTONS.PHASE.color,
         );
         break;
+      //set end phase
+      case "step_7d":
       case "step_7e":
         dummyPhaseBtn.updatePhase(
           turnLabel,
@@ -1069,6 +1066,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.actionMenuView.renderMenu(targetX, targetY, options, handleMenuCancel);
 
     const nextStep = cardType.includes("MONSTER") ? "step_9" : "step_12a";
+    console.log(nextStep);
     this.scene
       .get("TutorialUIScene")
       .events.emit(TutorialEvent.FORCE_UI_STEP, { targetTextKey: nextStep });

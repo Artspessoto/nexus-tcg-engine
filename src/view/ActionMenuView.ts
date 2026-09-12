@@ -33,10 +33,16 @@ export class ActionMenuView {
       .setInteractive()
       .setDepth(THEME_CONFIG.DEPTHS.PREVIEW_CARD - 1);
 
+    const hasIcons = options.some((opt) => opt.icon !== undefined);
+
     //if clicks outside, cancel menu or shake btns
     this.inputBlocker.on("pointerdown", () => {
-      if (onCancel) onCancel();
-      else this.shakeButtons();
+      if (hasIcons) {
+        this.shakeButtons();
+      } else {
+        if (onCancel) onCancel();
+        this.clearMenu();
+      }
     });
 
     options.forEach((option) => {

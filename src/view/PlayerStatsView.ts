@@ -21,6 +21,10 @@ export class PlayerStatsView {
   private manaIcon!: Phaser.GameObjects.Image;
   private manaAura!: Phaser.GameObjects.Image;
 
+  private enemyAvatarImage?: Phaser.GameObjects.Image;
+  private playerAvatarImage?: Phaser.GameObjects.Image;
+  private maxLP: number;
+
   constructor(config: PlayerStatsViewConfig) {
     this.scene = config.scene;
 
@@ -29,6 +33,8 @@ export class PlayerStatsView {
       config.playerName,
       config.initialLP,
     );
+
+    this.maxLP = config.initialLP;
 
     this.manaContainer = this.buildManaDisplay(config.side, config.initialMana);
   }
@@ -47,20 +53,41 @@ export class PlayerStatsView {
 
     const bg = this.scene.add.graphics();
 
-    bg.fillStyle(COLORS.OVERLAY_BLACK, 0.5);
-    bg.fillRoundedRect(4, 4, WIDTH, HEIGHT, RADIUS);
+    // bg.fillStyle(COLORS.OVERLAY_BLACK, 0.5);
+    // bg.fillRoundedRect(4, 4, WIDTH, HEIGHT, RADIUS);
 
-    bg.fillStyle(COLORS.STONE_DARK, 1);
+    // bg.fillStyle(COLORS.STONE_DARK, 1);
+    // bg.fillRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
+
+    // bg.lineStyle(4, COLORS.GOLD_METAL, 1);
+    // bg.strokeRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
+
+    // bg.lineStyle(2, COLORS.OVERLAY_BLACK, 0.3);
+    // bg.strokeRoundedRect(3, 3, WIDTH - 6, HEIGHT - 6, RADIUS - 2);
+    bg.fillStyle(COLORS.OVERLAY_BLACK, 0.6);
+    bg.fillRoundedRect(4, 6, WIDTH, HEIGHT, RADIUS);
+
+    //gradient
+    //4 colors(top left, top right, left bottom, right bottom)
+    bg.fillGradientStyle(
+      COLORS.UI_BG_TOP,
+      COLORS.UI_BG_TOP,
+      COLORS.UI_BG_BOTTOM,
+      COLORS.UI_BG_BOTTOM,
+      1,
+    );
     bg.fillRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
 
-    bg.lineStyle(4, COLORS.GOLD_METAL, 1);
+    // Borda Principal (Usando GOLD_METAL em vez do GOLD_PRIMARY chamativo)
+    bg.lineStyle(3, COLORS.GOLD_METAL, 1);
     bg.strokeRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
 
-    bg.lineStyle(2, COLORS.OVERLAY_BLACK, 0.3);
+    // Linha interna de detalhe (mais sutil)
+    bg.lineStyle(1, COLORS.OVERLAY_BLACK, 0.5);
     bg.strokeRoundedRect(3, 3, WIDTH - 6, HEIGHT - 6, RADIUS - 2);
 
     const nameText = this.scene.add
-      .text(20, 8, playerName, {
+      .text(0, 0, playerName, {
         fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
         fontSize: "16px",
         color: "#EAEAEA",
@@ -68,7 +95,7 @@ export class PlayerStatsView {
       .setOrigin(0.0);
 
     const labelLP = this.scene.add
-      .text(20, 45, "LP", {
+      .text(0, 0, "LP", {
         fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
         fontSize: "18px",
         color: COLORS.GOLD_GLOW,
@@ -82,15 +109,38 @@ export class PlayerStatsView {
     };
 
     this.lpText = this.scene.add
-      .text(55, 45, `${initialLP}`, textStyle)
+      .text(0, 0, `${initialLP}`, textStyle)
       .setOrigin(0, 0.5)
       .setShadow(2, 2, "#000000", 4, true, false);
 
-    container.add([bg, nameText, labelLP, this.lpText]);
+    const elementsToRender: Phaser.GameObjects.GameObject[] = [
+      bg,
+      nameText,
+      labelLP,
+      this.lpText,
+    ];
 
-    if (side === "PLAYER") {
-      container.setY(yPos - 10);
+    nameText.setPosition(110, 15);
+    labelLP.setPosition(110, 60);
+    this.lpText.setPosition(145, 60);
+
+    if (side === "OPPONENT") {
+      this.enemyAvatarImage = this.scene.add
+        .image(55, HEIGHT / 2, "avatars_profile", "enemy_face_1")
+        .setOrigin(0.5, 0.5)
+        .setDisplaySize(105, 105);
+
+      elementsToRender.push(this.enemyAvatarImage);
+    } else {
+      this.playerAvatarImage = this.scene.add
+        .image(55, HEIGHT / 2, "avatars_profile", "player_face_1")
+        .setOrigin(0.5, 0.5)
+        .setDisplaySize(120, 120);
+
+      elementsToRender.push(this.playerAvatarImage);
     }
+
+    container.add(elementsToRender);
 
     return container;
   }
@@ -147,6 +197,9 @@ export class PlayerStatsView {
       onUpdate: () => {
         this.lpText.setText(Math.floor(lpCounter.value).toString());
       },
+      onComplete: () => {
+        this.updateAvatarExpression(targetLP);
+      },
     });
   }
 
@@ -191,6 +244,22 @@ export class PlayerStatsView {
         ANIMATIONS.SHAKES.STRONG.duration,
         ANIMATIONS.SHAKES.STRONG.intensity,
       );
+    }
+  }
+
+  private updateAvatarExpression(currentLP: number): void {
+    if (!this.enemyAvatarImage) return;
+
+    const healthPercent = Math.max(0, currentLP / this.maxLP);
+
+    if (healthPercent > 0.75) {
+      this.enemyAvatarImage.setTexture("avatars_profile", "enemy_face_1");
+    } else if (healthPercent > 0.4) {
+      this.enemyAvatarImage.setTexture("avatars_profile", "enemy_face_5");
+    } else if (healthPercent > 0.15) {
+      this.enemyAvatarImage.setTexture("avatars_profile", "enemy_face_4");
+    } else {
+      this.enemyAvatarImage.setTexture("avatars_profile", "enemy_face_2");
     }
   }
 }

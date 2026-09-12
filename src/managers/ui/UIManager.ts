@@ -151,8 +151,8 @@ export class UIManager implements IUIManager {
       case "DRAW": {
         const drawMsg =
           activePlayer == "PLAYER"
-            ? battle_scene.draw_phase
-            : battle_scene.opponent_draw;
+            ? battle_scene.draw_notice
+            : battle_scene.opponent_draw_notice;
         this.showNotice(drawMsg, "PHASE");
         break;
       }
@@ -265,7 +265,9 @@ export class UIManager implements IUIManager {
     }
 
     this.addDetailsButton(menuArgs);
-    this.actionMenuView.renderMenu(x, y, options);
+    this.actionMenuView.renderMenu(x, y, options, () => {
+      this.context.getHand("PLAYER").showHand();
+    });
   }
 
   public showGraveyardMenu(graveyardCards: Card[], x: number, y: number) {

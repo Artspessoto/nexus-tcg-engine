@@ -129,12 +129,24 @@ export class VersusScene extends Phaser.Scene {
 
     //avatar and texts
     const playerAvatar = this.add
-      .circle(-SCREEN.WIDTH / 4, SCREEN.CENTER_Y, 70, 0xcfb35d)
-      .setStrokeStyle(4, 0xffffff);
+      .image(
+        -SCREEN.WIDTH / 4,
+        SCREEN.CENTER_Y + bannerHeight / 2,
+        "avatars_profile",
+        "player_face_1",
+      )
+      .setOrigin(0.5, 1)
+      .setDisplaySize(150, bannerHeight + 20);
 
     const npcAvatar = this.add
-      .circle(SCREEN.WIDTH + SCREEN.WIDTH / 4, SCREEN.CENTER_Y, 70, 0x1a1a1a)
-      .setStrokeStyle(4, 0xffffff);
+      .image(
+        SCREEN.WIDTH + SCREEN.WIDTH / 4,
+        SCREEN.CENTER_Y + bannerHeight / 2,
+        "avatars_profile",
+        "enemy_face_1",
+      )
+      .setOrigin(0.5, 1)
+      .setDisplaySize(150, bannerHeight);
 
     const textY = SCREEN.CENTER_Y + bannerHeight / 2 + 30; //closer to banner
 

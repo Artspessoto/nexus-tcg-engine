@@ -24,7 +24,7 @@ export const TRANSLATIONS = {
       step_5:
         "Você inicia o duelo com 5 cartas do seu deck, mas atenção: o limite da sua mão é 6. Para jogar qualquer carta no campo, você precisará pagar com seu custo de mana. Vamos conhecer cada tipo de carta",
       step_5a:
-        "Esta é uma Carta de Monstro. Ela possui pontos de Ataque (ATK) e Defesa (DEF). Você pode invocá-la no campo em Modo de Ataque (face para cima) ou em Modo de Defesa (face para baixo).",
+        "Esta é uma Carta de Monstro.\n\nEla possui pontos de Ataque (ATK) e Defesa (DEF). \n\nVocê pode invocá-la no campo em Modo de Ataque (face para cima) ou em Modo de Defesa (face para baixo).",
       step_5b:
         "Este é um Monstro de Efeito. Ele é invocado da mesma forma que um monstro normal, porém possui uma habilidade especial que pode ser ativada no turno seguinte à sua invocação.",
       step_5c:
@@ -40,19 +40,19 @@ export const TRANSLATIONS = {
       step_6c:
         "A Zona de Cemitério é onde as cartas usadas e destruídas em combate e/ou por efeito são enviadas.",
       step_7:
-        "Este é o seu Controle de Fases. Cada turno no duelo é dividido em etapas, e você usará este botão para avançar entre elas.",
+        "Este é o seu Controle de Fases. Cada turno é dividido em etapas e você usará este botão para transitar entre elas — com exceção do início do turno.",
       step_7a:
-        "Normalmente, o turno começa na Fase de Compra (DRAW PHASE). Para puxar sua carta, você deve clicar diretamente sobre o seu Deck ou apertar a tecla ESPAÇO.",
+        "Normalmente, o turno começa na Fase de Compra. Nela, o botão fica travado indicando a fase e você compra clicando sobre o seu Deck ou apertando a tecla ESPAÇO.",
       step_7b:
-        "Mas atenção à regra: para manter o duelo justo, quem joga o primeiro turno da partida não compra carta, começando direto na Fase Principal (MAIN PHASE).",
+        "Mas atenção: quem começa o primeiro turno não compra carta, indo direto para a Fase Principal! A partir daqui, o botão passa a indicar a sua próxima ação disponível.",
       step_7c:
-        "A Fase Principal é o seu momento de preparação: é apenas nela que você pode invocar monstros, ativar mágicas e baixar suas armadilhas no campo.",
+        "A Fase Principal é o seu momento de preparação para invocar cartas. Note que o botão já exibe a opção de avançar para a Batalha quando você terminar suas jogadas.",
       step_7d:
-        "Depois de se preparar, você avança para a Fase de Batalha (BATTLE PHASE), onde seus monstros atacam!",
+        "Na Fase de Batalha, seus monstros atacam. Lembrando que atacar é sempre opcional caso prefira manter sua posição defensiva.",
       step_7e:
-        "Quando terminar, basta clicar novamente para passar o turno para o oponente.",
+        "Quando terminar seus ataques ou decidir não batalhar, basta clicar novamente no botão para encerrar a rodada e passar o turno ao oponente.",
       step_8:
-        "Agora que você já conhece a teoria, vamos para a prática! Como este é o nosso primeiro turno, estamos na Fase Principal.",
+        "Agora que você conhece o fluxo, vamos para a prática! Como este é o nosso primeiro turno, estamos na Fase Principal — por isso seu botão já oferece a opção de avançar para a batalha quando terminar.",
       step_8a:
         "Vamos reforçar nossas defesas. Clique e arraste a sua Carta de Monstro até uma das Zonas de Monstro disponíveis no campo para invocá-la.",
       step_9:
@@ -79,8 +79,7 @@ export const TRANSLATIONS = {
         "Em partidas reais, você só pode mudar a posição de batalha no turno seguinte e atacar é sempre opcional. Mas como estamos no tutorial, vamos abrir uma exceção para você aprender a lutar: clique no seu monstro e mude-o para Modo de Ataque!",
       step_14:
         "Agora que estamos com o campo preparado, vamos nos preparar para batalhar!",
-      step_15:
-        "Clique no botão de Fases para avançar à Fase de Batalha (BATTLE PHASE).",
+      step_15: "Clique no botão de Fases para avançar à Fase de Batalha.",
       step_16:
         "O oponente invocou um monstro! Enquanto ele estiver em campo, os Pontos de Vida do adversário estão protegidos.",
       step_16a:
@@ -143,8 +142,9 @@ export const TRANSLATIONS = {
     },
     battle_scene: {
       opponent: "OPONENTE",
-      draw_phase: "ESPAÇO: COMPRAR CARTA | ARRASTE PARA JOGAR",
-      opponent_draw: "FASE DE COMPRA DO OPONENTE",
+      draw_notice: "ESPAÇO: COMPRAR CARTA | ARRASTE PARA JOGAR",
+      opponent_draw_notice: "FASE DE COMPRA DO OPONENTE",
+      draw_phase: "FASE DE COMPRA",
       main_phase: "FASE PRINCIPAL",
       battle_phase: "FASE DE BATALHA",
       turn_ended: "FIM DO TURNO",
@@ -237,19 +237,19 @@ export const TRANSLATIONS = {
       step_6c:
         "The Graveyard Zone is where used cards are those destroyed in combat and/or by effects are sent.",
       step_7:
-        "This is your Phase Control. Each turn in the duel is divided into phases, and you'll use this button to advance through them.",
+        "This is your Phase Control. Each turn is divided into stages and you will use this button to transition between them — with the exception of the start of the turn.",
       step_7a:
-        "Normally, a turn starts in the Draw Phase (DRAW PHASE). To draw your card, you must click directly on your Deck or press the SPACEBAR.",
+        "Normally, the turn begins in the Draw Phase. Here, the button remains locked indicating the phase, and you draw by clicking on your Deck or pressing SPACE.",
       step_7b:
-        "But pay attention to this rule: to keep the duel fair, the player who goes first doesn't draw a card, starting straight in the Main Phase (MAIN PHASE).",
+        "However, take note: the player going first doesn't draw a card, going straight into the Main Phase! From this point on, the button shows your next available action.",
       step_7c:
-        "The Main Phase is your preparation time: this is the only phase where you can summon monsters, activate spells, and set your traps on the field.",
+        "The Main Phase is your setup window to summon cards. Notice that the button already displays the option to advance to Battle once your plays are done.",
       step_7d:
-        "After preparing, you advance to the Battle Phase (BATTLE PHASE), where your monsters attack!",
+        "During the Battle Phase, your monsters attack. Keep in mind that attacking is always optional if you prefer staying defensive.",
       step_7e:
-        "Once you're done, simply click the button again to pass the turn to your opponent.",
+        "Once you finish attacking or decide not to battle, simply click the button again to end your turn and hand control to the opponent.",
       step_8:
-        "Now that you know the theory, let's put it into practice! Since this is our first turn, we are in the Main Phase.",
+        "Now that you know the flow, let's jump into practice! Since this is our first turn, we are in the Main Phase — which is why the button already offers the option to advance to battle once you're ready.",
       step_8a:
         "Let's bolster our defenses. Click and drag your Monster Card to one of the available Monster Zones on the field to summon it.",
       step_9:
@@ -337,8 +337,9 @@ export const TRANSLATIONS = {
     },
     battle_scene: {
       opponent: "OPPONENT",
-      draw_phase: "SPACE: DRAW CARD | DRAG TO PLAY",
-      opponent_draw: "OPPONENT'S DRAW PHASE",
+      draw_notice: "SPACE: DRAW CARD | DRAG TO PLAY",
+      opponent_draw_notice: "OPPONENT'S DRAW PHASE",
+      draw_phase: "DRAW PHASE",
       main_phase: "MAIN PHASE",
       battle_phase: "BATTLE PHASE",
       turn_ended: "TURN ENDED",

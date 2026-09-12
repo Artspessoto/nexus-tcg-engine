@@ -24,6 +24,12 @@
       },
       { 
         "type": "atlas",
+        "key": "avatars_profile",
+        "textureURL": "assets/battle/illustrations/avatars.png",
+        "atlasURL": "assets/battle/illustrations/avatars.json"
+      },
+      { 
+        "type": "atlas",
         "key": "card_illustrations_monsters",
         "textureURL": "assets/battle/illustrations/monsters.webp",
         "atlasURL": "assets/battle/illustrations/monsters.json"

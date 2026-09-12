@@ -259,6 +259,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
       id: ["HAND_CARD_FIRE_BALL"],
       disabled_hover: true,
     },
+    requireAction: true,
   },
   {
     textKey: "step_13", //graveyard introduction (click on graveyard)

@@ -35,7 +35,11 @@ export class PhaseManager implements IPhaseManager {
 
     switch (phase) {
       case "DRAW":
-        phaseButton.updatePhase(this.turn, "DRAW", PHASE.color);
+        phaseButton.updatePhase(
+          this.turn,
+          this.context.translationText.draw_phase,
+          PHASE.color,
+        );
 
         if (isPlayerTurn) {
           phaseButton.setAlpha(1);

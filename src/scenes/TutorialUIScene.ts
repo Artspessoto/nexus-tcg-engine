@@ -59,11 +59,11 @@ export class TutorialUIScene extends Phaser.Scene {
           return this.layoutHandlers.DEFAULT(target, boxWidth, boxHeight);
 
         const desiredX = target.x - boxWidth / 2;
-        const desiredY = target.y - boxHeight / 2;
+        const desiredY = target.y - boxHeight - 70;
 
         return {
           x: Phaser.Math.Clamp(desiredX, 20, SCREEN.WIDTH - boxWidth - 20),
-          y: Phaser.Math.Clamp(desiredY, 30, SCREEN.HEIGHT - boxHeight - 30),
+          y: Phaser.Math.Clamp(desiredY, 20, SCREEN.HEIGHT - boxHeight - 20),
         };
       },
       BUTTON: (target, boxWidth, boxHeight) => {
@@ -283,6 +283,9 @@ export class TutorialUIScene extends Phaser.Scene {
     const boxWidth = SCREEN.WIDTH - 240;
     const boxHeight = 130;
 
+    //return to original scale
+    this.nextBtn.setScale(1);
+
     //text and visible config
     this.dialogText.setOrigin(0, 0.5);
     this.dialogText.setStyle({
@@ -319,34 +322,36 @@ export class TutorialUIScene extends Phaser.Scene {
     x: number;
     y: number;
   } {
-    const boxWidth = 320;
     const step = TUTORIAL_STEPS[this.currentStepIndex];
+    const hasButton = !step.requireAction;
+    const boxWidth = 340;
 
     this.dialogText.setOrigin(0, 0);
     this.dialogText.setStyle({
       fontSize: "16px",
       wordWrap: { width: boxWidth - 40 },
-      lineSpacing: 6,
     });
+    this.dialogText.setLineSpacing(3);
     this.dialogText.setPosition(20, 20);
+    this.dialogText.updateText();
 
     //dynamic height based on step text
     const textHeight = this.dialogText.height;
-    const boxHeight = Math.max(100, textHeight + 60);
 
-    //hidden the button and show the dialog text with click zone btn
-    this.nextBtn.setVisible(false);
+    const boxHeight = hasButton ? textHeight + 70 : textHeight + 40;
+
+    this.tooltipHintText.setVisible(false);
+    this.clickZone.disableInteractive();
 
     //requireAction blocks click zone (lock dialog for user action)
     if (step.requireAction) {
-      this.tooltipHintText.setVisible(false);
-      this.clickZone.disableInteractive(false);
+      this.nextBtn.setVisible(false);
     } else {
-      this.tooltipHintText.setVisible(true);
-      this.tooltipHintText.setPosition(boxWidth - 20, boxHeight - 15);
+      this.nextBtn.setVisible(true);
+      this.nextBtn.setText(this.translationText.next_btn);
 
-      this.clickZone.setSize(boxWidth, boxHeight);
-      this.clickZone.setInteractive({ useHandCursor: true });
+      this.nextBtn.setScale(0.7);
+      this.nextBtn.setPosition(boxWidth - 65, boxHeight - 25);
     }
 
     this.drawPanelBackground(boxWidth, boxHeight);

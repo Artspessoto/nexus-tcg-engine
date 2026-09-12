@@ -6,6 +6,9 @@ export const THEME_CONFIG = {
     GOLD_DARK: 0x996600, // panel border (guide/details)
     GOLD_UI_STROKE: "#4D2600", //mana counter stroke
 
+    UI_BG_TOP: 0x2c303a, 
+    UI_BG_BOTTOM: 0x0f1115,
+
     //states
     NOTICE_PHASE: 0xffcc00,
     NOTICE_WARNING: 0xcc0000,
