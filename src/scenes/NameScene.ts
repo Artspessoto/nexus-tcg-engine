@@ -79,19 +79,19 @@ export class NameScene extends Phaser.Scene {
       hoverColor: 0x333333,
     });
 
-    backToMenuBtn.on("pointerdown", () => {
+    backToMenuBtn.once("pointerdown", () => {
       this.scene.start("MenuScene");
     });
 
-    this.input.keyboard?.on("keydown-ESC", () => {
+    this.input.keyboard?.once("keydown-ESC", () => {
       this.scene.start("MenuScene");
     });
 
-    this.input.keyboard?.on("keydown-ENTER", () => {
+    this.input.keyboard?.once("keydown-ENTER", () => {
       this.callNextScene(text, inputElement);
     });
 
-    confirmBtn.on("pointerdown", () => {
+    confirmBtn.once("pointerdown", () => {
       this.callNextScene(text, inputElement);
     });
   }

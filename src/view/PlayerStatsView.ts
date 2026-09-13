@@ -78,11 +78,9 @@ export class PlayerStatsView {
     );
     bg.fillRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
 
-    // Borda Principal (Usando GOLD_METAL em vez do GOLD_PRIMARY chamativo)
     bg.lineStyle(3, COLORS.GOLD_METAL, 1);
     bg.strokeRoundedRect(0, 0, WIDTH, HEIGHT, RADIUS);
 
-    // Linha interna de detalhe (mais sutil)
     bg.lineStyle(1, COLORS.OVERLAY_BLACK, 0.5);
     bg.strokeRoundedRect(3, 3, WIDTH - 6, HEIGHT - 6, RADIUS - 2);
 

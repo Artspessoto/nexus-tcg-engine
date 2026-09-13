@@ -33,16 +33,10 @@ export class ActionMenuView {
       .setInteractive()
       .setDepth(THEME_CONFIG.DEPTHS.PREVIEW_CARD - 1);
 
-    const hasIcons = options.some((opt) => opt.icon !== undefined);
-
     //if clicks outside, cancel menu or shake btns
     this.inputBlocker.on("pointerdown", () => {
-      if (hasIcons) {
-        this.shakeButtons();
-      } else {
-        if (onCancel) onCancel();
-        this.clearMenu();
-      }
+      if (onCancel) onCancel();
+      this.clearMenu();
     });
 
     options.forEach((option) => {
@@ -73,18 +67,18 @@ export class ActionMenuView {
     });
   }
 
-  private shakeButtons() {
-    this.selectionButtons.forEach((btn) => {
-      this.scene.tweens.add({
-        targets: btn,
-        x: btn.x + 5,
-        duration: 50,
-        yoyo: true,
-        repeat: 3,
-        ease: "Power1",
-      });
-    });
-  }
+  // private shakeButtons() {
+  //   this.selectionButtons.forEach((btn) => {
+  //     this.scene.tweens.add({
+  //       targets: btn,
+  //       x: btn.x + 5,
+  //       duration: 50,
+  //       yoyo: true,
+  //       repeat: 3,
+  //       ease: "Power1",
+  //     });
+  //   });
+  // }
 
   public clearMenu() {
     if (this.inputBlocker) {

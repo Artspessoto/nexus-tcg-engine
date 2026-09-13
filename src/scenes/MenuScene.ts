@@ -100,7 +100,7 @@ export class MenuScene extends Phaser.Scene {
       text: strings.start,
     });
 
-    startBtn.on("pointerdown", () => {
+    startBtn.once("pointerdown", () => {
       this.callNextScene(() => {
         this.scene.start("NameScene", { difficulty: this.selectedDifficulty });
       });
@@ -118,7 +118,7 @@ export class MenuScene extends Phaser.Scene {
     //   this.scene.pause();
     //   this.scene.launch("GuideScene");
     // });
-    tutorialBtn.on("pointerdown", () => {
+    tutorialBtn.once("pointerdown", () => {
       this.callNextScene(() => {
         this.scene.launch("TutorialUIScene");
         this.scene.start("TutorialBoardScene");

@@ -181,17 +181,17 @@ export class DeckPreviewScene extends Phaser.Scene {
       width: 220,
     });
 
-    readyBtn.on("pointerdown", () => {
+    readyBtn.once("pointerdown", () => {
       this.callNextScene();
     });
 
-    backBtn.on("pointerdown", () => {
+    backBtn.once("pointerdown", () => {
       this.scene.start("NameScene", {
         difficulty: this.difficulty,
       });
     });
 
-    this.input.keyboard?.on("keydown-ENTER", () => {
+    this.input.keyboard?.once("keydown-ENTER", () => {
       this.callNextScene();
     });
   }
