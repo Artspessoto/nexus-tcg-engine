@@ -27,9 +27,16 @@ export class InputManager implements IInputManager {
         if (currentlyOver.length === 0) {
           const activeSide = this.context.gameState.activePlayer;
 
-          if (this.isSelectionLocked()) return;
-          this.context.cancelPlacement();
+          if (
+            this.context.gameState.activePlayer !== "PLAYER" &&
+            !this.context.effects.isSelectingResponse
+          ) {
+            return;
+          }
 
+          if (this.isSelectionLocked()) return;
+
+          this.context.cancelPlacement();
           this.context.clearAllMenus();
           this.context.getHand(activeSide).showHand();
 
@@ -123,8 +130,14 @@ export class InputManager implements IInputManager {
 
   public setupDragEvents(card: Card) {
     const { ANIMATIONS, COMPONENTS, DEPTHS } = THEME_CONFIG;
+
     card.on("dragstart", (pointer: Phaser.Input.Pointer) => {
-      if (this.context.currentPhase !== "MAIN" || this.isSelectionLocked()) {
+      if (
+        this.context.gameState.activePlayer !== "PLAYER" ||
+        this.context.currentPhase !== "MAIN" ||
+        this.isSelectionLocked() ||
+        this.context.combat.isAnimating
+      ) {
         this.context.engine.input.setDragState(pointer, 0);
         return;
       }

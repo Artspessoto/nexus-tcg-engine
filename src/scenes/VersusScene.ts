@@ -270,7 +270,7 @@ export class VersusScene extends Phaser.Scene {
   private callNextScene(): void {
     const { ACCELERATE } = THEME_CONFIG.ANIMATIONS.EASING;
 
-    this.time.delayedCall(1600, () => {
+    this.time.delayedCall(500, () => {
       this.cameras.main.zoomTo(3, 600, ACCELERATE);
       this.cameras.main.fadeOut(800, 255, 255, 255); //brighten the screen with white
       this.cameras.main.once("camerafadeoutcomplete", () => {

@@ -154,7 +154,11 @@ export class CombatManager implements ICombatManager {
       }
     }
 
-    if (!this.currentAttacker || !this.currentAttacker.active) {
+    if (
+      !this.currentAttacker ||
+      !this.currentAttacker.active ||
+      this.currentAttacker.location !== "FIELD"
+    ) {
       Logger.debug(
         "COMBAT",
         "Attack canceled. The attacking monster/warrior was negated/destroyed by the effect",
@@ -164,7 +168,7 @@ export class CombatManager implements ICombatManager {
     }
 
     if (triggerCard) {
-      await this.delay(1500);
+      await this.delay(1200);
     }
   }
 

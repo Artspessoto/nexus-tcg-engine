@@ -168,7 +168,7 @@ export class HandManager implements IHandManager {
         `[HandManager] attempt to remove a non-existent card from ${this.side}'s hand.`,
         { invalidTarget: card },
       );
-      return false
+      return false;
     }
     this.hand = this.hand.filter((handCard) => handCard !== card);
     this.reorganizeHand();

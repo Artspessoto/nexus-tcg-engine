@@ -513,10 +513,16 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     side: GameSide,
     instructions?: EffectInstructions,
   ): Promise<void> {
+    if (card.location === "GRAVEYARD") {
+      return Promise.resolve();
+    }
+
     return new Promise((resolve) => {
       const { SCREEN, BATTLE } = LAYOUT_CONFIG;
       const { COLORS, ANIMATIONS } = THEME_CONFIG;
       const isEffectMonster = card.getType() === "EFFECT_MONSTER";
+
+      card.disableInteractive();
 
       //save original position
       const originalPos = {
@@ -528,7 +534,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
       card.activate();
       card.setHandVisuals();
-      card.fieldStatsBadge?.setVisible(false);
+      if (card.fieldStatsBadge) card.fieldStatsBadge.setVisible(false);
 
       //creating a temporary point to store position data
       const tempPoint = new Phaser.Math.Vector2();
@@ -547,7 +553,8 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
           0.7,
         )
         .setAlpha(0)
-        .setDepth(0);
+        .setDepth(0)
+        .setInteractive();
 
       this.tweens.add({
         targets: background,
@@ -610,10 +617,13 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
                   card.setHandVisuals();
                   card.fieldStatsBadge?.setVisible(true);
                   this.currentHand.showHand();
+
+                  card.setInteractive({ useHandCursor: true });
                   resolve();
                 },
               });
             } else {
+              card.setInteractive({ useHandCursor: true });
               resolve();
             }
           },
@@ -701,6 +711,8 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   }
 
   private applyDamage(side: GameSide, amount: number) {
+    if (amount == 0) return;
+
     const startLP = this.gameState.getHP(side);
 
     this.gameState.modifyHP(side, amount);
