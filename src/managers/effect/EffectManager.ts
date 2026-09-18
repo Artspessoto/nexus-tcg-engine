@@ -177,7 +177,7 @@ export class EffectManager implements IEffectManager {
       }
 
       aiTarget.startTargetHighlight();
-      this.delay(600);
+      await this.delay(600);
 
       await resolution(aiTarget);
 
@@ -684,7 +684,7 @@ export class EffectManager implements IEffectManager {
     });
   }
 
-  private delay(ms: number) {
+  private delay(ms: number): Promise<void> {
     return new Promise((resolve) => this.context.time.delayedCall(ms, resolve));
   }
 }
