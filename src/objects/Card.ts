@@ -7,6 +7,7 @@ import { GameEvent } from "../events/GameEvents";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 
 export class Card extends Phaser.GameObjects.Container {
+  //obj control
   public location: CardLocation = "DECK"; //card initial location
   public readonly originalOwner: GameSide; //real owner of card
   public owner: GameSide; //card controller
@@ -23,6 +24,7 @@ export class Card extends Phaser.GameObjects.Container {
   private atkText?: Phaser.GameObjects.Text;
   private defText?: Phaser.GameObjects.Text;
 
+  //badge (atk and def text in field)
   public fieldStatsBadge?: Phaser.GameObjects.Container;
   private fieldAtkText?: Phaser.GameObjects.Text;
   private fieldDefText?: Phaser.GameObjects.Text;
@@ -31,6 +33,13 @@ export class Card extends Phaser.GameObjects.Container {
   private baseData: CardData;
   private currentData: CardData;
   public cardType: CardType;
+
+  //attack and target glow animation
+  private isHighlighted: boolean = false;
+  private isTargeted: boolean = false;
+  private suspendedTargetHighlight: boolean = false;
+  private attackGlowEffect?: Phaser.FX.Glow;
+  private targetGlowEffect?: Phaser.FX.Glow;
 
   public visualElements!: Phaser.GameObjects.Container;
 
@@ -617,5 +626,87 @@ export class Card extends Phaser.GameObjects.Container {
         });
       },
     });
+  }
+
+  public startAttackHighlight(): void {
+    if (this.isHighlighted) return;
+
+    this.isHighlighted = true;
+    this.attackGlowEffect = this.postFX.addGlow(0xff0000, 0, 0);
+
+    this.scene.tweens.add({
+      targets: this.attackGlowEffect,
+      outerStrength: 6, //0 to 6
+      duration: 500,
+      yoyo: true,
+      repeat: -1,
+    });
+
+    //floating card
+    this.scene.tweens.add({
+      targets: this.visualElements,
+      y: -15,
+      scale: 1.05,
+      duration: 500,
+      yoyo: true,
+      repeat: -1,
+    });
+  }
+
+  public stopAttackHighlight(): void {
+    if (!this.isHighlighted) return;
+    this.isHighlighted = false;
+
+    this.scene.tweens.killTweensOf(this.visualElements);
+
+    if (this.attackGlowEffect) {
+      this.scene.tweens.killTweensOf(this.attackGlowEffect);
+      this.postFX.remove(this.attackGlowEffect);
+      this.attackGlowEffect = undefined;
+    }
+
+    this.visualElements.setY(0);
+    this.visualElements.setScale(1);
+  }
+
+  public startTargetHighlight() {
+    if (this.isTargeted) return;
+    this.isTargeted = true;
+
+    //orange color
+    this.targetGlowEffect = this.postFX.addGlow(0xff8c00, 6, 2);
+
+    this.scene.tweens.add({
+      targets: this.targetGlowEffect,
+      outerStrength: 8,
+      duration: 300,
+      yoyo: true,
+      repeat: -1,
+    });
+  }
+
+  public stopTargetHighlight() {
+    if (!this.isTargeted) return;
+    this.isTargeted = false;
+
+    if (this.targetGlowEffect) {
+      this.scene.tweens.killTweensOf(this.targetGlowEffect);
+      this.postFX.remove(this.targetGlowEffect);
+      this.targetGlowEffect = undefined;
+    }
+  }
+
+  public suspendHighlights() {
+    this.suspendedTargetHighlight = this.isTargeted;
+
+    //disable glow
+    this.stopTargetHighlight();
+  }
+
+  public resumeHighlights() {
+    if (this.suspendedTargetHighlight) this.startTargetHighlight();
+
+    //clean cache
+    this.suspendedTargetHighlight = false;
   }
 }

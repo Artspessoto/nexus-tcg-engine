@@ -90,6 +90,9 @@ export const createMockCard = (overrides: Partial<Card> = {}): Card => {
     disableInteractive: vi.fn(),
     setInteractive: vi.fn(),
     removeAllListeners: vi.fn(),
+    stopAttackHighlight: vi.fn(),
+    stopTargetHighlight: vi.fn(),
+    startTargetHighlight: vi.fn(),
     on: vi.fn(function (this: Card) {
       return this;
     }),

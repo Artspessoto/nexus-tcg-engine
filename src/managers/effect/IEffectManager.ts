@@ -11,9 +11,9 @@ export interface IEffectManager {
     AIInstructions?: EffectInstructions,
   ): Promise<void>;
   onGraveyardClicked(side: GameSide): void;
-  handleCardSelection(target: Card): void;
+  handleCardSelection(target: Card): Promise<void>;
   prepareTargeting(effect: CardEffect, source: Card): Promise<void>;
   selectResponseActivationSource(): Promise<Card | null>;
-  handleGlobalClick(card: Card): void;
+  handleGlobalClick(card: Card): Promise<void>;
   cancelResponseAction(): void;
 }

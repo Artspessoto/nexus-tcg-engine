@@ -175,7 +175,13 @@ export class EffectManager implements IEffectManager {
         );
         return;
       }
+
+      aiTarget.startTargetHighlight();
+      this.delay(600);
+
       await resolution(aiTarget);
+
+      aiTarget.stopTargetHighlight();
     } else {
       await this.prepareTargeting(effect, source);
     }
@@ -343,8 +349,8 @@ export class EffectManager implements IEffectManager {
     this.context.engine.scene.launch("GraveyardScene", {
       cards: validCards,
       isSelectionMode: true,
-      onSelect: (selectedCard: Card) => {
-        this.handleCardSelection(selectedCard);
+      onSelect: async (selectedCard: Card) => {
+        await this.handleCardSelection(selectedCard);
       },
     });
 
@@ -533,7 +539,7 @@ export class EffectManager implements IEffectManager {
     return target.getType().includes(effect.targetType);
   }
 
-  public handleCardSelection(target: Card) {
+  public async handleCardSelection(target: Card): Promise<void> {
     if (!this.pendingEffect || !this.pendingSource) return;
 
     //prevents select source card to apply effect
@@ -552,7 +558,13 @@ export class EffectManager implements IEffectManager {
 
     const resolve = this.targetResolution[this.pendingEffect.type];
     if (resolve) {
+      target.startTargetHighlight();
+
+      await this.delay(400);
+
       resolve(target, this.pendingSource, this.pendingEffect);
+
+      target.stopTargetHighlight();
 
       if (this.pendingEffect.type !== "REVIVE") {
         EventBus.emit(GameEvent.EFFECT_RESOLVED, {
@@ -611,7 +623,7 @@ export class EffectManager implements IEffectManager {
     }
   }
 
-  public handleGlobalClick(card: Card): void {
+  public async handleGlobalClick(card: Card): Promise<void> {
     if (this.isSelectingTarget && this.context.selectedCard) {
       return;
     }
@@ -619,7 +631,7 @@ export class EffectManager implements IEffectManager {
       if (card.location === "GRAVEYARD") {
         this.onGraveyardClicked(card.owner);
       } else {
-        this.handleCardSelection(card);
+        await this.handleCardSelection(card);
       }
       return;
     }
@@ -670,5 +682,9 @@ export class EffectManager implements IEffectManager {
       source: null,
       type: "RESPONSE",
     });
+  }
+
+  private delay(ms: number) {
+    return new Promise((resolve) => this.context.time.delayedCall(ms, resolve));
   }
 }

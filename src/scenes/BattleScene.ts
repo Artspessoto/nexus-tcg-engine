@@ -523,6 +523,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       const isEffectMonster = card.getType() === "EFFECT_MONSTER";
 
       card.disableInteractive();
+      card.suspendHighlights();
 
       //save original position
       const originalPos = {
@@ -570,7 +571,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       // add background and card into temp container
       this.overlayLayer.add([background, card]);
       card.setPosition(tempPoint.x, tempPoint.y);
-      card.setDepth(1); // background depth 0, card 1
+      card.setDepth(100); // background depth 0, card 100
 
       this.tweens.add({
         targets: card,
@@ -619,11 +620,17 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
                   this.currentHand.showHand();
 
                   card.setInteractive({ useHandCursor: true });
+                  card.setDepth(10); //back to default card depth in field
+                  card.resumeHighlights();
+
                   resolve();
                 },
               });
             } else {
               card.setInteractive({ useHandCursor: true });
+              card.setDepth(10);
+              card.resumeHighlights();
+
               resolve();
             }
           },
@@ -634,6 +641,8 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
   public async onAttackDeclared(attacker: Card, target?: Card): Promise<void> {
     this.combat.currentAttacker = attacker;
+    attacker.startAttackHighlight();
+
     if (target) {
       this.combat.isSelectingTarget = true;
       await this.combat.handleCardSelection(target);

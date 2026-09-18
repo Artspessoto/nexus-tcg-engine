@@ -11,6 +11,7 @@ export class CombatManager implements ICombatManager {
   private context: IBattleContext;
   public isSelectingTarget: boolean = false;
   public currentAttacker: Card | null = null;
+  public currentTarget: Card | null = null;
   public isAnimating: boolean = false;
 
   constructor(context: IBattleContext) {
@@ -72,7 +73,7 @@ export class CombatManager implements ICombatManager {
       source: attacker,
       type: "ATTACK",
     });
-    attacker.setAlpha(0.7);
+    // attacker.setAlpha(0.7);
   }
 
   public async handleCardSelection(target: Card): Promise<void> {
@@ -80,13 +81,37 @@ export class CombatManager implements ICombatManager {
       return;
 
     this.isSelectingTarget = false;
+    this.currentTarget = target;
+
+    const attackOwnCard = target.owner === this.currentAttacker.owner;
+    const isValidTargetType = target.getType().includes("MONSTER");
 
     if (this.context.gameState.currentPhase !== "BATTLE") {
       this.cancelTarget();
       return;
     }
-    const attackOwnCard = target.owner === this.currentAttacker.owner;
-    const isValidTargetType = target.getType().includes("MONSTER");
+
+    if (!isValidTargetType) {
+      EventBus.emit(GameEvent.NOTICE_REQUESTED, {
+        message: this.notices.select_attack_target,
+        type: "WARNING",
+      });
+      this.currentTarget = null;
+      return;
+    }
+
+    if (attackOwnCard) {
+      EventBus.emit(GameEvent.NOTICE_REQUESTED, {
+        message: this.notices.invalid_own_card,
+        type: "WARNING",
+      });
+      this.cancelTarget();
+      return;
+    }
+
+    this.currentTarget.startTargetHighlight();
+
+    await this.delay(600);
 
     await this.triggerActivation(target.owner);
 
@@ -102,24 +127,7 @@ export class CombatManager implements ICombatManager {
       return;
     }
 
-    if (attackOwnCard) {
-      EventBus.emit(GameEvent.NOTICE_REQUESTED, {
-        message: this.notices.invalid_own_card,
-        type: "WARNING",
-      });
-      this.cancelTarget();
-      return;
-    }
-
-    if (!isValidTargetType) {
-      EventBus.emit(GameEvent.NOTICE_REQUESTED, {
-        message: this.notices.select_attack_target,
-        type: "WARNING",
-      });
-      return;
-    }
-
-    await this.executeAttack(this.currentAttacker, target);
+    await this.executeAttack(this.currentAttacker, this.currentTarget);
 
     this.cancelTarget();
   }
@@ -174,15 +182,22 @@ export class CombatManager implements ICombatManager {
 
   public cancelTarget() {
     if (this.currentAttacker) {
+      this.currentAttacker.stopAttackHighlight();
+
       EventBus.emit(GameEvent.ATTACK_CANCELED, {
         attacker: this.currentAttacker,
       });
+
       if (!this.currentAttacker.hasAttacked) {
         this.currentAttacker.setAlpha(1);
       }
     }
+
+    if (this.currentTarget) this.currentTarget.stopTargetHighlight();
+
     this.isSelectingTarget = false;
     this.currentAttacker = null;
+    this.currentTarget = null;
   }
 
   private executeAttack(attacker: Card, target: Card): Promise<void> {
@@ -221,6 +236,8 @@ export class CombatManager implements ICombatManager {
         },
         onComplete: () => {
           this.isAnimating = false;
+          attacker.stopAttackHighlight();
+          target.stopTargetHighlight();
           resolve();
         },
       });
@@ -263,6 +280,7 @@ export class CombatManager implements ICombatManager {
         },
         onComplete: () => {
           this.isAnimating = false;
+          attacker.stopAttackHighlight();
           resolve();
         },
       });
@@ -362,6 +380,7 @@ export class CombatManager implements ICombatManager {
     card.active = false;
     this.context.field.releaseSlot(card, side);
     card.disableInteractive();
+    card.stopTargetHighlight();
 
     if (silentEffect) {
       this.context.tweens.add({
