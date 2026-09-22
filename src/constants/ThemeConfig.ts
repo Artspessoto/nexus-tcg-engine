@@ -6,7 +6,7 @@ export const THEME_CONFIG = {
     GOLD_DARK: 0x996600, // panel border (guide/details)
     GOLD_UI_STROKE: "#4D2600", //mana counter stroke
 
-    UI_BG_TOP: 0x2c303a, 
+    UI_BG_TOP: 0x2c303a,
     UI_BG_BOTTOM: 0x0f1115,
 
     //states
@@ -87,25 +87,23 @@ export const THEME_CONFIG = {
   },
   ANIMATIONS: {
     DURATIONS: {
-      FAST: 100,
-      UI_POP: 150,
-      PREVIEW: 200,
-      FIELD_PLAY: 250,
-      NORMAL: 300,
-      ACTIVATION: 400,
+      FASTEST: 100,
+      VERY_FAST: 150,
+      FAST: 200,
+      MEDIUM_FAST: 250,
+      BASE: 300,
+      MEDIUM_SLOW: 400,
       SLOW: 500,
-      LP_ROLL: 1200,
-      TURN_TRANSITION: 1500,
+      VERY_SLOW: 1200,
+      VERY_SLOWEST: 1500,
     },
     EASING: {
-      BOUNCE: "Back.easeOut",
-      QUART_OUT: "Quad.easeOut",
-      POWER_OUT: "Power2.easeOut",
-      EXPO_OUT: "Expo.easeOut",
-      SMOOTH: "Power2",
-      DYNAMIC: "Power3",
-      SHOCK: "Bounce.easeOut",
-      ACCELERATE: "Sine.easeIn"
+      SPRING: "Back.easeOut",
+      SMOOTH: "Quad.easeOut",
+      SNAPPY: "Expo.easeOut",
+      DYNAMIC: "Power3.easeOut",
+      BOUNCE: "Bounce.easeOut",
+      ACCELERATE: "Sine.easeIn",
     },
     SHAKES: {
       LIGHT: { duration: 100, intensity: 0.002 },
@@ -155,15 +153,20 @@ export const THEME_CONFIG = {
   //z-index
   DEPTHS: {
     BACKGROUND: -100,
-    DECK: 10,
-    FIELD_CARDS: 10,
-    UI_BASE: 100,
-    HAND_CARDS: 200,
-    DRAGGING_CARD: 2000,
-    PHASE_BUTTON: 5000,
-    PREVIEW_CARD: 5000,
-    BANNERS: 10000,
-    SELECTION_MENU: 10002,
-    OVERLAY_ACTIVATION: 20000,
+
+    BOARD_DECK: 10,
+    BOARD_FIELD: 20,
+
+    HAND_IDLE: 100,
+    HAND_DRAG: 500,
+    
+    UI_BASE: 1000,
+    UI_CONTROLS: 1100,
+    
+    OVERLAY_PREVIEW: 2000,
+    OVERLAY_BANNER: 3000,
+    OVERLAY_MENU: 3100,
+
+    OVERLAY_ACTIVATION: 5000,
   },
 };

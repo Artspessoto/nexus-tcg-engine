@@ -217,8 +217,8 @@ export class CombatManager implements ICombatManager {
         targets: attacker,
         x: target.x,
         y: target.y,
-        duration: DURATIONS.NORMAL,
-        ease: EASING.BOUNCE,
+        duration: DURATIONS.BASE,
+        ease: EASING.SPRING,
         yoyo: true, //attacker return into original pos
         onYoyoAll: () => {
           this.triggerImpactEffects(target);
@@ -264,8 +264,8 @@ export class CombatManager implements ICombatManager {
         targets: attacker,
         y: targetY,
         x: targetX,
-        duration: DURATIONS.NORMAL,
-        ease: EASING.BOUNCE,
+        duration: DURATIONS.BASE,
+        ease: EASING.SPRING,
         yoyo: true, //attacker return into original pos
         onYoyoAll: () => {
           this.context.cameras.main.shake(
@@ -386,7 +386,7 @@ export class CombatManager implements ICombatManager {
       this.context.tweens.add({
         targets: card,
         alpha: 0,
-        duration: DURATIONS.NORMAL,
+        duration: DURATIONS.BASE,
         onComplete: () => {
           card.setFaceUp();
           this.applyTint(card, null);
@@ -403,7 +403,7 @@ export class CombatManager implements ICombatManager {
       alpha: 0,
       scale: 1.4,
       duration: DURATIONS.SLOW,
-      ease: EASING.EXPO_OUT,
+      ease: EASING.SNAPPY,
       onStart: () => {
         this.applyTint(card, THEME_CONFIG.COLORS.TINT_IMPACT);
       },

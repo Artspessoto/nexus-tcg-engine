@@ -262,8 +262,8 @@ export class TutorialUIScene extends Phaser.Scene {
       targets: this.dialogContainer,
       x: targetX,
       alpha: 1,
-      duration: ANIMATIONS.DURATIONS.NORMAL,
-      ease: ANIMATIONS.EASING.QUART_OUT,
+      duration: ANIMATIONS.DURATIONS.BASE,
+      ease: ANIMATIONS.EASING.SMOOTH,
     });
   }
 

@@ -102,7 +102,7 @@ export class HandManager implements IHandManager {
 
     newCard.setLocation("HAND");
 
-    newCard.setDepth(DEPTHS.HAND_CARDS);
+    newCard.setDepth(DEPTHS.HAND_IDLE);
     this.hand.push(newCard);
 
     EventBus.emit(GameEvent.CARD_DRAW, { card: newCard, side: this.side });
@@ -124,7 +124,7 @@ export class HandManager implements IHandManager {
     this.context.tweens.add({
       targets: card,
       alpha: 1,
-      duration: DURATIONS.FAST,
+      duration: DURATIONS.FASTEST,
     });
   }
 
@@ -153,7 +153,7 @@ export class HandManager implements IHandManager {
         scale: finalScale,
         duration: ANIMATIONS.DURATIONS.SLOW, // 0.5s
         // ease: "Power2",
-        ease: ANIMATIONS.EASING.BOUNCE,
+        ease: ANIMATIONS.EASING.SPRING,
       });
     });
   }

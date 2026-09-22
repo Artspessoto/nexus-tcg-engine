@@ -336,7 +336,7 @@ describe("CombatManager", () => {
       expect(mockContext.tweens.add).toHaveBeenCalledWith(
         expect.objectContaining({
           alpha: 0,
-          duration: THEME_CONFIG.ANIMATIONS.DURATIONS.NORMAL,
+          duration: THEME_CONFIG.ANIMATIONS.DURATIONS.BASE,
         }),
       );
     });

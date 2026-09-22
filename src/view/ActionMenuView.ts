@@ -31,7 +31,7 @@ export class ActionMenuView {
     this.inputBlocker = this.scene.add
       .rectangle(640, 360, 1280, 720, 0x000000, 0.4)
       .setInteractive()
-      .setDepth(THEME_CONFIG.DEPTHS.PREVIEW_CARD - 1);
+      .setDepth(THEME_CONFIG.DEPTHS.OVERLAY_PREVIEW - 1);
 
     //if clicks outside, cancel menu or shake btns
     this.inputBlocker.on("pointerdown", () => {
@@ -57,7 +57,7 @@ export class ActionMenuView {
       width: option.width || 120,
       fontSize: option.isLeft ? "18px" : "14px",
       icon: option.icon,
-    }).setDepth(THEME_CONFIG.DEPTHS.SELECTION_MENU);
+    }).setDepth(THEME_CONFIG.DEPTHS.OVERLAY_MENU);
 
     this.selectionButtons.push(btn);
 

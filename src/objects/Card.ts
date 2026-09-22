@@ -483,7 +483,7 @@ export class Card extends Phaser.GameObjects.Container {
   }
 
   public refreshPositionHighlight() {
-    if (!this.fieldAtkText || !this.fieldDefText) return;
+    if (!this.fieldAtkText || !this.fieldDefText || !this.fieldManaText) return;
 
     const { GOLD_GLOW } = THEME_CONFIG.COLORS;
     const NEUTRAL_COLOR = "#EAEAEA";
@@ -500,6 +500,8 @@ export class Card extends Phaser.GameObjects.Container {
     if (!isDefUpdated) {
       this.fieldDefText.setColor(this.isDefMode ? GOLD_GLOW : NEUTRAL_COLOR);
     }
+
+    this.fieldManaText.setVisible(true);
   }
 
   public resetStats() {
@@ -537,6 +539,7 @@ export class Card extends Phaser.GameObjects.Container {
   }
 
   public updateStat(newValue: number, statType: "atk" | "def") {
+    const { ANIMATIONS } = THEME_CONFIG;
     const text = statType == "atk" ? this.atkText : this.defText;
     const badgeText = statType == "atk" ? this.fieldAtkText : this.fieldDefText;
     const baseValue =
@@ -590,9 +593,9 @@ export class Card extends Phaser.GameObjects.Container {
       ...jumpConfig,
       scale: 1.1,
       y: -30,
-      duration: 200,
+      duration: ANIMATIONS.DURATIONS.FAST,
       yoyo: true,
-      ease: "Back.easeOut",
+      ease: ANIMATIONS.EASING.SPRING,
       onStart: () => {
         this.frame.setTint(newValue > baseValue ? 0x4dff4d : 0xff4d4d);
       },
@@ -607,22 +610,24 @@ export class Card extends Phaser.GameObjects.Container {
       this.scene.tweens.add({
         targets: targetToApply,
         scale: 1.2,
-        duration: 200,
+        duration: ANIMATIONS.DURATIONS.FAST,
         yoyo: true,
-        ease: "Quad.easeOut",
+        ease: ANIMATIONS.EASING.SMOOTH,
       });
     }
   }
 
   public animateFlip(onComplete?: () => void) {
+    const { ANIMATIONS } = THEME_CONFIG;
+
     this.hasChangedPosition = true;
 
     this.scene.tweens.add({
       targets: this,
       angle: 0,
       scale: 0.45,
-      duration: 250,
-      ease: "Back.easeOut",
+      duration: ANIMATIONS.DURATIONS.MEDIUM_FAST,
+      ease: ANIMATIONS.EASING.SPRING,
       onStart: () => this.setFaceUp(),
       onComplete: () => {
         this.refreshPositionHighlight();
@@ -630,7 +635,7 @@ export class Card extends Phaser.GameObjects.Container {
         this.scene.tweens.add({
           targets: this,
           scale: 0.32, // back to original scale
-          duration: 150,
+          duration: ANIMATIONS.DURATIONS.VERY_FAST,
           onComplete: () => {
             if (onComplete) onComplete();
           },
@@ -640,6 +645,8 @@ export class Card extends Phaser.GameObjects.Container {
   }
 
   public animateChangePosition(onComplete?: () => void) {
+    const { ANIMATIONS } = THEME_CONFIG;
+
     this.hasChangedPosition = true;
     const isAtk = this.angle === 0;
     const targetAngle = isAtk ? -90 : 0;
@@ -648,15 +655,15 @@ export class Card extends Phaser.GameObjects.Container {
       targets: this,
       angle: targetAngle,
       scale: 0.45,
-      duration: 250,
-      ease: "Power2",
+      duration: ANIMATIONS.DURATIONS.MEDIUM_FAST,
+      ease: ANIMATIONS.EASING.SMOOTH,
       onComplete: () => {
         this.refreshPositionHighlight();
 
         this.scene.tweens.add({
           targets: this,
           scale: 0.32,
-          duration: 150,
+          duration: ANIMATIONS.DURATIONS.VERY_FAST,
           onComplete: () => {
             if (onComplete) onComplete();
           },
@@ -666,6 +673,8 @@ export class Card extends Phaser.GameObjects.Container {
   }
 
   public startAttackHighlight(): void {
+    const { ANIMATIONS } = THEME_CONFIG;
+
     if (this.isHighlighted) return;
 
     this.isHighlighted = true;
@@ -674,7 +683,7 @@ export class Card extends Phaser.GameObjects.Container {
     this.scene.tweens.add({
       targets: this.attackGlowEffect,
       outerStrength: 6, //change britness(glow) intensity (start with 0 and animate to 6)
-      duration: 500,
+      duration: ANIMATIONS.DURATIONS.SLOW,
       yoyo: true,
       repeat: -1,
     });
@@ -684,7 +693,7 @@ export class Card extends Phaser.GameObjects.Container {
       targets: this.visualElements,
       y: -15,
       scale: 1.05,
-      duration: 500,
+      duration: ANIMATIONS.DURATIONS.SLOW,
       yoyo: true,
       repeat: -1,
     });
@@ -707,6 +716,8 @@ export class Card extends Phaser.GameObjects.Container {
   }
 
   public startTargetHighlight() {
+    const { ANIMATIONS } = THEME_CONFIG;
+
     if (this.isTargeted) return;
     this.isTargeted = true;
 
@@ -716,7 +727,7 @@ export class Card extends Phaser.GameObjects.Container {
     this.scene.tweens.add({
       targets: this.targetGlowEffect,
       outerStrength: 8,
-      duration: 300,
+      duration: ANIMATIONS.DURATIONS.BASE,
       yoyo: true,
       repeat: -1,
     });

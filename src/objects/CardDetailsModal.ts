@@ -24,7 +24,7 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
     this.owner = data.owner;
     this.originalOwner = data.originalOwner;
 
-    this.setDepth(THEME_CONFIG.DEPTHS.BANNERS || 15000);
+    this.setDepth(THEME_CONFIG.DEPTHS.OVERLAY_BANNER || 15000);
 
     this.buildModal();
 
@@ -148,8 +148,8 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
     this.scene.tweens.add({
       targets: this,
       alpha: 0,
-      duration: DURATIONS.UI_POP,
-      ease: EASING.QUART_OUT,
+      duration: DURATIONS.VERY_FAST,
+      ease: EASING.SMOOTH,
       onComplete: () => {
         this.destroy();
       },

@@ -23,7 +23,7 @@ export class NoticeBannerView {
     this.container = this.scene.add
       .container(SCREEN.CENTER_X, SCREEN.CENTER_Y)
       .setVisible(false)
-      .setDepth(DEPTHS.BANNERS);
+      .setDepth(DEPTHS.OVERLAY_BANNER);
 
     this.bannerBg = this.scene.add
       .rectangle(
@@ -35,13 +35,13 @@ export class NoticeBannerView {
         0.85,
       )
       .setVisible(false)
-      .setDepth(DEPTHS.BANNERS);
+      .setDepth(DEPTHS.OVERLAY_BANNER);
 
     this.bannerText = this.scene.add
       .text(0, 0, "", FONTS.STYLES.BANNER_TEXT)
       .setOrigin(0.5)
       .setVisible(false)
-      .setDepth(DEPTHS.BANNERS + 1);
+      .setDepth(DEPTHS.OVERLAY_BANNER + 1);
 
     this.container.add([this.bannerBg, this.bannerText]);
   }
@@ -98,16 +98,16 @@ export class NoticeBannerView {
       targets: this.bannerBg,
       scaleY: 1,
       alpha: 1,
-      duration: ANIMATIONS.DURATIONS.FAST,
-      ease: ANIMATIONS.EASING.QUART_OUT,
+      duration: ANIMATIONS.DURATIONS.FASTEST,
+      ease: ANIMATIONS.EASING.SMOOTH,
     });
 
     // pop animation
     this.scene.tweens.add({
       targets: this.bannerText,
       scale: 1,
-      duration: ANIMATIONS.DURATIONS.UI_POP,
-      ease: ANIMATIONS.EASING.BOUNCE,
+      duration: ANIMATIONS.DURATIONS.VERY_FAST,
+      ease: ANIMATIONS.EASING.SPRING,
       onComplete: () => {
         //shake effect
         if (type === "WARNING") {
@@ -127,8 +127,8 @@ export class NoticeBannerView {
         targets: [this.bannerText, this.bannerBg],
         alpha: 0,
         y: "-=30",
-        duration: ANIMATIONS.DURATIONS.PREVIEW,
-        ease: ANIMATIONS.EASING.POWER_OUT,
+        duration: ANIMATIONS.DURATIONS.FAST,
+        ease: ANIMATIONS.EASING.SMOOTH,
         onComplete: () => {
           this.container.setVisible(false);
           this.bannerTimer = undefined;

@@ -456,7 +456,7 @@ export class UIManager implements IUIManager {
           0.6,
         )
         .setInteractive()
-        .setDepth(DEPTHS.BANNERS - 1);
+        .setDepth(DEPTHS.OVERLAY_BANNER - 1);
 
       new DecisionModal(
         this.context.engine,
@@ -470,7 +470,7 @@ export class UIManager implements IUIManager {
           inputBlocker?.destroy();
           resolve(result);
         },
-      ).setDepth(THEME_CONFIG.DEPTHS.BANNERS);
+      ).setDepth(THEME_CONFIG.DEPTHS.OVERLAY_BANNER);
     });
   }
 }

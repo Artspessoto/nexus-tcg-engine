@@ -157,7 +157,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       width: BATTLE.PHASE_BUTTON.width,
       height: BATTLE.PHASE_BUTTON.height,
     });
-    this.phaseButton.setVisible(false).setDepth(DEPTHS.PHASE_BUTTON - 1);
+    this.phaseButton.setVisible(false).setDepth(DEPTHS.UI_CONTROLS - 1);
 
     this.pauseButton = new ToonButton(this, {
       x: BATTLE.PAUSE_BUTTON.x,
@@ -171,7 +171,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       width: BATTLE.PAUSE_BUTTON.width,
       height: BATTLE.PAUSE_BUTTON.height,
     });
-    this.pauseButton.setVisible(true).setDepth(DEPTHS.PHASE_BUTTON - 1);
+    this.pauseButton.setVisible(true).setDepth(DEPTHS.UI_CONTROLS - 1);
 
     this.phaseButton.on("pointerdown", () => {
       if (this.controls.isSelectionLocked()) return;
@@ -560,7 +560,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       this.tweens.add({
         targets: background,
         alpha: 0.7,
-        duration: ANIMATIONS.DURATIONS.NORMAL,
+        duration: ANIMATIONS.DURATIONS.BASE,
       });
 
       if (card.parentContainer) {
@@ -579,15 +579,15 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         y: BATTLE.ACTIVATION_CENTER.y, // y center (720 / 2)
         angle: 0,
         scale: 1,
-        duration: ANIMATIONS.DURATIONS.ACTIVATION,
-        ease: ANIMATIONS.EASING.BOUNCE,
+        duration: ANIMATIONS.DURATIONS.MEDIUM_SLOW,
+        ease: ANIMATIONS.EASING.SPRING,
       });
 
       this.time.delayedCall(1000, () => {
         this.tweens.add({
           targets: background,
           alpha: 0,
-          duration: ANIMATIONS.DURATIONS.NORMAL,
+          duration: ANIMATIONS.DURATIONS.BASE,
           onComplete: async () => {
             background.destroy();
             this.overlayLayer.remove(card);
@@ -612,8 +612,8 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
                 y: originalPos.y,
                 angle: originalPos.angle,
                 scale: originalPos.scale,
-                duration: ANIMATIONS.DURATIONS.ACTIVATION,
-                ease: ANIMATIONS.EASING.POWER_OUT,
+                duration: ANIMATIONS.DURATIONS.MEDIUM_SLOW,
+                ease: ANIMATIONS.EASING.SMOOTH,
                 onComplete: () => {
                   card.setHandVisuals();
                   card.fieldStatsBadge?.setVisible(true);
@@ -670,7 +670,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         COLORS.OVERLAY_BLACK,
       )
       .setAlpha(0)
-      .setDepth(DEPTHS.BANNERS - 1);
+      .setDepth(DEPTHS.OVERLAY_BANNER - 1);
 
     this.tweens.add({
       targets: overLay,
@@ -701,7 +701,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         padding: { x: 10, y: 10 },
       })
       .setOrigin(0.5)
-      .setDepth(DEPTHS.BANNERS)
+      .setDepth(DEPTHS.OVERLAY_BANNER)
       .setScale(5)
       .setAlpha(0);
 
@@ -709,8 +709,8 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       targets: gameOverText,
       scale: 1,
       alpha: 1,
-      duration: ANIMATIONS.DURATIONS.ACTIVATION,
-      ease: ANIMATIONS.EASING.EXPO_OUT,
+      duration: ANIMATIONS.DURATIONS.MEDIUM_SLOW,
+      ease: ANIMATIONS.EASING.SNAPPY,
       onComplete: () => {
         this.time.delayedCall(500, () => {
           this.showGameOverButtons(loserSide);
@@ -754,7 +754,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         text: battle_buttons.next_duel,
         width: 180,
         height: 50,
-      }).setDepth(DEPTHS.BANNERS);
+      }).setDepth(DEPTHS.OVERLAY_BANNER);
 
       continueBtn.on("pointerdown", () => {
         // this.scene.start("RewardScene");
@@ -770,7 +770,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         text: battle_buttons.rematch,
         width: 200,
         height: 50,
-      }).setDepth(DEPTHS.BANNERS);
+      }).setDepth(DEPTHS.OVERLAY_BANNER);
 
       retryBtn.on("pointerdown", () => {
         this.cameras.main.fadeOut(500, 0, 0, 0);
@@ -791,7 +791,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         textColor: "#fff",
         color: 0x1a1a1a,
         hoverColor: 0x333333,
-      }).setDepth(DEPTHS.BANNERS);
+      }).setDepth(DEPTHS.OVERLAY_BANNER);
 
       giveUpBtn.on("pointerdown", () => {
         this.cameras.main.fadeOut(500, 0, 0, 0);
@@ -809,7 +809,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         textColor: "#fff",
         color: 0x1a1a1a,
         hoverColor: 0x333333,
-      }).setDepth(DEPTHS.BANNERS);
+      }).setDepth(DEPTHS.OVERLAY_BANNER);
 
       menuBtn.on("pointerdown", () => {
         this.cameras.main.fadeOut(500, 0, 0, 0);

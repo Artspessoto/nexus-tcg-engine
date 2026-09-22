@@ -190,7 +190,7 @@ export class PlayerStatsView {
     this.scene.tweens.add({
       targets: lpCounter,
       value: targetLP,
-      duration: ANIMATIONS.DURATIONS.LP_ROLL,
+      duration: ANIMATIONS.DURATIONS.VERY_SLOW,
       ease: ANIMATIONS.EASING.SMOOTH,
       onUpdate: () => {
         this.lpText.setText(Math.floor(lpCounter.value).toString());
@@ -210,8 +210,8 @@ export class PlayerStatsView {
       targets: this.manaAura,
       alpha: { from: 0.8, to: 0 },
       scale: { from: 0.5, to: 0.8 }, //shock wave effect
-      duration: ANIMATIONS.DURATIONS.NORMAL,
-      ease: ANIMATIONS.EASING.QUART_OUT,
+      duration: ANIMATIONS.DURATIONS.BASE,
+      ease: ANIMATIONS.EASING.SMOOTH,
       onComplete: () => {
         this.manaAura.setScale(0.5).setAlpha(0);
       },
@@ -228,9 +228,9 @@ export class PlayerStatsView {
     this.scene.tweens.add({
       targets: this.lpText,
       scale: 1.4,
-      duration: ANIMATIONS.DURATIONS.UI_POP,
+      duration: ANIMATIONS.DURATIONS.VERY_FAST,
       yoyo: true,
-      ease: ANIMATIONS.EASING.BOUNCE,
+      ease: ANIMATIONS.EASING.SPRING,
       onComplete: () => {
         this.lpText.setColor(COLORS.GOLD_GLOW);
         this.lpText.setScale(1);

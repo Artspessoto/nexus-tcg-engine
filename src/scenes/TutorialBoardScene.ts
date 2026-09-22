@@ -222,7 +222,7 @@ export class TutorialBoardScene extends Phaser.Scene {
         angle: 0,
         scale: COMPONENTS.CARD.SCALES.PLAYER_HAND,
         duration: ANIMATIONS.DURATIONS.SLOW, // 0.5s
-        ease: ANIMATIONS.EASING.BOUNCE,
+        ease: ANIMATIONS.EASING.SPRING,
       });
     });
   }
@@ -255,7 +255,7 @@ export class TutorialBoardScene extends Phaser.Scene {
           targets: card,
           y: HAND.PLAYER.NORMAL_Y,
           duration: ANIMATIONS.DURATIONS.SLOW,
-          ease: ANIMATIONS.EASING.BOUNCE,
+          ease: ANIMATIONS.EASING.SPRING,
         });
       }
     });
@@ -363,8 +363,8 @@ export class TutorialBoardScene extends Phaser.Scene {
       targets: dummyCard.visualElements,
       y: COMPONENTS.CARD.OFFSETS.HOVER_Y,
       scale: COMPONENTS.CARD.SCALES.ZOOM,
-      duration: ANIMATIONS.DURATIONS.PREVIEW,
-      ease: ANIMATIONS.EASING.BOUNCE,
+      duration: ANIMATIONS.DURATIONS.FAST,
+      ease: ANIMATIONS.EASING.SPRING,
     });
     dummyCard.setDepth(DEPTHS.UI_BASE + 1);
   }
@@ -376,7 +376,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       targets: dummyCard.visualElements,
       y: 0,
       scale: 1,
-      duration: ANIMATIONS.DURATIONS.PREVIEW,
+      duration: ANIMATIONS.DURATIONS.FAST,
       ease: ANIMATIONS.EASING.SMOOTH,
     });
 
@@ -480,7 +480,7 @@ export class TutorialBoardScene extends Phaser.Scene {
         this.tweens.add({
           targets: monsterZones,
           alpha: 1,
-          duration: 300,
+          duration: ANIMATIONS.DURATIONS.BASE,
         });
       }
 
@@ -494,10 +494,10 @@ export class TutorialBoardScene extends Phaser.Scene {
       this.tweens.add({
         targets: card,
         scale: COMPONENTS.CARD.SCALES.DEFAULT_HAND,
-        duration: ANIMATIONS.DURATIONS.UI_POP,
+        duration: ANIMATIONS.DURATIONS.VERY_FAST,
         ease: ANIMATIONS.EASING.SMOOTH,
       });
-      card.setDepth(DEPTHS.DRAGGING_CARD);
+      card.setDepth(DEPTHS.UI_BASE + 10);
     });
 
     card.on(
@@ -606,7 +606,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       card.setInteractive({ useHandCursor: true });
 
       card.once("pointerdown", () => {
-        card.setDepth(THEME_CONFIG.DEPTHS.PREVIEW_CARD || 2000);
+        card.setDepth(THEME_CONFIG.DEPTHS.OVERLAY_PREVIEW);
         const translationText =
           this.translationText.battle_scene.battle_buttons;
 
@@ -672,7 +672,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     if (graveyardCards.length == 0 || !fieldCard) return;
 
     graveyardCards.forEach((card) => {
-      card.setDepth(THEME_CONFIG.DEPTHS.DRAGGING_CARD);
+      card.setDepth(THEME_CONFIG.DEPTHS.UI_BASE + 10);
       card.off("pointerdown");
       card.setInteractive({ useHandCursor: true });
 
@@ -857,8 +857,8 @@ export class TutorialBoardScene extends Phaser.Scene {
       targets: opponentCard,
       y: targetPos.y,
       alpha: 1,
-      duration: ANIMATIONS.DURATIONS.FIELD_PLAY,
-      ease: ANIMATIONS.EASING.BOUNCE,
+      duration: ANIMATIONS.DURATIONS.MEDIUM_FAST,
+      ease: ANIMATIONS.EASING.SPRING,
       onComplete: () => {
         this.cameras.main.shake(
           ANIMATIONS.SHAKES.LIGHT.duration,
@@ -928,14 +928,14 @@ export class TutorialBoardScene extends Phaser.Scene {
   private executeDummyAttack(attacker: Card, target: Card): void {
     const { ANIMATIONS, DEPTHS } = THEME_CONFIG;
     attacker.setAlpha(0.7);
-    attacker.setDepth(DEPTHS.DRAGGING_CARD);
+    attacker.setDepth(DEPTHS.HAND_DRAG);
 
     this.tweens.add({
       targets: attacker,
       x: target.x,
       y: target.y,
-      duration: ANIMATIONS.DURATIONS.NORMAL,
-      ease: ANIMATIONS.EASING.BOUNCE,
+      duration: ANIMATIONS.DURATIONS.BASE,
+      ease: ANIMATIONS.EASING.SPRING,
       yoyo: true, //attacker return into original pos
       onYoyo: () => {
         this.cameras.main.shake(
@@ -987,11 +987,11 @@ export class TutorialBoardScene extends Phaser.Scene {
       y: targetY,
       scale: COMPONENTS.CARD.SCALES.PREVIEW,
       angle: 0,
-      duration: ANIMATIONS.DURATIONS.PREVIEW,
+      duration: ANIMATIONS.DURATIONS.FAST,
       ease: ANIMATIONS.EASING.SMOOTH,
     });
 
-    card.setDepth(DEPTHS.PREVIEW_CARD);
+    card.setDepth(DEPTHS.OVERLAY_PREVIEW);
   }
 
   private showSelectMenu(
@@ -1066,7 +1066,6 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.actionMenuView.renderMenu(targetX, targetY, options, handleMenuCancel);
 
     const nextStep = cardType.includes("MONSTER") ? "step_9" : "step_12a";
-    console.log(nextStep);
     this.scene
       .get("TutorialUIScene")
       .events.emit(TutorialEvent.FORCE_UI_STEP, { targetTextKey: nextStep });
@@ -1101,8 +1100,8 @@ export class TutorialBoardScene extends Phaser.Scene {
       targets: card,
       angle: finalAngle,
       scale: finalScale,
-      duration: ANIMATIONS.DURATIONS.FIELD_PLAY,
-      ease: ANIMATIONS.EASING.BOUNCE,
+      duration: ANIMATIONS.DURATIONS.MEDIUM_FAST,
+      ease: ANIMATIONS.EASING.SPRING,
       onComplete: () => {
         //card impact animation effect
         this.cameras.main.shake(
@@ -1147,7 +1146,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.dummyCards.delete(`HAND_CARD_${cardId}`);
     card.setLocation("GRAVEYARD");
 
-    card.setDepth(DEPTHS.OVERLAY_ACTIVATION || 20000);
+    card.setDepth(DEPTHS.OVERLAY_ACTIVATION);
 
     this.tweens.add({
       targets: card,
@@ -1155,8 +1154,8 @@ export class TutorialBoardScene extends Phaser.Scene {
       y: LAYOUT_CONFIG.SCREEN.CENTER_Y,
       scale: 1,
       angle: 0,
-      duration: ANIMATIONS.DURATIONS.ACTIVATION,
-      ease: ANIMATIONS.EASING.BOUNCE,
+      duration: ANIMATIONS.DURATIONS.MEDIUM_SLOW,
+      ease: ANIMATIONS.EASING.SPRING,
       onComplete: () => {
         this.cameras.main.shake(
           ANIMATIONS.SHAKES.MEDIUM.duration,
@@ -1211,10 +1210,10 @@ export class TutorialBoardScene extends Phaser.Scene {
       duration: ANIMATIONS.DURATIONS.SLOW,
       ease: ANIMATIONS.EASING.SMOOTH,
       onStart: () => {
-        card.setDepth(DEPTHS.DRAGGING_CARD);
+        card.setDepth(DEPTHS.HAND_DRAG);
       },
       onComplete: () => {
-        card.setDepth(DEPTHS.FIELD_CARDS + 1);
+        card.setDepth(DEPTHS.BOARD_FIELD + 1);
 
         this.uiElements.set(`GRAVEYARD_CARD_${card.getCardData().id}`, card);
 
@@ -1269,7 +1268,7 @@ export class TutorialBoardScene extends Phaser.Scene {
             duration: ANIMATIONS.DURATIONS.SLOW,
             ease: ANIMATIONS.EASING.SMOOTH,
           });
-          card.setDepth(DEPTHS.DRAGGING_CARD);
+          card.setDepth(DEPTHS.UI_BASE + 10);
         } else {
           //hide other hand cards to show the spell slot
           this.tweens.add({
@@ -1379,7 +1378,7 @@ export class TutorialBoardScene extends Phaser.Scene {
         const isFieldCard = id.includes("FIELD_CARD_");
         if (!isFieldCard) {
           //cards on hand needs high depth than fields
-          card.setDepth(DEPTHS.DRAGGING_CARD);
+          card.setDepth(DEPTHS.UI_BASE + 10);
           if (!targetData?.disabled_hover) {
             this.handleDummyHover(card);
             this.currentFocusedCard.push(card);

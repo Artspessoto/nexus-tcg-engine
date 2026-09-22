@@ -106,8 +106,8 @@ export class InputManager implements IInputManager {
       targets: card.visualElements,
       y: COMPONENTS.CARD.OFFSETS.HOVER_Y,
       scale: COMPONENTS.CARD.SCALES.ZOOM,
-      duration: ANIMATIONS.DURATIONS.PREVIEW,
-      ease: ANIMATIONS.EASING.BOUNCE,
+      duration: ANIMATIONS.DURATIONS.FAST,
+      ease: ANIMATIONS.EASING.SPRING,
     });
     card.setDepth(200);
   }
@@ -121,7 +121,7 @@ export class InputManager implements IInputManager {
       targets: card.visualElements,
       y: 0,
       scale: 1,
-      duration: ANIMATIONS.DURATIONS.PREVIEW,
+      duration: ANIMATIONS.DURATIONS.FAST,
       ease: ANIMATIONS.EASING.SMOOTH,
     });
 
@@ -149,10 +149,10 @@ export class InputManager implements IInputManager {
       this.context.tweens.add({
         targets: card,
         scale: COMPONENTS.CARD.SCALES.DEFAULT_HAND,
-        duration: ANIMATIONS.DURATIONS.UI_POP,
+        duration: ANIMATIONS.DURATIONS.VERY_FAST,
         ease: ANIMATIONS.EASING.SMOOTH,
       });
-      card.setDepth(DEPTHS.DRAGGING_CARD);
+      card.setDepth(DEPTHS.HAND_DRAG);
     });
 
     card.on(
@@ -173,8 +173,8 @@ export class InputManager implements IInputManager {
       this.context.tweens.add({
         targets: card,
         scale: COMPONENTS.CARD.SCALES.DEFAULT_HAND,
-        duration: ANIMATIONS.DURATIONS.PREVIEW,
-        ease: ANIMATIONS.EASING.BOUNCE,
+        duration: ANIMATIONS.DURATIONS.FAST,
+        ease: ANIMATIONS.EASING.SPRING,
       });
     });
 

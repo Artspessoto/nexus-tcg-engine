@@ -199,20 +199,20 @@ export class VersusScene extends Phaser.Scene {
     this.tweens.add({
       targets: bgBorder,
       scaleX: 1,
-      duration: ANIMATIONS.DURATIONS.NORMAL,
+      duration: ANIMATIONS.DURATIONS.BASE,
       ease: ANIMATIONS.EASING.SMOOTH,
       onComplete: () => {
         //player slide in
         this.tweens.add({
           targets: [playerBanner, playerSpeedLines],
           x: 0,
-          duration: ANIMATIONS.DURATIONS.ACTIVATION,
+          duration: ANIMATIONS.DURATIONS.MEDIUM_SLOW,
           ease: ANIMATIONS.EASING.DYNAMIC,
         });
         this.tweens.add({
           targets: [playerText, playerAvatar],
           x: SCREEN.WIDTH / 4,
-          duration: ANIMATIONS.DURATIONS.ACTIVATION,
+          duration: ANIMATIONS.DURATIONS.MEDIUM_SLOW,
           ease: ANIMATIONS.EASING.DYNAMIC,
         });
 
@@ -220,13 +220,13 @@ export class VersusScene extends Phaser.Scene {
         this.tweens.add({
           targets: [npcBanner, npcSpeedLines],
           x: SCREEN.WIDTH - bannerW,
-          duration: ANIMATIONS.DURATIONS.ACTIVATION,
+          duration: ANIMATIONS.DURATIONS.MEDIUM_SLOW,
           ease: ANIMATIONS.EASING.DYNAMIC,
         });
         this.tweens.add({
           targets: [npcText, npcAvatar],
           x: SCREEN.WIDTH * 0.75,
-          duration: ANIMATIONS.DURATIONS.ACTIVATION,
+          duration: ANIMATIONS.DURATIONS.MEDIUM_SLOW,
           ease: ANIMATIONS.EASING.DYNAMIC,
           onComplete: () => {
             //show speed lines and shock "VS" on center
@@ -248,7 +248,7 @@ export class VersusScene extends Phaser.Scene {
             this.tweens.add({
               targets: impactFlash,
               alpha: 0,
-              duration: ANIMATIONS.DURATIONS.PREVIEW,
+              duration: ANIMATIONS.DURATIONS.FAST,
               onComplete: () => impactFlash.destroy(), //clean of memory
             });
 
@@ -256,7 +256,7 @@ export class VersusScene extends Phaser.Scene {
               targets: vsText,
               scale: 1,
               duration: ANIMATIONS.DURATIONS.SLOW,
-              ease: ANIMATIONS.EASING.SHOCK,
+              ease: ANIMATIONS.EASING.BOUNCE,
               onComplete: () => {
                 this.callNextScene();
               },

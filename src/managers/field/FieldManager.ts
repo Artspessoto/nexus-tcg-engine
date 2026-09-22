@@ -217,8 +217,8 @@ export class FieldManager implements IFieldManager {
       y: targetY,
       angle: finalAngle,
       scale: finalScale,
-      duration: DURATIONS.FIELD_PLAY,
-      ease: EASING.BOUNCE,
+      duration: DURATIONS.MEDIUM_FAST,
+      ease: EASING.SPRING,
       onComplete: () => {
         // card impact animation effect
         this.context.cameras.main.shake(
@@ -246,11 +246,11 @@ export class FieldManager implements IFieldManager {
       y: targetY,
       scale: COMPONENTS.CARD.SCALES.PREVIEW,
       angle: 0,
-      duration: ANIMATIONS.DURATIONS.PREVIEW,
+      duration: ANIMATIONS.DURATIONS.FAST,
       ease: ANIMATIONS.EASING.SMOOTH,
     });
 
-    card.setDepth(DEPTHS.PREVIEW_CARD);
+    card.setDepth(DEPTHS.OVERLAY_PREVIEW);
   }
 
   public moveToGraveyard(card: Card) {

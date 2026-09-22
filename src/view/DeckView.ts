@@ -67,8 +67,8 @@ export class DeckView {
       targets: this.countText,
       scale: 1.5,
       yoyo: true,
-      duration: DURATIONS.FAST,
-      ease: EASING.QUART_OUT,
+      duration: DURATIONS.FASTEST,
+      ease: EASING.SMOOTH,
     });
 
     if (newCount <= 3) {
