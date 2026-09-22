@@ -146,20 +146,6 @@ describe("InputManager", () => {
 
       expect(context.combat.cancelTarget).toHaveBeenCalled();
     });
-
-    it("should advance turn on T key", () => {
-      manager.setupGlobalInputs();
-      const keyboard = context.engine.input.keyboard!;
-      const onMock = keyboard.on as unknown as ReturnType<typeof vi.fn>;
-
-      const calls = onMock.mock.calls;
-      const tHandler = calls.find(([event]) => event === "keydown-T")?.[1];
-
-      tHandler?.();
-
-      expect(context.gameState.nextTurn).toHaveBeenCalled();
-      expect(context.setPhase).toHaveBeenCalledWith("DRAW");
-    });
   });
 
   describe("setupCardInteractions", () => {

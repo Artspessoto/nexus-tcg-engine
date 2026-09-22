@@ -4,12 +4,13 @@ import { LanguageManager } from "../managers/language/LanguageManager";
 import { TRANSLATIONS } from "../constants/Translations";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
-import type { Difficulty } from "../types/GameTypes";
+import type { Difficulty, Lang } from "../types/GameTypes";
 
 export class MenuScene extends Phaser.Scene {
   private selectedDifficulty: Difficulty = "MEDIUM";
   private diffButtons: Map<Difficulty, Phaser.GameObjects.Text> = new Map();
   private diffBgs: Map<Difficulty, Phaser.GameObjects.Graphics> = new Map();
+  private currentLang!: Lang;
 
   constructor() {
     super("MenuScene");
@@ -30,8 +31,8 @@ export class MenuScene extends Phaser.Scene {
     const { SCREEN, MENU } = LAYOUT_CONFIG;
     const { COLORS, FONTS, COMPONENTS } = THEME_CONFIG;
 
-    const lang = LanguageManager.getInstance().currentLanguage;
-    const strings = TRANSLATIONS[lang].menu;
+    this.currentLang = LanguageManager.getInstance().currentLanguage;
+    const strings = TRANSLATIONS[this.currentLang].menu;
 
     const bg = this.add.image(SCREEN.CENTER_X, SCREEN.CENTER_Y, "background");
     bg.setDisplaySize(SCREEN.WIDTH, 900);
@@ -54,16 +55,14 @@ export class MenuScene extends Phaser.Scene {
       .setOrigin(0.5);
 
     this.add
-      .text(
-        SCREEN.CENTER_X,
-        MENU.SUBTITLE_Y,
-        strings.select_diff,
-        FONTS.STYLES.MENU_SUBTITLE,
-      )
+      .text(SCREEN.CENTER_X, MENU.SUBTITLE_Y, strings.select_diff, {
+        fontFamily: FONTS.FAMILY_DISPLAY,
+        ...FONTS.STYLES.MENU_SUBTITLE,
+      })
       .setOrigin(0.5);
 
     const diffs: { id: Difficulty; label: string; color: string }[] = [
-      { id: "EASY", label: strings.easy, color: "#00ff00" },
+      { id: "EASY", label: strings.easy, color: "#4CAF50" },
       { id: "MEDIUM", label: strings.medium, color: "#ffff00" },
       // TODO: implement 100% hard difficulty
       // { id: "HARD", label: strings.hard, color: "#ff0000" },
@@ -84,12 +83,17 @@ export class MenuScene extends Phaser.Scene {
           fontSize: "26px",
           fontStyle: "bold",
         })
-        .setOrigin(0.5)
-        .setInteractive({ useHandCursor: true });
-
-      btn.on("pointerdown", () => this.updateDifficulty(diff.id, diff.color));
+        .setOrigin(0.5);
 
       this.diffButtons.set(diff.id, btn);
+
+      const hitZone = this.add
+        .zone(xPos, yPos, MENU.DIFF_BUTTONS.WIDTH, MENU.DIFF_BUTTONS.HEIGHT)
+        .setInteractive({ useHandCursor: true });
+
+      hitZone.on("pointerdown", () =>
+        this.updateDifficulty(diff.id, diff.color),
+      );
     });
 
     this.updateDifficulty("MEDIUM", "#ffff00");
@@ -125,31 +129,7 @@ export class MenuScene extends Phaser.Scene {
       });
     });
 
-    const langPickerY = MENU.LANG_PICKER.Y;
-
-    const btnPT = this.add
-      .text(MENU.LANG_PICKER.PT_X, langPickerY, "PT", {
-        fontSize: "20px",
-        color: "#fff",
-      })
-      .setInteractive({ useHandCursor: true });
-
-    const btnEN = this.add
-      .text(MENU.LANG_PICKER.EN_X, langPickerY, "EN", {
-        fontSize: "20px",
-        color: "#fff",
-      })
-      .setInteractive({ useHandCursor: true });
-
-    btnPT.on("pointerdown", () => {
-      LanguageManager.getInstance().setLanguage("pt-BR");
-      this.scene.restart();
-    });
-
-    btnEN.on("pointerdown", () => {
-      LanguageManager.getInstance().setLanguage("en");
-      this.scene.restart();
-    });
+    this.createLanguagePicker();
   }
 
   private updateDifficulty(difficulty: Difficulty, activeColor: string) {
@@ -165,14 +145,14 @@ export class MenuScene extends Phaser.Scene {
 
       if (isSelected) {
         graphics.lineStyle(
-          3,
+          6,
           Phaser.Display.Color.HexStringToColor(activeColor).color,
           1,
         );
         graphics.fillStyle(COLORS.PANEL_BG_DARK, 0.9);
         btn.setStyle({ color: activeColor }).setScale(1.0);
       } else {
-        graphics.lineStyle(2, COLORS.OVERLAY_BLACK, 0.5);
+        graphics.lineStyle(5, COLORS.OVERLAY_BLACK, 0.5);
         graphics.fillStyle(COLORS.PANEL_BG_DARK, 0.7);
         btn.setStyle({ color: "#666" }).setScale(1.0);
       }
@@ -182,15 +162,61 @@ export class MenuScene extends Phaser.Scene {
         btn.y - DIFF_BUTTONS.HEIGHT / 2,
         DIFF_BUTTONS.WIDTH,
         DIFF_BUTTONS.HEIGHT,
-        10,
+        15,
       );
       graphics.strokeRoundedRect(
         btn.x - DIFF_BUTTONS.WIDTH / 2,
         btn.y - DIFF_BUTTONS.HEIGHT / 2,
         DIFF_BUTTONS.WIDTH,
         DIFF_BUTTONS.HEIGHT,
-        10,
+        15,
       );
+    });
+  }
+
+  private createLanguagePicker(): void {
+    const { MENU } = LAYOUT_CONFIG;
+    const langPickerY = MENU.LANG_PICKER.Y;
+    const isPT = this.currentLang === "pt-BR";
+
+    const btnPT = this.add
+      .text(MENU.LANG_PICKER.PT_X, langPickerY, "PT", {
+        fontSize: "20px",
+        color: isPT ? "#ffffff" : "#666666",
+        fontStyle: isPT ? "bold" : "normal",
+      })
+      .setInteractive({ useHandCursor: true });
+
+    this.add
+      .text(
+        (MENU.LANG_PICKER.PT_X + MENU.LANG_PICKER.EN_X) / 2 + 10,
+        langPickerY,
+        "|",
+        {
+          fontSize: "20px",
+          color: "#444444",
+        },
+      )
+      .setOrigin(0.5, 0);
+
+    const btnEN = this.add
+      .text(MENU.LANG_PICKER.EN_X, langPickerY, "EN", {
+        fontSize: "20px",
+        color: !isPT ? "#ffffff" : "#666666",
+        fontStyle: !isPT ? "bold" : "normal",
+      })
+      .setInteractive({ useHandCursor: true });
+
+    btnPT.on("pointerdown", () => {
+      if (isPT) return;
+      LanguageManager.getInstance().setLanguage("pt-BR");
+      this.scene.restart();
+    });
+
+    btnEN.on("pointerdown", () => {
+      if (!isPT) return;
+      LanguageManager.getInstance().setLanguage("en");
+      this.scene.restart();
     });
   }
 
