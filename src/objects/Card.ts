@@ -239,12 +239,12 @@ export class Card extends Phaser.GameObjects.Container {
   }
 
   public setFieldVisuals() {
-    const FIELD_W = 320;
-    const FIELD_H = 450;
+    // const FIELD_W = 320;
+    // const FIELD_H = 450;
 
-    this.frame.setDisplaySize(FIELD_W, FIELD_H);
+    // this.frame.setDisplaySize(FIELD_W, FIELD_H);
 
-    this.setSize(FIELD_W, FIELD_H);
+    // this.setSize(FIELD_W, FIELD_H);
 
     const isMonster = this.currentData.type.includes("MONSTER");
 
@@ -254,6 +254,8 @@ export class Card extends Phaser.GameObjects.Container {
       }
       if (this.fieldManaText) this.fieldManaText.setVisible(true);
       if (this.manaText) this.manaText.setVisible(false);
+      if (this.nameText) this.nameText.setVisible(false);
+      if (this.descText) this.descText.setVisible(false);
     }
   }
 
@@ -270,17 +272,19 @@ export class Card extends Phaser.GameObjects.Container {
   }
 
   public setHandVisuals() {
-    const width = CARD_CONFIG.WIDTH;
-    const height = CARD_CONFIG.HEIGHT;
+    // const width = CARD_CONFIG.WIDTH;
+    // const height = CARD_CONFIG.HEIGHT;
 
-    this.frame.setDisplaySize(width, height);
+    // this.frame.setDisplaySize(width, height);
 
-    this.setSize(width, height);
+    // this.setSize(width, height);
 
     if (this.fieldStatsBadge) this.fieldStatsBadge.setVisible(false);
     if (this.fieldManaText) this.fieldManaText.setVisible(false);
 
     if (this.manaText) this.manaText.setVisible(true);
+    if (this.nameText) this.nameText.setVisible(true);
+    if (this.descText) this.descText.setVisible(true);
   }
 
   public setFaceDown() {
@@ -307,18 +311,17 @@ export class Card extends Phaser.GameObjects.Container {
     this.frame.setTexture("battle_ui", frameKey);
     this.cardImage?.setVisible(true);
 
-    this.nameText.setVisible(true);
-    this.manaText.setVisible(true);
-    this.descText.setVisible(true);
-
     const isMonsterType = this.currentData.type.includes("MONSTER");
 
     if (this.atkText) this.atkText.setVisible(isMonsterType);
     if (this.defText) this.defText.setVisible(isMonsterType);
 
     if (this.location == "FIELD" || this.location == "GRAVEYARD") {
-      if (this.fieldManaText) this.fieldManaText.setVisible(true);
+      this.nameText.setVisible(false);
       this.manaText.setVisible(false);
+      this.descText.setVisible(false);
+
+      if (this.fieldManaText) this.fieldManaText.setVisible(true);
 
       if (this.fieldStatsBadge) {
         this.fieldStatsBadge.setVisible(isMonsterType);
@@ -326,6 +329,9 @@ export class Card extends Phaser.GameObjects.Container {
       }
     } else {
       this.manaText.setVisible(true);
+      this.nameText.setVisible(true);
+      this.descText.setVisible(true);
+      
       if (this.fieldManaText) this.fieldManaText.setVisible(false);
     }
   }
@@ -462,7 +468,7 @@ export class Card extends Phaser.GameObjects.Container {
     this.visualElements.add(this.fieldStatsBadge);
 
     this.fieldManaText = this.scene.add
-      .text(135, -195, `${data.manaCost || 0}`, {
+      .text(130, -180, `${data.manaCost || 0}`, {
         fontFamily: FONTS.FAMILY_DISPLAY,
         fontSize: "32px",
         color: "#EAEAEA",
