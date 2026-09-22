@@ -70,9 +70,9 @@ export const LAYOUT_CONFIG = {
     },
     OPPONENT: {
       MONSTER: [
-        { x: 505, y: 270 },
-        { x: 645, y: 270 },
-        { x: 787, y: 270 },
+        { x: 505, y: 280 },
+        { x: 645, y: 280 },
+        { x: 787, y: 280 },
       ],
       SPELL: [
         { x: 505, y: 120 },

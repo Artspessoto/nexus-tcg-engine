@@ -199,7 +199,7 @@ export class VersusScene extends Phaser.Scene {
     this.tweens.add({
       targets: bgBorder,
       scaleX: 1,
-      duration: ANIMATIONS.DURATIONS.BASE,
+      duration: ANIMATIONS.DURATIONS.FAST,
       ease: ANIMATIONS.EASING.SMOOTH,
       onComplete: () => {
         //player slide in
