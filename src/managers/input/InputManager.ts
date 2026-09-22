@@ -79,10 +79,10 @@ export class InputManager implements IInputManager {
       this.context.cancelPlacement();
     });
 
-    this.context.engine.input.keyboard?.on("keydown-T", () => {
-      this.context.gameState.nextTurn();
-      this.context.setPhase("DRAW");
-    });
+    // this.context.engine.input.keyboard?.on("keydown-T", () => {
+    //   this.context.gameState.nextTurn();
+    //   this.context.setPhase("DRAW");
+    // });
   }
 
   public setupCardInteractions(card: Card) {

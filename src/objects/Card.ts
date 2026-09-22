@@ -24,10 +24,11 @@ export class Card extends Phaser.GameObjects.Container {
   private atkText?: Phaser.GameObjects.Text;
   private defText?: Phaser.GameObjects.Text;
 
-  //badge (atk and def text in field)
+  //badge (atk, def and mana cost text in field)
   public fieldStatsBadge?: Phaser.GameObjects.Container;
   private fieldAtkText?: Phaser.GameObjects.Text;
   private fieldDefText?: Phaser.GameObjects.Text;
+  private fieldManaText?: Phaser.GameObjects.Text;
 
   private _isFaceDown: boolean = false;
   private baseData: CardData;
@@ -149,10 +150,10 @@ export class Card extends Phaser.GameObjects.Container {
       maskShape.setScale(worldPos.scaleX, worldPos.scaleY);
     };
 
-    scene.events.on("update", updateListener);
+    scene.events.on("postupdate", updateListener);
 
     this.once("destroy", () => {
-      scene.events.off("update", updateListener);
+      scene.events.off("postupdate", updateListener);
       maskShape.destroy();
     });
   }
@@ -247,8 +248,12 @@ export class Card extends Phaser.GameObjects.Container {
 
     const isMonster = this.currentData.type.includes("MONSTER");
 
-    if (!this._isFaceDown && this.fieldStatsBadge && isMonster) {
-      this.fieldStatsBadge.setVisible(true);
+    if (!this._isFaceDown) {
+      if (this.fieldStatsBadge && isMonster) {
+        this.fieldStatsBadge.setVisible(true);
+      }
+      if (this.fieldManaText) this.fieldManaText.setVisible(true);
+      if (this.manaText) this.manaText.setVisible(false);
     }
   }
 
@@ -273,6 +278,9 @@ export class Card extends Phaser.GameObjects.Container {
     this.setSize(width, height);
 
     if (this.fieldStatsBadge) this.fieldStatsBadge.setVisible(false);
+    if (this.fieldManaText) this.fieldManaText.setVisible(false);
+
+    if (this.manaText) this.manaText.setVisible(true);
   }
 
   public setFaceDown() {
@@ -288,6 +296,7 @@ export class Card extends Phaser.GameObjects.Container {
     if (this.defText) this.defText.setVisible(false);
 
     if (this.fieldStatsBadge) this.fieldStatsBadge.setVisible(false);
+    if (this.fieldManaText) this.fieldManaText.setVisible(false);
 
     this.setFieldVisuals();
   }
@@ -307,9 +316,17 @@ export class Card extends Phaser.GameObjects.Container {
     if (this.atkText) this.atkText.setVisible(isMonsterType);
     if (this.defText) this.defText.setVisible(isMonsterType);
 
-    if (this.location == "FIELD" && this.fieldStatsBadge) {
-      this.fieldStatsBadge.setVisible(isMonsterType);
-      if (isMonsterType) this.refreshPositionHighlight();
+    if (this.location == "FIELD" || this.location == "GRAVEYARD") {
+      if (this.fieldManaText) this.fieldManaText.setVisible(true);
+      this.manaText.setVisible(false);
+
+      if (this.fieldStatsBadge) {
+        this.fieldStatsBadge.setVisible(isMonsterType);
+        if (isMonsterType) this.refreshPositionHighlight();
+      }
+    } else {
+      this.manaText.setVisible(true);
+      if (this.fieldManaText) this.fieldManaText.setVisible(false);
     }
   }
 
@@ -443,6 +460,26 @@ export class Card extends Phaser.GameObjects.Container {
     this.fieldStatsBadge.setVisible(false);
 
     this.visualElements.add(this.fieldStatsBadge);
+
+    this.fieldManaText = this.scene.add
+      .text(135, -195, `${data.manaCost || 0}`, {
+        fontFamily: FONTS.FAMILY_DISPLAY,
+        fontSize: "32px",
+        color: "#EAEAEA",
+        stroke: "#000000",
+        strokeThickness: 10,
+        shadow: {
+          offsetX: 0,
+          offsetY: 4,
+          color: "#000000",
+          blur: 4,
+          fill: true,
+        },
+      })
+      .setOrigin(0.5, 0.5);
+
+    this.fieldManaText.setVisible(false);
+    this.visualElements.add(this.fieldManaText);
   }
 
   public refreshPositionHighlight() {
@@ -605,7 +642,7 @@ export class Card extends Phaser.GameObjects.Container {
   public animateChangePosition(onComplete?: () => void) {
     this.hasChangedPosition = true;
     const isAtk = this.angle === 0;
-    const targetAngle = isAtk ? 270 : 0;
+    const targetAngle = isAtk ? -90 : 0;
 
     this.scene.tweens.add({
       targets: this,
@@ -636,7 +673,7 @@ export class Card extends Phaser.GameObjects.Container {
 
     this.scene.tweens.add({
       targets: this.attackGlowEffect,
-      outerStrength: 6, //0 to 6
+      outerStrength: 6, //change britness(glow) intensity (start with 0 and animate to 6)
       duration: 500,
       yoyo: true,
       repeat: -1,

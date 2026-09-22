@@ -21,10 +21,6 @@ const config: Phaser.Types.Core.GameConfig = {
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    min: {
-      width: LAYOUT_CONFIG.SCREEN.WIDTH,
-      height: LAYOUT_CONFIG.SCREEN.HEIGHT,
-    },
     max: {
       width: LAYOUT_CONFIG.SCREEN.MAX_WIDTH,
       height: LAYOUT_CONFIG.SCREEN.MAX_HEIGHT,
@@ -39,6 +35,7 @@ const config: Phaser.Types.Core.GameConfig = {
   },
   input: {
     gamepad: true,
+    activePointers: 2,
   },
   scene: [
     MenuScene,

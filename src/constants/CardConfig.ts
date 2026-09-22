@@ -32,7 +32,7 @@ export const CARD_CONFIG = {
       fontStyle: "bold",
     },
     STATS: {
-      fontSize: "18px",
+      fontSize: "20px",
       fontStyle: "bold",
       color: "#ffffff",
       stroke: "#000000",
