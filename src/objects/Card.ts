@@ -290,6 +290,10 @@ export class Card extends Phaser.GameObjects.Container {
   public setFaceDown() {
     this._isFaceDown = true;
     this.frame.setTexture("battle_ui", "card_back2");
+    const FIELD_W = 300;
+    const FIELD_H = 420;
+
+    this.frame.setDisplaySize(FIELD_W, FIELD_H);
 
     this.nameText.setVisible(false);
     this.manaText.setVisible(false);
@@ -309,6 +313,11 @@ export class Card extends Phaser.GameObjects.Container {
     this._isFaceDown = false;
     const frameKey = this.getFrameKey(this.currentData.type);
     this.frame.setTexture("battle_ui", frameKey);
+
+    const width = this.baseData.width ?? CARD_CONFIG.WIDTH;
+    const height = this.baseData.height ?? CARD_CONFIG.HEIGHT;
+    this.frame.setDisplaySize(width, height);
+
     this.cardImage?.setVisible(true);
 
     const isMonsterType = this.currentData.type.includes("MONSTER");

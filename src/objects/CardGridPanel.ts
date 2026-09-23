@@ -17,6 +17,7 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
   private detailTypeText!: Phaser.GameObjects.Text;
   private detailDescText!: Phaser.GameObjects.Text;
   private selectionHighlight!: Phaser.GameObjects.Graphics;
+  private typeBadgeBg!: Phaser.GameObjects.Graphics;
   private panelConfig!: CardGridPanelConfig;
   private cardScale: number = 0.28;
 
@@ -58,6 +59,7 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
     const cellHeight = MODAL.LIST.CELL_HEIGHT;
 
     const panel = this.scene.add.graphics();
+    this.typeBadgeBg = this.scene.add.graphics();
 
     //panel (background and border)
     panel.fillStyle(COLORS.PANEL_BG, 0.95);
@@ -70,7 +72,7 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
     //vertical line divisor between the zones
     panel.lineBetween(gridWidth, 20, gridWidth, config.height - 20);
 
-    this.add(panel);
+    this.add([panel, this.typeBadgeBg]);
 
     this.selectionHighlight = this.scene.add.graphics();
     this.selectionHighlight.setDepth(DEPTHS.UI_BASE + 1);
@@ -133,8 +135,6 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
       const detailCenterX = gridWidth + MODAL.LIST.DETAIL_WIDTH / 2;
       const textPaddingY = MODAL.LIST.TEXT_Y_START;
 
-      const initialColor = this.getTypeColor(firstCardItem.type);
-
       this.cardDetailView = new Card(
         this.scene,
         detailCenterX,
@@ -157,12 +157,18 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
         .setOrigin(0.5);
 
       this.detailTypeText = this.scene.add
-        .text(detailCenterX, textPaddingY + 30, `[ ${firstCardItem.type} ]`, {
-          fontSize: "16px",
-          color: initialColor,
-          fontStyle: "bold",
-        })
-        .setOrigin(0.5, 0);
+        .text(
+          detailCenterX,
+          textPaddingY + 30,
+          this.formatTypeLabel(firstCardItem.type),
+          {
+            fontSize: "13px",
+            color: "#FFFFFF",
+            fontStyle: "bold",
+            fontFamily: FONTS.FAMILY_DISPLAY,
+          },
+        )
+        .setOrigin(0.5, 0.5);
 
       this.detailDescText = this.scene.add
         .text(
@@ -172,6 +178,7 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
           {
             ...FONTS.STYLES.MODAL_CONTENT,
             fontSize: "14px",
+            fontFamily: FONTS.FAMILY_DISPLAY,
             wordWrap: { width: MODAL.LIST.DETAIL_WIDTH - 40 },
           },
         )
@@ -184,6 +191,8 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
         this.detailDescText,
       ]);
 
+      this.renderTypeBadge(firstCardItem.type);
+
       //marks first card as 'select' by default
       this.updateHighlight(cellWidth / 2, 100);
     }
@@ -195,8 +204,10 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
     this.detailNameText.setText(data.nameKey.toUpperCase());
     this.detailDescText.setText(data.descriptionKey);
 
-    this.detailTypeText.setText(`[ ${data.type} ]`);
-    this.detailTypeText.setColor(this.getTypeColor(data.type));
+    this.detailTypeText.setText(this.formatTypeLabel(data.type));
+    this.detailTypeText.setColor("#FFFFFF");
+
+    this.renderTypeBadge(data.type);
   }
 
   private updateHighlight(x: number, y: number) {
@@ -224,5 +235,28 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
       TRAP: COLORS.TYPE_TRAP,
     };
     return colorMap[type] || COLORS.GOLD_GLOW;
+  }
+
+  private formatTypeLabel(type: string): string {
+    //transform effect_monster into "effect monster" or remove underline
+    return type.replace("_", " ");
+  }
+
+  private renderTypeBadge(type: string) {
+    const colorHex = this.getTypeColor(type);
+    const colorNum = Phaser.Display.Color.HexStringToColor(colorHex).color;
+
+    this.typeBadgeBg.clear();
+
+    const width = this.detailTypeText.width + 24;
+    const height = 24;
+    const x = this.detailTypeText.x - width / 2;
+    const y = this.detailTypeText.y - height / 2;
+
+    this.typeBadgeBg.fillStyle(0x242424, 0.9);
+    this.typeBadgeBg.fillRoundedRect(x, y, width, height, 12);
+
+    this.typeBadgeBg.lineStyle(2, colorNum, 0.9);
+    this.typeBadgeBg.strokeRoundedRect(x, y, width, height, 12);
   }
 }

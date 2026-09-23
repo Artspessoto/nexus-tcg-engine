@@ -101,7 +101,7 @@ export class DeckPreviewScene extends Phaser.Scene {
       TRANSLATIONS[lang].deck_preview;
 
     const { SCREEN } = LAYOUT_CONFIG;
-    const { COLORS, FONTS, COMPONENTS } = THEME_CONFIG;
+    const { COLORS, FONTS, COMPONENTS, DEPTHS } = THEME_CONFIG;
 
     const panelWidth = 1000;
     const panelHeight = 550;
@@ -124,6 +124,13 @@ export class DeckPreviewScene extends Phaser.Scene {
       0.5,
     );
 
+    const counterBg = this.add.graphics();
+    counterBg.fillStyle(COLORS.PANEL_BG_DARK, 0.85);
+    counterBg.fillRoundedRect(startX, 12, 130, 40, 8);
+    counterBg.lineStyle(2, 0x333333, 0.8);
+    counterBg.strokeRoundedRect(startX, 12, 130, 40, 8);
+    counterBg.setDepth(DEPTHS.UI_BASE);
+
     this.add
       .text(SCREEN.CENTER_X, 25, title, {
         fontFamily: FONTS.FAMILY_DISPLAY,
@@ -134,21 +141,26 @@ export class DeckPreviewScene extends Phaser.Scene {
 
     this.add
       .text(SCREEN.CENTER_X, 60, subtitle.replace("{name}", this.playerName), {
-        fontFamily: FONTS.FAMILY_PRIMARY,
+        fontFamily: FONTS.FAMILY_DISPLAY,
         fontSize: "16px",
         color: "#CCCCCC",
-        fontStyle: "italic",
+        // fontStyle: "italic",
       })
       .setOrigin(0.5);
 
     this.add
-      .text(startX, 25, `${this.gameState.getDeckCount("PLAYER")} ${cards}`, {
-        fontFamily: "Arial",
-        fontSize: "18px",
-        color: "#FFFFFF",
-        fontStyle: "bold",
-      })
-      .setOrigin(0, 0.5);
+      .text(
+        startX + 65,
+        32,
+        `${this.gameState.getDeckCount("PLAYER")} ${cards.toUpperCase()}`,
+        {
+          fontFamily: FONTS.FAMILY_DISPLAY,
+          fontSize: "14px",
+          color: "#EAEAEA",
+        },
+      )
+      .setOrigin(0.5, 0.5)
+      .setDepth(DEPTHS.UI_BASE + 1);
 
     const deckPanel = new CardGridPanel(this, startX, startY, {
       cards: this.playerDeckData,
@@ -202,7 +214,7 @@ export class DeckPreviewScene extends Phaser.Scene {
       this.scene.start("VersusScene", {
         playerName: this.playerName,
         difficulty: this.difficulty,
-        playerDeckIds: this.playerDeckIds,      
+        playerDeckIds: this.playerDeckIds,
       });
     });
   }
