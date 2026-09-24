@@ -98,7 +98,7 @@ export type LPChangedPayload = {
   amount: number;
 };
 export type ErrorPayload = { side: GameSide };
-export type TurnStartedPayload = { side: GameSide; turnCount: number };
+export type TurnStartedPayload = { side: GameSide; actor: string; turnCount: number };
 export type CardDrawPayload = { card: Card; side: GameSide };
 export type EffectActivatedPayload = { card: Card; effect: CardEffect };
 export type EffectResolvedPayload = { source: Card; target: Card };

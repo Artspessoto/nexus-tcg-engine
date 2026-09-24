@@ -11,6 +11,7 @@ export type Lang = "pt-BR" | "en";
 export type NameTranslations = TranslationStructure["name_scene"];
 export type TutorialTranslations = TranslationStructure["tutorial"];
 export type BattleTranslations = TranslationStructure["battle_scene"];
+export type HistoryLogTranslations = TranslationStructure["history_log"]
 export type DeckPreviewTranslations = TranslationStructure["deck_preview"];
 
 export type GameSide = "PLAYER" | "OPPONENT";

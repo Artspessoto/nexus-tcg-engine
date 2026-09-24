@@ -195,6 +195,14 @@ export const TRANSLATIONS = {
         select_valid_response: "SELECIONE UM CARD OU EFEITO PARA ATIVAR",
       },
     },
+    history_log: {
+      turn_started: "Turno {turnCount} iniciado por {actor}",
+      play_card: "{side} jogou {cardName} em posição de {mode}",
+      battle_resolved:
+        "{attackerName} atacou {targetName} causando {damage} de dano!",
+      direct_attack: "{attackerName} atacou diretamente causando {damage} de dano!",
+      effect_activated: "Efeito de {cardName} ativado ({effectType})"
+    },
   },
   en: {
     menu: {
@@ -389,6 +397,15 @@ export const TRANSLATIONS = {
         cancel_btn: "NO",
         select_valid_response: "SELECT A CARD OR EFFECT TO ACTIVATE",
       },
+    },
+    history_log: {
+      turn_started: "Turn {turnCount} started by {actor}",
+      play_card: "{side} played {cardName} in {mode} position",
+      battle_resolved:
+        "{attackerName} attacked {targetName} dealing {damage} damage!",
+      direct_attack:
+        "{attackerName} attacked directly dealing {damage} damage!",
+      effect_activated: "{cardName}'s effect was activated ({effectType})",
     },
   },
 };

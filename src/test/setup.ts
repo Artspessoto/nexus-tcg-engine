@@ -7,6 +7,11 @@ vi.mock("phaser", () => {
       Math: {
         Between: vi.fn((min: number, _max: number) => min),
       },
+      Utils: {
+        String: {
+          UUID: vi.fn(() => "mocked-uuid-1234"),
+        },
+      },
       Events: {
         EventEmitter: class {
           private listeners: Record<string, Function[]> = {};

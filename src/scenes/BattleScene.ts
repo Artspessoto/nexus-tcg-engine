@@ -38,6 +38,8 @@ import type { IPhaseManager } from "../managers/phase/IPhaseManager";
 import { PhaseManager } from "../managers/phase/PhaseManager";
 import type { IUIManager } from "../managers/ui/IUIManager";
 import { UIManager } from "../managers/ui/UIManager";
+import type { IBattleLogManager } from "../managers/log/IBattleLogManager";
+import { BattleLogManager } from "../managers/log/BattleLogManager";
 
 export interface BattleSceneConfig {
   playerName: string;
@@ -62,6 +64,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public combat!: ICombatManager;
   public effects!: IEffectManager;
   public npcAction!: IAIManager;
+  protected historyLog!: IBattleLogManager;  
 
   public phaseButton!: ToonButton;
   public pauseButton!: ToonButton;
@@ -91,6 +94,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.controls = new InputManager(this);
     this.combat = new CombatManager(this);
     this.effects = new EffectManager(this);
+    this.historyLog = new BattleLogManager(this);
 
     this.playerUI = new UIManager(this, "PLAYER");
     this.opponentUI = new UIManager(this, "OPPONENT");
@@ -346,18 +350,23 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public setPhase(newPhase: GamePhase) {
     this.gameState.setPhase(newPhase);
 
+      const activePlayer = this.gameState.activePlayer;
+
     if (newPhase === "CHANGE_TURN") {
       this.gameState.advanceTurnCount();
     }
 
     EventBus.emit(GameEvent.PHASE_CHANGED, {
       newPhase,
-      activePlayer: this.gameState.activePlayer,
+      activePlayer,
     });
 
     if (newPhase === "DRAW") {
+
+      const actor = activePlayer == "PLAYER" ? this.playerDisplayName : "CPU"
       EventBus.emit(GameEvent.TURN_STARTED, {
         side: this.gameState.activePlayer,
+        actor,
         turnCount: this.gameState.currentTurn,
       });
     }
