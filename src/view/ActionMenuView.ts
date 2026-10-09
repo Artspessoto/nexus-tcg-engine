@@ -1,3 +1,4 @@
+import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { ToonButton } from "../objects/ToonButton";
 
@@ -26,10 +27,18 @@ export class ActionMenuView {
     options: MenuOption[],
     onCancel?: () => void,
   ) {
+    const { SCREEN } = LAYOUT_CONFIG;
     this.clearMenu();
 
     this.inputBlocker = this.scene.add
-      .rectangle(640, 360, 1280, 720, 0x000000, 0.4)
+      .rectangle(
+        SCREEN.CENTER_X,
+        SCREEN.CENTER_Y,
+        SCREEN.WIDTH,
+        SCREEN.HEIGHT,
+        THEME_CONFIG.COLORS.OVERLAY_BLACK,
+        0.4,
+      )
       .setInteractive()
       .setDepth(THEME_CONFIG.DEPTHS.OVERLAY_PREVIEW - 1);
 
@@ -55,7 +64,7 @@ export class ActionMenuView {
       ...THEME_CONFIG.COMPONENTS.BUTTONS.PRIMARY,
       height: 40,
       width: option.width || 120,
-      fontSize: option.isLeft ? "18px" : "14px",
+      fontSize: "12px",
       icon: option.icon,
     }).setDepth(THEME_CONFIG.DEPTHS.OVERLAY_MENU);
 

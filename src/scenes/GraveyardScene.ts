@@ -101,7 +101,6 @@ export class GraveyardScene extends Phaser.Scene {
       height: 50,
       textColor: COLORS.GOLD_GLOW,
       alpha: 0,
-      fontSize: "20px",
     }).on("pointerdown", () => this.closeModal());
   }
 

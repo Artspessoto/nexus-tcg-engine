@@ -125,6 +125,7 @@ export const TRANSLATIONS = {
     pause_scene: {
       paused: "PAUSADO",
       resume: "RETOMAR",
+      forfeit: "DESISTIR"
     },
     deck_preview: {
       title: "PREPARAÇÃO DE BATALHA",
@@ -328,6 +329,7 @@ export const TRANSLATIONS = {
     pause_scene: {
       paused: "PAUSED",
       resume: "RESUME",
+      forfeit: "SURRENDER"
     },
     deck_preview: {
       title: "BATTLE PREPARATION",

@@ -14,7 +14,7 @@ export class PauseScene extends Phaser.Scene {
   create() {
     const lang = LanguageManager.getInstance().currentLanguage;
     const currentTranslations = TRANSLATIONS[lang].pause_scene;
-    
+
     const { CENTER_X, CENTER_Y, WIDTH, HEIGHT } = LAYOUT_CONFIG.SCREEN;
     const { COLORS, COMPONENTS } = THEME_CONFIG;
 
@@ -28,8 +28,8 @@ export class PauseScene extends Phaser.Scene {
     );
     overlay.setInteractive();
 
-    const panelWidth = 300;
-    const panelHeight = 200;
+    const panelWidth = 320;
+    const panelHeight = 250;
     const cornerRadius = 16;
 
     const panel = this.add.graphics();
@@ -39,7 +39,13 @@ export class PauseScene extends Phaser.Scene {
     const panelX = CENTER_X - panelWidth / 2;
     const panelY = CENTER_Y - panelHeight / 2;
 
-    panel.fillRoundedRect(panelX, panelY, panelWidth, panelHeight, cornerRadius);
+    panel.fillRoundedRect(
+      panelX,
+      panelY,
+      panelWidth,
+      panelHeight,
+      cornerRadius,
+    );
     panel.strokeRoundedRect(
       panelX,
       panelY,
@@ -49,8 +55,8 @@ export class PauseScene extends Phaser.Scene {
     );
 
     this.add
-      .text(CENTER_X, CENTER_Y - 40, currentTranslations.paused, {
-        fontSize: "32px",
+      .text(CENTER_X, CENTER_Y - 60, currentTranslations.paused, {
+        fontSize: "30px",
         fontFamily: "Arial Black",
         color: "#ddb63e",
         fontStyle: "bold",
@@ -59,21 +65,50 @@ export class PauseScene extends Phaser.Scene {
 
     const resumeButton = new ToonButton(this, {
       x: CENTER_X,
-      y: CENTER_Y + 40,
+      y: CENTER_Y + 20,
       text: currentTranslations.resume,
-      fontSize: "20px",
-      textColor: "#ffffff",
-      color: COMPONENTS.BUTTONS.RESUME.color,
-      hoverColor: COMPONENTS.BUTTONS.RESUME.hoverColor,
+      // textColor: "#ffffff",
       width: 200,
       height: 50,
     });
 
-    resumeButton.on("pointerdown", () => {
-      this.scene.resume("BattleScene");
-      this.scene.stop();
+    const forfeitButton = new ToonButton(this, {
+      x: CENTER_X,
+      y: CENTER_Y + 80,
+      text: currentTranslations.forfeit,
+      textColor: "#ffffff",
+      color: COMPONENTS.BUTTONS.SECONDARY.color,
+      hoverColor: COMPONENTS.BUTTONS.SECONDARY.hoverColor,
+      width: 200,
+      height: 50,
+    });
 
-      EventBus.emit(GameEvent.GAME_RESUMED, { message: "resume" });
+    forfeitButton.once("pointerdown", () => {
+      this.handleForfeit();
+    });
+
+    resumeButton.once("pointerdown", () => {
+      this.handleResume();
+    });
+
+    this.input.keyboard?.once("keydown-ESC", () => {
+      this.handleResume();
+    });
+  }
+
+  private handleResume(): void {
+    this.scene.resume("BattleScene");
+    this.scene.stop();
+
+    EventBus.emit(GameEvent.GAME_RESUMED, { message: "resume" });
+  }
+
+  private handleForfeit(): void {
+    this.cameras.main.fadeOut(300, 0, 0, 0);
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+      this.scene.stop("PauseScene");
+      this.scene.stop("BattleScene");
+      this.scene.start("MenuScene");
     });
   }
 }

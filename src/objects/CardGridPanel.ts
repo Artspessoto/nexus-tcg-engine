@@ -62,7 +62,7 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
     this.typeBadgeBg = this.scene.add.graphics();
 
     //panel (background and border)
-    panel.fillStyle(COLORS.PANEL_BG, 0.95);
+    panel.fillStyle(COLORS.PANEL_BG, 1); //0.95
     panel.lineStyle(4, borderConvert, 1);
 
     //box

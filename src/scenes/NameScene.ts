@@ -28,7 +28,7 @@ export class NameScene extends Phaser.Scene {
     const text: NameTranslations = TRANSLATIONS[lang].name_scene;
 
     const { SCREEN } = LAYOUT_CONFIG;
-    const { COLORS } = THEME_CONFIG;
+    const { COLORS, FONTS } = THEME_CONFIG;
 
     this.add
       .image(SCREEN.CENTER_X, SCREEN.CENTER_Y, "background")
@@ -47,6 +47,7 @@ export class NameScene extends Phaser.Scene {
       .text(SCREEN.CENTER_X, 200, text.title, {
         fontSize: "40px",
         color: "#ffcc00",
+        fontFamily: FONTS.FAMILY_DISPLAY,
         fontStyle: "bold",
       })
       .setOrigin(0.5);
@@ -58,7 +59,7 @@ export class NameScene extends Phaser.Scene {
         fontSize: "16px",
         color: "#ff4d4d",
         fontStyle: "bold",
-        fontFamily: "Arial",
+        fontFamily: FONTS.FAMILY_DISPLAY,
       })
       .setOrigin(0.5)
       .setAlpha(0); //"invisible"(transparent)
@@ -67,16 +68,19 @@ export class NameScene extends Phaser.Scene {
       x: 640,
       y: 480,
       text: text.confirm,
+      fontSize: "18px",
+      width: 280,
     });
 
     const backToMenuBtn = new ToonButton(this, {
       x: 640,
       y: 550,
       text: text.back_to_menu,
-      fontSize: "22px",
+      fontSize: "16px",
       textColor: "#fff",
       color: 0x1a1a1a,
       hoverColor: 0x333333,
+      width: 280,
     });
 
     backToMenuBtn.once("pointerdown", () => {
@@ -91,7 +95,7 @@ export class NameScene extends Phaser.Scene {
       this.callNextScene(text, inputElement);
     });
 
-    confirmBtn.once("pointerdown", () => {
+    confirmBtn.on("pointerdown", () => {
       this.callNextScene(text, inputElement);
     });
   }
@@ -135,23 +139,36 @@ export class NameScene extends Phaser.Scene {
   }
 
   private showWarning(message: string, element: Phaser.GameObjects.DOMElement) {
+    const { SCREEN } = LAYOUT_CONFIG;
+    const baseCenterX = SCREEN.CENTER_X;
+
+    //block other tween between preview effect is in execution
+    this.tweens.killTweensOf(element);
+    this.tweens.killTweensOf(this.warningText);
+
+    //return to original pos
+    element.setX(baseCenterX);
+    this.warningText.setX(baseCenterX);
+
     this.warningText.setText(message);
     this.warningText.setAlpha(1);
 
     this.tweens.add({
       targets: element,
-      x: element.x + 10,
+      x: baseCenterX + 10,
       duration: 50,
       yoyo: true,
       repeat: 3,
+      onComplete: () => element.setX(baseCenterX),
     });
 
     this.tweens.add({
       targets: this.warningText,
-      x: this.warningText.x + 5,
+      x: baseCenterX + 5,
       duration: 50,
       yoyo: true,
       repeat: 3,
+      onComplete: () => this.warningText.setX(baseCenterX),
     });
   }
 }

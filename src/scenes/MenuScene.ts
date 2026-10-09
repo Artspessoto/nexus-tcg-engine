@@ -102,6 +102,7 @@ export class MenuScene extends Phaser.Scene {
       x: SCREEN.CENTER_X,
       y: MENU.ACTIONS.START_Y,
       text: strings.start,
+      fontSize: "20px",
     });
 
     startBtn.once("pointerdown", () => {
@@ -114,7 +115,7 @@ export class MenuScene extends Phaser.Scene {
       x: SCREEN.CENTER_X,
       y: MENU.ACTIONS.GUIDE_Y,
       text: strings.tutorial,
-      fontSize: "22px",
+      fontSize: "18px",
       ...COMPONENTS.BUTTONS.SECONDARY,
     });
 

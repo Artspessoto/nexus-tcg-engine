@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { THEME_CONFIG } from "../constants/ThemeConfig";
 
 export interface ButtonConfig {
   x: number;
@@ -36,8 +37,8 @@ export class ToonButton extends Phaser.GameObjects.Container {
       color: 0xffcc00,
       hoverColor: 0xffe066,
       textColor: "#000000",
-      fontSize: "24px",
-      fontFamily: "Arial Black",
+      fontSize: "18px",
+      fontFamily: THEME_CONFIG.FONTS.FAMILY_DISPLAY,
       icon: "",
       borderWidth: 3,
       borderColor: 0x000000,
@@ -59,10 +60,11 @@ export class ToonButton extends Phaser.GameObjects.Container {
       .text(0, labelY, this.config.text, {
         fontSize: this.config.fontSize,
         color: this.config.textColor,
+        fontFamily: this.config.fontFamily,
         fontStyle: "bold",
       })
       .setOrigin(0.5);
-    
+
     this.adjustTextScale();
 
     if (config.headerText) {

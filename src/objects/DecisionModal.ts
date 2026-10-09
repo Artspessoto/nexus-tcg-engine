@@ -49,6 +49,7 @@ export class DecisionModal extends Phaser.GameObjects.Container {
       y: 70,
       width: 150,
       height: 45,
+      fontSize: "16px",
       ...COMPONENTS.BUTTONS.SECONDARY,
     });
 
@@ -58,6 +59,7 @@ export class DecisionModal extends Phaser.GameObjects.Container {
       y: 70,
       width: 150,
       height: 45,
+      fontSize: "16px",
       ...COMPONENTS.BUTTONS.PRIMARY,
     });
 
