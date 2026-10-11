@@ -12,6 +12,8 @@ export class InputManager implements IInputManager {
   }
 
   public setupGlobalInputs() {
+    this.context.engine.input.mouse?.disableContextMenu();
+
     this.context.engine.input.on(
       "pointerdown",
       (
@@ -23,14 +25,25 @@ export class InputManager implements IInputManager {
           `X: ${Math.round(pointer.x)}, Y: ${Math.round(pointer.y)}`,
         );
 
+        if (pointer.rightButtonDown()) {
+          if (this.context.effects.isSelectingResponse) {
+            this.context.effects.cancelResponseAction();
+            return;
+          }
+          if (this.context.currentPhase === "BATTLE") {
+            this.context.combat.cancelTarget();
+          }
+        }
+
         //click action into void
         if (currentlyOver.length === 0) {
           const activeSide = this.context.gameState.activePlayer;
 
-          if (
-            this.context.gameState.activePlayer !== "PLAYER" &&
-            !this.context.effects.isSelectingResponse
-          ) {
+          if (this.context.effects.isSelectingResponse) {
+            return;
+          }
+
+          if (this.context.gameState.activePlayer !== "PLAYER") {
             return;
           }
 
@@ -43,11 +56,6 @@ export class InputManager implements IInputManager {
           //cancel effect target
           if (this.context.effects.isSelectingTarget) {
             this.context.effects.cancelTargeting();
-          }
-
-          //cancel trap or effect monster response after response window
-          if (this.context.effects.isSelectingResponse) {
-            this.context.effects.cancelResponseAction();
           }
 
           // cancel combat target
@@ -78,11 +86,6 @@ export class InputManager implements IInputManager {
       }
       this.context.cancelPlacement();
     });
-
-    // this.context.engine.input.keyboard?.on("keydown-T", () => {
-    //   this.context.gameState.nextTurn();
-    //   this.context.setPhase("DRAW");
-    // });
   }
 
   public setupCardInteractions(card: Card) {

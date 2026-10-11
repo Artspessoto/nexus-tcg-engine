@@ -10,6 +10,7 @@ interface CardDetailsData {
   owner: GameSide;
   originalOwner: GameSide;
   location: CardLocation;
+  onClose?: () => void;
 }
 
 export class CardDetailsModal extends Phaser.GameObjects.Container {
@@ -17,6 +18,7 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
   private owner!: GameSide;
   private originalOwner!: GameSide;
   private typeBadgeBg!: Phaser.GameObjects.Graphics;
+  private onClose?: () => void;
 
   constructor(scene: Phaser.Scene, data: CardDetailsData) {
     super(scene, 0, 0);
@@ -24,6 +26,7 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
     this.cardData = data.cardData;
     this.owner = data.owner;
     this.originalOwner = data.originalOwner;
+    this.onClose = data.onClose;
 
     this.setDepth(THEME_CONFIG.DEPTHS.OVERLAY_BANNER || 3000);
 
@@ -173,6 +176,7 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
       ease: EASING.SMOOTH,
       onComplete: () => {
         this.destroy();
+        this.onClose?.();
       },
     });
   }

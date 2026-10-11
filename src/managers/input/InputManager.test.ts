@@ -8,6 +8,13 @@ describe("InputManager", () => {
   let context: IBattleContext;
   let manager: InputManager;
 
+  const createMockPointer = (isRightClick = false, x = 0, y = 0) =>
+    ({
+      x,
+      y,
+      rightButtonDown: vi.fn().mockReturnValue(isRightClick),
+    }) as unknown as Phaser.Input.Pointer;
+
   beforeEach(() => {
     context = createMockBattleContext();
     const keyboardOnMock = vi.fn();
@@ -44,7 +51,7 @@ describe("InputManager", () => {
         currentlyOver: Phaser.GameObjects.GameObject[],
       ) => void;
 
-      callback({ x: 100, y: 200 } as Phaser.Input.Pointer, []);
+      callback(createMockPointer(false, 100, 200), []);
 
       expect(context.cancelPlacement).toHaveBeenCalled();
       expect(context.clearAllMenus).toHaveBeenCalled();
@@ -63,7 +70,7 @@ describe("InputManager", () => {
         currentlyOver: Phaser.GameObjects.GameObject[],
       ) => void;
 
-      callback({} as Phaser.Input.Pointer, []);
+      callback(createMockPointer(false), []);
 
       expect(context.effects.cancelTargeting).toHaveBeenCalled();
     });
@@ -80,25 +87,42 @@ describe("InputManager", () => {
         currentlyOver: Phaser.GameObjects.GameObject[],
       ) => void;
 
-      callback({} as Phaser.Input.Pointer, []);
+      callback(createMockPointer(false), []);
 
       expect(context.combat.cancelTarget).toHaveBeenCalled();
     });
 
-    it("should do nothing if selection is locked", () => {
-      context.effects.isSelectingTarget = true;
-      context.selectedCard = createMockCard();
-      const keyboard = context.engine.input.keyboard!;
-      const onMock = keyboard.on as unknown as ReturnType<typeof vi.fn>;
+    it("should cancel response action when right clicking", () => {
+      context.effects.isSelectingResponse = true;
 
       manager.setupGlobalInputs();
+      const input = context.engine.input!;
+      const onMock = input.on as unknown as ReturnType<typeof vi.fn>;
 
       const callback = onMock.mock.calls[0][1] as (
         pointer: Phaser.Input.Pointer,
         currentlyOver: Phaser.GameObjects.GameObject[],
       ) => void;
 
-      callback({} as Phaser.Input.Pointer, []);
+      callback(createMockPointer(true), []);
+
+      expect(context.effects.cancelResponseAction).toHaveBeenCalled();
+    });
+
+    it("should do nothing if selection is locked", () => {
+      context.effects.isSelectingTarget = true;
+      context.selectedCard = createMockCard();
+
+      manager.setupGlobalInputs();
+      const input = context.engine.input!;
+      const onMock = input.on as unknown as ReturnType<typeof vi.fn>;
+
+      const callback = onMock.mock.calls[0][1] as (
+        pointer: Phaser.Input.Pointer,
+        currentlyOver: Phaser.GameObjects.GameObject[],
+      ) => void;
+
+      callback(createMockPointer(false), []);
 
       expect(context.cancelPlacement).not.toHaveBeenCalled();
     });
@@ -124,7 +148,6 @@ describe("InputManager", () => {
       const onMock = keyboard.on as unknown as ReturnType<typeof vi.fn>;
 
       const calls = onMock.mock.calls;
-
       const escHandler = calls.find(([event]) => event === "keydown-ESC")?.[1];
 
       escHandler?.();
@@ -164,9 +187,9 @@ describe("InputManager", () => {
       manager.setupCardInteractions(card);
 
       expect(card.on).toHaveBeenCalledWith("pointerover", expect.any(Function));
-
       expect(card.on).toHaveBeenCalledWith("pointerout", expect.any(Function));
     });
+
     it("should NOT reset card on pointerout if dragging", () => {
       const card = createMockCard();
       context.gameState.setDragging(true);
@@ -208,7 +231,7 @@ describe("InputManager", () => {
 
       manager.setupDragEvents(card);
 
-      events["dragstart"]({} as Phaser.Input.Pointer);
+      events["dragstart"](createMockPointer());
 
       expect(context.engine.input.setDragState).toHaveBeenCalled();
     });
@@ -232,7 +255,7 @@ describe("InputManager", () => {
 
       manager.setupDragEvents(card);
 
-      events["dragstart"]({} as Phaser.Input.Pointer);
+      events["dragstart"](createMockPointer());
 
       expect(context.engine.input.setDragState).toHaveBeenCalled();
     });
@@ -253,7 +276,7 @@ describe("InputManager", () => {
 
       manager.setupDragEvents(card);
 
-      events["dragstart"]({} as Phaser.Input.Pointer);
+      events["dragstart"](createMockPointer());
 
       expect(context.gameState.setDragging).toHaveBeenCalledWith(true);
       expect(context.tweens.killTweensOf).toHaveBeenCalled();
@@ -275,7 +298,7 @@ describe("InputManager", () => {
 
       manager.setupDragEvents(card);
 
-      events["drag"]({} as Phaser.Input.Pointer, 50, 60);
+      events["drag"](createMockPointer(), 50, 60);
 
       expect(card.setPosition).toHaveBeenCalledWith(50, 60);
     });
@@ -296,7 +319,7 @@ describe("InputManager", () => {
 
       manager.setupDragEvents(card);
 
-      events["dragend"]({} as Phaser.Input.Pointer, false);
+      events["dragend"](createMockPointer(), false);
 
       expect(context.gameState.setDragging).toHaveBeenCalledWith(false);
     });
@@ -322,7 +345,7 @@ describe("InputManager", () => {
 
       const zone = {} as Phaser.GameObjects.Zone;
 
-      events["drop"]({} as Phaser.Input.Pointer, zone);
+      events["drop"](createMockPointer(), zone);
 
       expect(context.handleCardDrop).not.toHaveBeenCalled();
     });
@@ -343,7 +366,7 @@ describe("InputManager", () => {
 
       manager.setupDragEvents(card);
 
-      events["dragend"]({} as Phaser.Input.Pointer, false);
+      events["dragend"](createMockPointer(), false);
 
       expect(context.getHand("PLAYER").reorganizeHand).toHaveBeenCalled();
     });
@@ -366,11 +389,12 @@ describe("InputManager", () => {
 
       const zone = {} as Phaser.GameObjects.Zone;
 
-      events["drop"]({} as Phaser.Input.Pointer, zone);
+      events["drop"](createMockPointer(), zone);
 
       expect(context.handleCardDrop).toHaveBeenCalledWith(zone, card);
     });
   });
+
   describe("isSelectionLocked", () => {
     it("should return true when selecting target and has selected card", () => {
       context.effects.isSelectingTarget = true;
@@ -386,6 +410,7 @@ describe("InputManager", () => {
       expect(manager.isSelectionLocked()).toBe(false);
     });
   });
+
   describe("hover behavior", () => {
     it("should block hover when dragging", () => {
       const card = createMockCard();

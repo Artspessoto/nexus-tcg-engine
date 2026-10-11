@@ -391,7 +391,7 @@ export class TutorialBoardScene extends Phaser.Scene {
       x: BATTLE.PHASE_BUTTON.x,
       y: BATTLE.PHASE_BUTTON.y,
       text: this.translationText.battle_scene.draw_phase,
-      fontSize: "18px",
+      fontSize: "14px",
       textColor: "#fff",
       color: COMPONENTS.BUTTONS.PHASE.color,
       hoverColor: COMPONENTS.BUTTONS.PHASE.color,

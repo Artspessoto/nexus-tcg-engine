@@ -20,6 +20,7 @@ export class HandManager implements IHandManager {
   public readonly hiddenY: number; //hidden hand cards
   public readonly normalY: number;
   public readonly maxHandSize: number;
+  private isResponseWindowOpen: boolean = false;
 
   constructor(context: IBattleContext, side: GameSide) {
     this.context = context;
@@ -59,6 +60,21 @@ export class HandManager implements IHandManager {
     EventBus.on(GameEvent.DIRECT_ATTACK, () => {
       if (this.side === "PLAYER") this.showHand();
     });
+
+    EventBus.on(GameEvent.RESPONSE_WINDOW_OPENED, () => {
+      if (this.side === "PLAYER") {
+        this.isResponseWindowOpen = true;
+        this.hideHand();
+      }
+    });
+
+    EventBus.on(GameEvent.RESPONSE_WINDOW_CLOSED, (data) => {
+      if (this.side === "PLAYER") {
+        this.isResponseWindowOpen = false;
+
+        if (!data.activated) this.showHand();
+      }
+    });
   }
 
   public get cards(): Card[] {
@@ -71,9 +87,13 @@ export class HandManager implements IHandManager {
   }
 
   public showHand() {
+    //decision modal blocks hand apparition
+    if (this.isResponseWindowOpen) {
+      return;
+    }
     this.currentHandY = this.normalY;
     this.context.time.delayedCall(500, () => {
-      this.reorganizeHand();
+      if (!this.isResponseWindowOpen) this.reorganizeHand();
     });
   }
 

@@ -160,7 +160,7 @@ export class TutorialUIScene extends Phaser.Scene {
       text: this.translationText.next_btn,
       width: 150,
       height: 45,
-      fontSize: "20px",
+      fontSize: "14px",
     }).on("pointerdown", () => this.advanceStep());
 
     //return to menu scene
@@ -170,7 +170,7 @@ export class TutorialUIScene extends Phaser.Scene {
       text: this.translationText.skip_btn,
       width: 150,
       height: 45,
-      fontSize: "16px",
+      fontSize: "14px",
       textColor: "#fff",
       color: 0x1a1a1a,
       hoverColor: 0x333333,

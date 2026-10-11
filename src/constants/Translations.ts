@@ -84,7 +84,8 @@ export const TRANSLATIONS = {
         "O oponente invocou um monstro! Enquanto ele estiver em campo, os Pontos de Vida do adversário estão protegidos.",
       step_16a:
         "Selecione o seu monstro em campo e declare um ataque para destruí-lo!",
-      step_16b: "Escolha o monstro oponente como alvo para efetuar o ataque!",
+      step_16b:
+        "Escolha o monstro oponente como alvo para efetuar o ataque! (Dica: use o Botão Direito ou ESC para cancelar uma mira ou ação",
       step_16c:
         "Com o monstro inimigo destruído, o oponente fica vulnerável a ataques diretos! Mas lembre-se da regra: cada monstro só pode atacar uma vez por turno.",
       step_17:
@@ -125,7 +126,17 @@ export const TRANSLATIONS = {
     pause_scene: {
       paused: "PAUSADO",
       resume: "RETOMAR",
-      forfeit: "DESISTIR"
+      forfeit: "DESISTIR",
+      controls_btn: "CONTROLES",
+      controls_title: "CONTROLES E ATALHOS",
+      controls: [
+        "• Clique Esquerdo: Selecionar e interagir",
+        "• Arrastar: Jogar cartas da mão",
+        "• Botão Direito / ESC: Cancelar mira ou seleção",
+        "• ESPAÇO: Comprar carta na Fase de Compra",
+        "• ENTER / ESPAÇO: Avançar diálogos",
+      ],
+      back: "VOLTAR",
     },
     deck_preview: {
       title: "PREPARAÇÃO DE BATALHA",
@@ -201,8 +212,9 @@ export const TRANSLATIONS = {
       play_card: "{side} jogou {cardName} em posição de {mode}",
       battle_resolved:
         "{attackerName} atacou {targetName} causando {damage} de dano!",
-      direct_attack: "{attackerName} atacou diretamente causando {damage} de dano!",
-      effect_activated: "Efeito de {cardName} ativado ({effectType})"
+      direct_attack:
+        "{attackerName} atacou diretamente causando {damage} de dano!",
+      effect_activated: "Efeito de {cardName} ativado ({effectType})",
     },
   },
   en: {
@@ -288,7 +300,8 @@ export const TRANSLATIONS = {
         "The opponent summoned a monster! As long as it is on the field, the opponent's Life Points are protected.",
       step_16a:
         "Select your monster on the field and declare an attack to destroy it!",
-      step_16b: "Target the opponent's monster to execute the attack!",
+      step_16b:
+        "Target the opponent's monster to execute the attack! (Tip: use Right Click or ESC to cancel aiming or actions)",
       step_16c:
         "With the enemy monster destroyed, the opponent is open to direct attacks! However, remember the rule: each monster can only attack once per turn.",
       step_17:
@@ -329,7 +342,17 @@ export const TRANSLATIONS = {
     pause_scene: {
       paused: "PAUSED",
       resume: "RESUME",
-      forfeit: "SURRENDER"
+      forfeit: "SURRENDER",
+      controls_btn: "CONTROLS",
+      controls_title: "CONTROLS & SHORCUTS",
+      controls: [
+        "• Left Click: Select and interact",
+        "• Drag & Drop: Play cards from hand",
+        "• Right Click / ESC: Cancel aiming or selection",
+        "• SPACE: Draw card during Draw Phase",
+        "• ENTER / SPACE: Advance dialogs",
+      ],
+      back: "BACK",
     },
     deck_preview: {
       title: "BATTLE PREPARATION",

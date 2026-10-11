@@ -39,6 +39,8 @@ export enum GameEvent {
   REQUEST_CARD_MENU = "REQUEST_CARD_MENU",
   ACTION_FINALIZED = "ACTION_FINALIZED",
   NOTICE_REQUESTED = "NOTICE_REQUESTED",
+  RESPONSE_WINDOW_OPENED = "RESPONSE_WINDOW_OPENED",
+  RESPONSE_WINDOW_CLOSED = "RESPONSE_WINDOW_CLOSED",
 
   //EFFECTS
   EFFECT_ACTIVATED = "EFFECT_ACTIVATED",
@@ -98,7 +100,11 @@ export type LPChangedPayload = {
   amount: number;
 };
 export type ErrorPayload = { side: GameSide };
-export type TurnStartedPayload = { side: GameSide; actor: string; turnCount: number };
+export type TurnStartedPayload = {
+  side: GameSide;
+  actor: string;
+  turnCount: number;
+};
 export type CardDrawPayload = { card: Card; side: GameSide };
 export type EffectActivatedPayload = { card: Card; effect: CardEffect };
 export type EffectResolvedPayload = { source: Card; target: Card };
@@ -144,6 +150,15 @@ export type GameOver = {
   reason: "DECK OUT" | "DEFEAT";
 };
 
+export type ResponseWindowOpenedPayload = {
+  reason: "ATTACK" | "EFFECT";
+  attacker?: Card;
+};
+
+export type ResponseWindowClosedPayload = {
+  activated: boolean;
+};
+
 export interface GameEventMap {
   [GameEvent.PHASE_CHANGED]: PhaseChangedPayload;
   [GameEvent.CARD_PLAYED]: CardPlayedPayload;
@@ -175,4 +190,6 @@ export interface GameEventMap {
   [GameEvent.GAME_PAUSED]: GamePausedPayload;
   [GameEvent.GAME_RESUMED]: GameResumedPayload;
   [GameEvent.GAME_OVER]: GameOver;
+  [GameEvent.RESPONSE_WINDOW_OPENED]: ResponseWindowOpenedPayload;
+  [GameEvent.RESPONSE_WINDOW_CLOSED]: ResponseWindowClosedPayload;
 }

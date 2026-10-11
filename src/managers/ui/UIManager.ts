@@ -1,4 +1,3 @@
-import { LAYOUT_CONFIG } from "../../constants/LayoutConfig";
 import { THEME_CONFIG } from "../../constants/ThemeConfig";
 import { EventBus } from "../../events/EventBus";
 import { GameEvent } from "../../events/GameEvents";
@@ -266,7 +265,9 @@ export class UIManager implements IUIManager {
 
     this.addDetailsButton(menuArgs);
     this.actionMenuView.renderMenu(x, y, options, () => {
-      this.context.getHand("PLAYER").showHand();
+      if (!this.context.effects.isSelectingResponse) {
+        this.context.getHand("PLAYER").showHand();
+      }
     });
   }
 
@@ -409,12 +410,14 @@ export class UIManager implements IUIManager {
         label: buttonTexts.details,
         offsetX: -70,
         action: () => {
-          this.context.getHand("PLAYER").showHand();
           new CardDetailsModal(this.context.engine, {
             cardData: card.getCardData(),
             owner: card.owner,
             originalOwner: card.originalOwner,
             location: card.location,
+            onClose: () => {
+              this.context.getHand("PLAYER").showHand();
+            },
           });
         },
       });
@@ -440,23 +443,12 @@ export class UIManager implements IUIManager {
 
   public async showTrapResponseAction(): Promise<boolean> {
     return new Promise((resolve) => {
-      const { SCREEN } = LAYOUT_CONFIG;
-      const { DEPTHS } = THEME_CONFIG;
       const { response_title, response_message, confirm_btn, cancel_btn } =
         this.translations.battle_scene.effect_notices;
 
-      //opacity block background
-      const inputBlocker = this.context.add
-        .rectangle(
-          SCREEN.CENTER_X,
-          SCREEN.CENTER_Y,
-          SCREEN.WIDTH,
-          SCREEN.HEIGHT,
-          0x000000,
-          0.6,
-        )
-        .setInteractive()
-        .setDepth(DEPTHS.OVERLAY_BANNER - 1);
+      EventBus.emit(GameEvent.RESPONSE_WINDOW_OPENED, {
+        reason: "ATTACK",
+      });
 
       new DecisionModal(
         this.context.engine,
@@ -467,7 +459,9 @@ export class UIManager implements IUIManager {
           cancelText: cancel_btn,
         },
         (result) => {
-          inputBlocker?.destroy();
+          EventBus.emit(GameEvent.RESPONSE_WINDOW_CLOSED, {
+            activated: result,
+          });
           resolve(result);
         },
       ).setDepth(THEME_CONFIG.DEPTHS.OVERLAY_BANNER);
