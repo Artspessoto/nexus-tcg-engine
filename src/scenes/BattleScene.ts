@@ -40,10 +40,11 @@ import type { IUIManager } from "../managers/ui/IUIManager";
 import { UIManager } from "../managers/ui/UIManager";
 import type { IBattleLogManager } from "../managers/log/IBattleLogManager";
 import { BattleLogManager } from "../managers/log/BattleLogManager";
+import type { CardId } from "../constants/CardDatabase";
 
 export interface BattleSceneConfig {
   playerName: string;
-  playerDeckIds: string[];
+  playerDeckIds: CardId[];
   difficulty: Difficulty;
   retriesLeft?: number;
 }
@@ -64,7 +65,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public combat!: ICombatManager;
   public effects!: IEffectManager;
   public npcAction!: IAIManager;
-  protected historyLog!: IBattleLogManager;  
+  protected historyLog!: IBattleLogManager;
 
   public phaseButton!: ToonButton;
   public pauseButton!: ToonButton;
@@ -107,6 +108,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
     const playerDeckIds = Phaser.Utils.Array.Shuffle([...config.playerDeckIds]);
     const NPCDeckIds = DeckGenerator.generateNPCDeck(this.gameDifficulty);
+    console.log(NPCDeckIds);
 
     this.gameState.setPlayerName(this.playerDisplayName);
     this.gameState.initializeDecks(playerDeckIds, NPCDeckIds);
@@ -349,7 +351,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
   public setPhase(newPhase: GamePhase) {
     this.gameState.setPhase(newPhase);
 
-      const activePlayer = this.gameState.activePlayer;
+    const activePlayer = this.gameState.activePlayer;
 
     if (newPhase === "CHANGE_TURN") {
       this.gameState.advanceTurnCount();
@@ -361,8 +363,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     });
 
     if (newPhase === "DRAW") {
-
-      const actor = activePlayer == "PLAYER" ? this.playerDisplayName : "CPU"
+      const actor = activePlayer == "PLAYER" ? this.playerDisplayName : "CPU";
       EventBus.emit(GameEvent.TURN_STARTED, {
         side: this.gameState.activePlayer,
         actor,
@@ -430,12 +431,23 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
       slot.x,
       slot.y,
       card,
-      (mode: PlacementMode) => {
+      async (mode: PlacementMode) => {
         this.selectedCard = null; //apply null to drop card
-        this.executePlay(card, activeSide, zoneType, slot, mode);
+        await this.executePlay(card, activeSide, zoneType, slot, mode);
 
-        if (mode == "FACE_UP") {
-          this.cardActivation(card, activeSide);
+        const cardType = card.getType();
+        const effect = card.getCardData().effects;
+
+        //fast spell activation
+        const isSpellActivated = cardType == "SPELL" && mode == "FACE_UP";
+
+        //effect monster summoned fast activation (ON_SUMMONED)
+        const isMonsterOnSummon =
+          cardType == "EFFECT_MONSTER" && effect?.trigger == "ON_SUMMON";
+
+        if (isSpellActivated || isMonsterOnSummon) {
+          await new Promise((resolve) => this.time.delayedCall(500, resolve));
+          await this.cardActivation(card, activeSide);
         }
       },
       () => this.cancelPlacement(),
@@ -467,7 +479,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.selectedCard = null;
   }
 
-  public executePlay(
+  public async executePlay(
     card: Card,
     side: GameSide,
     type: "MONSTER" | "SPELL",
@@ -487,7 +499,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     }
 
     this.field.occupySlot(side, type, slot.index, card);
-    this.field.playCardToZone(card, slot.x, slot.y, mode);
+    await this.field.playCardToZone(card, slot.x, slot.y, mode);
 
     Logger.debug("SYSTEM", `Card ${card.getCardData().nameKey} is set`);
   }

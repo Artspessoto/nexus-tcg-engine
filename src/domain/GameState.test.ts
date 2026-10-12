@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GameState } from "./GameState";
+import type { CardId } from "../constants/CardDatabase";
 
 vi.mock("../constants/CardDatabase", () => ({
   CARD_DATABASE: {
-    CARD_01: { id: "CARD_01", nameKey: "Test Card 1" },
-    CARD_02: { id: "CARD_02", nameKey: "Test Card 2" },
+    AMAZON_WARRIOR: { id: "AMAZON_WARRIOR", nameKey: "Test Card 1" },
+    ALLIGATOR_WARRIOR: { id: "ALLIGATOR_WARRIOR", nameKey: "Test Card 2" },
   },
 }));
 
@@ -77,8 +78,8 @@ describe("GameState", () => {
   });
 
   describe("Deck Management", () => {
-    const mockPlayerDeck = ["CARD_01", "CARD_02"];
-    const mockOpponentDeck = ["CARD_01"];
+    const mockPlayerDeck: CardId[] = ["AMAZON_WARRIOR", "ALLIGATOR_WARRIOR"];
+    const mockOpponentDeck: CardId[] = ["APPRENTICE_WARRIOR"];
 
     beforeEach(() => {
       gameState.initializeDecks(mockPlayerDeck, mockOpponentDeck);
@@ -92,7 +93,7 @@ describe("GameState", () => {
     it("should return card data and decrease count when drawing (pop)", () => {
       const card = gameState.setDeckState("PLAYER");
 
-      expect(card?.id).toBe("CARD_02");
+      expect(card?.id).toBe("ALLIGATOR_WARRIOR");
       expect(gameState.getDeckCount("PLAYER")).toBe(1);
     });
 

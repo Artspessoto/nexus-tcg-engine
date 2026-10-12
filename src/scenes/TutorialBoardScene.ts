@@ -1,4 +1,4 @@
-import { CARD_DATABASE } from "../constants/CardDatabase";
+import { CARD_DATABASE, type CardId } from "../constants/CardDatabase";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 import { TRANSLATIONS } from "../constants/Translations";
@@ -38,7 +38,7 @@ export class TutorialBoardScene extends Phaser.Scene {
   private npcBaseLP: number = LAYOUT_CONFIG.GAME_STATE.BASE_LP;
 
   private stepHandlers: Record<string, () => void> = {
-    step_8a: () => this.setupDragCard("TOON_KNIGHT"),
+    step_8a: () => this.setupDragCard("LITTLE_KNIGHT"),
     step_11: () => this.setupFieldCardInteractions(),
     step_12: () => this.setupDragCard("FIRE_BALL"),
     step_13: () => this.setupGraveyardInteractions(),
@@ -159,9 +159,9 @@ export class TutorialBoardScene extends Phaser.Scene {
     const { SCREEN, HAND } = LAYOUT_CONFIG;
     const { COMPONENTS } = THEME_CONFIG;
 
-    const tutorialCards = [
-      "TOON_KNIGHT",
-      "MAGE_APPRENTICE",
+    const tutorialCards: CardId[] = [
+      "LITTLE_KNIGHT",
+      "APPRENTICE_WIZARD",
       "FIRE_BALL",
       "DARK_TRAP",
     ];
@@ -665,7 +665,7 @@ export class TutorialBoardScene extends Phaser.Scene {
     this.uiElements.forEach((element, key) => {
       if (key.startsWith("GRAVEYARD_CARD_") && element instanceof Card) {
         graveyardCards.push(element);
-      } else if (key.includes("TOON_KNIGHT") && element instanceof Card)
+      } else if (key.includes("LITTLE_KNIGHT") && element instanceof Card)
         fieldCard = element;
     });
 
@@ -731,7 +731,7 @@ export class TutorialBoardScene extends Phaser.Scene {
   private setupChangePositionInteraction(): void {
     let playerCard: Card | undefined;
     this.uiElements.forEach((element, key) => {
-      if (key.includes("TOON_KNIGHT") && element instanceof Card) {
+      if (key.includes("LITTLE_KNIGHT") && element instanceof Card) {
         playerCard = element;
       }
     });
@@ -829,7 +829,7 @@ export class TutorialBoardScene extends Phaser.Scene {
 
   //step 16
   private setupBattleStep(): void {
-    const cardData = CARD_DATABASE["MAGE_APPRENTICE"];
+    const cardData = CARD_DATABASE["APPRENTICE_WIZARD"];
     const targetKey: TutorialElementId = `OPPONENT_FIELD_CARD_${cardData.id}`;
 
     if (this.uiElements.has(targetKey)) return;
@@ -876,7 +876,7 @@ export class TutorialBoardScene extends Phaser.Scene {
   private setupPlayerAttackInteraction(): void {
     let playerCard: Card | undefined;
     this.uiElements.forEach((element, key) => {
-      if (key.includes("TOON_KNIGHT") && element instanceof Card) {
+      if (key.includes("LITTLE_KNIGHT") && element instanceof Card) {
         playerCard = element;
       }
     });
@@ -913,7 +913,7 @@ export class TutorialBoardScene extends Phaser.Scene {
   }
 
   private prepareOpponentTarget(attacker: Card): void {
-    const targetKey: TutorialElementId = "OPPONENT_FIELD_CARD_MAGE_APPRENTICE";
+    const targetKey: TutorialElementId = "OPPONENT_FIELD_CARD_APPRENTICE_WIZARD";
     const targetCard: Card | undefined = this.dummyCards.get(targetKey);
 
     if (!targetCard) return;

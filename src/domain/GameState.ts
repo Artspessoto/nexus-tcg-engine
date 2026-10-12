@@ -1,15 +1,15 @@
 import type { GamePhase, GameSide } from "../types/GameTypes";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import type { CardData } from "../types/CardTypes";
-import { CARD_DATABASE } from "../constants/CardDatabase";
+import { CARD_DATABASE, type CardId } from "../constants/CardDatabase";
 import type { IGameState } from "../interfaces/IGameState";
 
 export class GameState implements IGameState {
   private _currentPhase: GamePhase = "DRAW";
   private _isDragging: boolean = false;
   private _activePlayer: GameSide = "PLAYER";
-  private _playerDeck: string[] = [];
-  private _opponentDeck: string[] = [];
+  private _playerDeck: CardId[] = [];
+  private _opponentDeck: CardId[] = [];
   private _playerName!: string;
 
   public playerHP: number = LAYOUT_CONFIG.GAME_STATE.BASE_LP;
@@ -36,11 +36,11 @@ export class GameState implements IGameState {
     return this._isDragging;
   }
 
-  get playerDeck(): string[] {
+  get playerDeck(): CardId[] {
     return this._playerDeck;
   }
 
-  public initializeDecks(playerDeck?: string[], opponentDeck?: string[]): void {
+  public initializeDecks(playerDeck?: CardId[], opponentDeck?: CardId[]): void {
     this._playerDeck = playerDeck || [];
     this._opponentDeck = opponentDeck || [];
   }

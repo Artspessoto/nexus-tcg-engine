@@ -1,4 +1,4 @@
-import { CARD_DATABASE } from "../constants/CardDatabase";
+import { CARD_DATABASE, type CardId } from "../constants/CardDatabase";
 import type { DeckList } from "../constants/DeckConfig";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import type { Difficulty } from "../types/GameTypes";
@@ -6,7 +6,7 @@ import type { Difficulty } from "../types/GameTypes";
 export class DeckGenerator {
   public static generateNPCDeck(difficulty: Difficulty): DeckList {
     const deck: DeckList = [];
-    const allIds = Object.keys(CARD_DATABASE);
+    const allIds = Object.keys(CARD_DATABASE) as CardId[];
 
     const monsterPool = allIds.filter((id) => {
       const card = CARD_DATABASE[id];

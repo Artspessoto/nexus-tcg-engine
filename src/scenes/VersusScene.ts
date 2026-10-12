@@ -1,16 +1,17 @@
+import type { CardId } from "../constants/CardDatabase";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
 
 export interface VersusConfig {
   playerName: string;
   difficulty: string;
-  playerDeckIds: string[];
+  playerDeckIds: CardId[];
 }
 
 export class VersusScene extends Phaser.Scene {
   private playerName: string = "";
   private difficulty: string = "";
-  private playerDeckIds: string[] = [];
+  private playerDeckIds: CardId[] = [];
 
   constructor() {
     super("VersusScene");

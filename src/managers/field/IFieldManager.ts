@@ -46,6 +46,6 @@ export interface IFieldManager {
     targetX: number,
     targetY: number,
     mode: PlacementMode,
-  ): void;
+  ): Promise<void>;
   previewPlacement(card: Card, targetX: number, targetY: number): void;
 }

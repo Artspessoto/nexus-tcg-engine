@@ -51,7 +51,7 @@ export class MediumStrategy extends BaseStrategy {
 
   protected getHandMoves(playableCards: Card[], snapshot: FieldSnapshot) {
     const hand = this.context.getHand(this.side).hand;
-    const npcHandCards = hand.map((card) => card.getCardData().nameKey);
+    const npcHandCards = hand.map((card) => card.getName());
     Logger.debug("AI", "NPC Cards", npcHandCards);
     const moves: Move[] = [];
 

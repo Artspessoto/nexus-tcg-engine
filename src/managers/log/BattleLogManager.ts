@@ -38,22 +38,22 @@ export class BattleLogManager implements IBattleLogManager {
 
     //card played
     EventBus.on(GameEvent.CARD_PLAYED, (data) => {
-      const cardNameKey = data.card.getCardData().nameKey;
+      const cardName = data.card.getName();
       this.addEntry({
         type: "PLAY_CARD",
         side: data.side,
-        cardNameKey,
+        cardNameKey: cardName,
         messageKey: formatTemplate(this.translations.play_card, {
           side: data.side,
-          cardName: cardNameKey,
+          cardName,
           mode: data.mode, //"ATK" | "DEF" | "FACE_UP" | "SET" << need improve for translations response
         }),
       });
 
       //battle resolution
       EventBus.on(GameEvent.BATTLE_RESOLVED, (data) => {
-        const attackerName = data.attacker.getCardData().nameKey;
-        const targetName = data.target.getCardData().nameKey;
+        const attackerName = data.attacker.getName();
+        const targetName = data.target.getName();
         this.addEntry({
           type: "ATTACK",
           side: data.attacker.owner,
@@ -70,12 +70,12 @@ export class BattleLogManager implements IBattleLogManager {
 
       //direct attack
       EventBus.on(GameEvent.DIRECT_ATTACK, (data) => {
-        const attackerName = data.attacker.getCardData().nameKey;
+        const attackerName = data.attacker.getName();
         const damage = data.damage;
         this.addEntry({
           type: "ATTACK",
           side: data.attacker.owner,
-          cardNameKey: data.attacker.getCardData().nameKey,
+          cardNameKey: attackerName,
           amount: damage,
           messageKey: formatTemplate(this.translations.direct_attack, {
             attackerName,
@@ -86,7 +86,7 @@ export class BattleLogManager implements IBattleLogManager {
 
       //card effect ativation
       EventBus.on(GameEvent.EFFECT_ACTIVATED, (data) => {
-        const cardName = data.card.getCardData().nameKey;
+        const cardName = data.card.getName();
         this.addEntry({
           type: "EFFECT",
           side: data.card.owner,

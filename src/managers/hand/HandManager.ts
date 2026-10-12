@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import type { IBattleContext } from "../../interfaces/IBattleContext";
 import { Card } from "../../objects/Card";
-import { CARD_DATABASE } from "../../constants/CardDatabase";
+import { CARD_DATABASE, type CardId } from "../../constants/CardDatabase";
 import type { GameSide } from "../../types/GameTypes";
 import type { IHandManager } from "../hand/IHandManager";
 import { LAYOUT_CONFIG } from "../../constants/LayoutConfig";
@@ -132,7 +132,7 @@ export class HandManager implements IHandManager {
   }
 
   public getRandomCardData() {
-    const keys = Object.keys(CARD_DATABASE);
+    const keys = Object.keys(CARD_DATABASE) as CardId[];
     const randomKey = keys[Phaser.Math.Between(0, keys.length - 1)];
     return CARD_DATABASE[randomKey];
   }

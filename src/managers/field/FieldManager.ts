@@ -175,60 +175,63 @@ export class FieldManager implements IFieldManager {
     targetX: number,
     targetY: number,
     mode: PlacementMode,
-  ) {
-    const { SCALES } = THEME_CONFIG.COMPONENTS.CARD;
-    const { DURATIONS, SHAKES, EASING } = THEME_CONFIG.ANIMATIONS;
-    const currentTurn = this.context.gameState.currentTurn;
-    this.context.add.existing(card);
+  ): Promise<void> {
+    return new Promise((resolve) => {
+      const { SCALES } = THEME_CONFIG.COMPONENTS.CARD;
+      const { DURATIONS, SHAKES, EASING } = THEME_CONFIG.ANIMATIONS;
+      const currentTurn = this.context.gameState.currentTurn;
+      this.context.add.existing(card);
 
-    card.disableInteractive();
-    this.context.tweens.killTweensOf(card.visualElements);
+      card.disableInteractive();
+      this.context.tweens.killTweensOf(card.visualElements);
 
-    card.visualElements.setY(0);
-    card.visualElements.setScale(1);
-    card.setFieldVisuals();
-    card.setLocation("FIELD", currentTurn); //save actual turn and location into card obj
+      card.visualElements.setY(0);
+      card.visualElements.setScale(1);
+      card.setFieldVisuals();
+      card.setLocation("FIELD", currentTurn); //save actual turn and location into card obj
 
-    const isDefense = mode === "DEF";
-    const isSet = mode === "SET";
-    const isMonster = card.getType().includes("MONSTER");
+      const isDefense = mode === "DEF";
+      const isSet = mode === "SET";
+      const isMonster = card.getType().includes("MONSTER");
 
-    const finalAngle = isDefense ? 270 : 0;
-    const finalScale = isDefense ? SCALES.FIELD_DEF : SCALES.FIELD_ATK;
+      const finalAngle = isDefense ? 270 : 0;
+      const finalScale = isDefense ? SCALES.FIELD_DEF : SCALES.FIELD_ATK;
 
-    if (isSet || (isMonster && isDefense)) {
-      card.setFaceDown();
-    } else {
-      // mode == ATK or FACE_UP, card face up
-      //opponent need this to face up card into field slot (default -> card face down into opponent hand)
-      card.setFaceUp();
-    }
+      if (isSet || (isMonster && isDefense)) {
+        card.setFaceDown();
+      } else {
+        // mode == ATK or FACE_UP, card face up
+        //opponent need this to face up card into field slot (default -> card face down into opponent hand)
+        card.setFaceUp();
+      }
 
-    EventBus.emit(GameEvent.CARD_PLAYED, {
-      card,
-      side: card.owner,
-      mode,
-    });
+      EventBus.emit(GameEvent.CARD_PLAYED, {
+        card,
+        side: card.owner,
+        mode,
+      });
 
-    // Slot animation movement
-    this.context.tweens.add({
-      targets: card,
-      x: targetX,
-      y: targetY,
-      angle: finalAngle,
-      scale: finalScale,
-      duration: DURATIONS.MEDIUM_FAST,
-      ease: EASING.SPRING,
-      onComplete: () => {
-        // card impact animation effect
-        this.context.cameras.main.shake(
-          SHAKES.LIGHT.duration,
-          SHAKES.LIGHT.intensity,
-        );
-        card.setDepth(10);
+      // Slot animation movement
+      this.context.tweens.add({
+        targets: card,
+        x: targetX,
+        y: targetY,
+        angle: finalAngle,
+        scale: finalScale,
+        duration: DURATIONS.MEDIUM_FAST,
+        ease: EASING.SPRING,
+        onComplete: () => {
+          // card impact animation effect
+          this.context.cameras.main.shake(
+            SHAKES.LIGHT.duration,
+            SHAKES.LIGHT.intensity,
+          );
+          card.setDepth(10);
 
-        this.setupFieldInteractions(card);
-      },
+          this.setupFieldInteractions(card);
+          resolve();
+        },
+      });
     });
   }
 

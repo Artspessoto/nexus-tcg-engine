@@ -1,11 +1,10 @@
 import type { CardData } from "../types/CardTypes";
 
-export const CARD_DATABASE: Record<string, CardData> = {
-  SENTINEL_01: {
-    id: "SENTINEL_01",
+export const CARD_DATABASE = {
+  //normal monsters
+  IRON_SENTINEL: {
+    id: "IRON_SENTINEL",
     type: "MONSTER",
-    nameKey: "Sentinela de Ferro",
-    descriptionKey: "Um guardião ancestral que nunca dorme.",
     manaCost: 2,
     atk: 40,
     def: 55,
@@ -14,11 +13,10 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   ALLIGATOR_WARRIOR: {
     id: "ALLIGATOR_WARRIOR",
     type: "MONSTER",
-    nameKey: "Jacaré Guerreiro",
-    descriptionKey: "Um guerreiro incomum e maluco.",
     manaCost: 2,
     atk: 35,
     def: 45,
@@ -27,11 +25,10 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   KING_KNIGHT: {
     id: "KING_KNIGHT",
     type: "MONSTER",
-    nameKey: "Rei Esqueleto",
-    descriptionKey: "Um rei de um tempo antigo.",
     manaCost: 2,
     atk: 35,
     def: 45,
@@ -40,6 +37,241 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
+  LITTLE_KNIGHT: {
+    id: "LITTLE_KNIGHT",
+    type: "MONSTER",
+    manaCost: 2,
+    atk: 55,
+    def: 40,
+    imageKey: "little_knight",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  GOBLIN_HORDE: {
+    id: "GOBLIN_HORDE",
+    type: "MONSTER",
+    manaCost: 1,
+    atk: 30,
+    def: 25,
+    imageKey: "goblins",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  RED_DRAGON: {
+    id: "RED_DRAGON",
+    type: "MONSTER",
+    manaCost: 3,
+    atk: 65,
+    def: 50,
+    imageKey: "red_dragon",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  //effect monsters
+
+  //ON_SUMMON
+  APPRENTICE_WIZARD: {
+    id: "APPRENTICE_WIZARD",
+    type: "EFFECT_MONSTER",
+    effects: {
+      type: "DRAW_CARD",
+      targetSide: "OWNER",
+      value: 1,
+      trigger: "ON_SUMMON",
+    },
+    manaCost: 1,
+    atk: 35,
+    def: 60,
+    imageKey: "apprentice_wizard",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  PIED_PIPER_RAT: {
+    id: "PIED_PIPER_RAT",
+    type: "EFFECT_MONSTER",
+    effects: {
+      type: "DRAW_CARD",
+      targetSide: "OWNER",
+      value: 1,
+      trigger: "ON_SUMMON",
+    },
+    manaCost: 1,
+    atk: 25,
+    def: 30,
+    imageKey: "pied_piper_rat",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  BARD: {
+    id: "BARD",
+    type: "EFFECT_MONSTER",
+    effects: {
+      type: "HEAL",
+      targetSide: "OWNER",
+      value: 25,
+      trigger: "ON_SUMMON",
+    },
+    manaCost: 1,
+    atk: 20,
+    def: 35,
+    imageKey: "bard",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  PRIESTESS: {
+    id: "PRIESTESS",
+    type: "EFFECT_MONSTER",
+    effects: {
+      type: "HEAL",
+      targetSide: "OWNER",
+      value: 35,
+      trigger: "ON_SUMMON",
+    },
+    manaCost: 2,
+    atk: 20,
+    def: 55,
+    imageKey: "priestess",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  BANDIT_ARCHER: {
+    id: "BANDIT_ARCHER",
+    type: "EFFECT_MONSTER",
+    effects: {
+      type: "BURN",
+      targetSide: "OPPONENT",
+      value: 10,
+      trigger: "ON_SUMMON",
+    },
+    manaCost: 1,
+    atk: 52,
+    def: 20,
+    imageKey: "bandit_archer",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  BABY_DRAGON: {
+    id: "BABY_DRAGON",
+    type: "EFFECT_MONSTER",
+    effects: {
+      type: "BURN",
+      targetSide: "OPPONENT",
+      value: 15,
+      trigger: "ON_SUMMON",
+    },
+    manaCost: 1,
+    atk: 30,
+    def: 25,
+    imageKey: "baby_dragon",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  //NEXT_TURN
+  APPRENTICE_WARRIOR: {
+    id: "APPRENTICE_WARRIOR",
+    type: "EFFECT_MONSTER",
+    effects: { type: "CHANGE_POS", targetSide: "BOTH", trigger: "NEXT_TURN" },
+    manaCost: 1,
+    atk: 25,
+    def: 35,
+    imageKey: "apprentice_warrior",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  AMAZON_WARRIOR: {
+    id: "AMAZON_WARRIOR",
+    type: "EFFECT_MONSTER",
+    effects: {
+      type: "NERF_ATK",
+      value: 15,
+      targetSide: "OPPONENT",
+      trigger: "NEXT_TURN",
+    },
+    manaCost: 2,
+    atk: 48,
+    def: 35,
+    imageKey: "amazon",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  BOWLER: {
+    id: "BOWLER",
+    type: "EFFECT_MONSTER",
+    effects: {
+      type: "NERF_DEF",
+      value: 20,
+      targetSide: "OPPONENT",
+      trigger: "NEXT_TURN",
+    },
+    manaCost: 2,
+    atk: 50,
+    def: 35,
+    imageKey: "bowler",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  DARKNESS_WIZARD: {
+    id: "DARKNESS_WIZARD",
+    type: "EFFECT_MONSTER",
+    effects: {
+      type: "BOUNCE",
+      targetSide: "OPPONENT",
+      targetType: "MONSTER",
+      trigger: "NEXT_TURN",
+    },
+    manaCost: 3,
+    atk: 50,
+    def: 40,
+    imageKey: "darkness_wizard",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  VALKYRIE: {
+    id: "VALKYRIE",
+    type: "EFFECT_MONSTER",
+    effects: {
+      type: "REVIVE",
+      targetSide: "BOTH",
+      targetType: "MONSTER",
+      trigger: "NEXT_TURN",
+    },
+    manaCost: 3,
+    atk: 50,
+    def: 45,
+    imageKey: "valkyrie",
+    atlasKey: "card_illustrations_monsters",
+    width: 300,
+    height: 400,
+  },
+
+  //spells
   FIRE_BALL: {
     id: "FIRE_BALL",
     type: "SPELL",
@@ -51,6 +283,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   DRAW_CARD: {
     id: "DRAW_CARD",
     type: "SPELL",
@@ -62,6 +295,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   CHANGE_POS: {
     id: "CHANGE_POS",
     type: "SPELL",
@@ -73,6 +307,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   DESTROY_SPELL: {
     id: "DESTROY_SPELL",
     type: "SPELL",
@@ -84,6 +319,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   BOOST_ATK: {
     id: "BOOST_ATK",
     type: "SPELL",
@@ -95,6 +331,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   BOOST_DEF: {
     id: "BOOST_DEF",
     type: "SPELL",
@@ -106,6 +343,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   REVIVE_SPELL: {
     id: "REVIVE_SPELL",
     type: "SPELL",
@@ -118,6 +356,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   REVIVE_MONSTER: {
     id: "REVIVE_MONSTER",
     type: "SPELL",
@@ -129,6 +368,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   NERF_ATK: {
     id: "NERF_ATK",
     type: "SPELL",
@@ -140,6 +380,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   BOUNCE: {
     id: "BOUNCE",
     type: "SPELL",
@@ -151,59 +392,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
-  DARK_TRAP: {
-    id: "DARK_TRAP",
-    type: "TRAP",
-    nameKey: "Armadilha Sombria",
-    descriptionKey: "Destrua um monstro em campo do seu oponente.",
-    effects: { type: "DESTROY", targetSide: "OPPONENT", targetType: "MONSTER" },
-    manaCost: 1,
-    imageKey: "",
-    width: 300,
-    height: 400,
-  },
-  TOON_KNIGHT: {
-    id: "TOON_KNIGHT",
-    type: "MONSTER",
-    nameKey: "Cavaleiro Toon",
-    descriptionKey: "Um guerreiro em ascensão, inabalável.",
-    manaCost: 2,
-    atk: 55,
-    def: 40,
-    imageKey: "knight",
-    atlasKey: "card_illustrations_monsters",
-    width: 300,
-    height: 400,
-  },
-  MAGE_APPRENTICE: {
-    id: "MAGE_APPRENTICE",
-    type: "EFFECT_MONSTER",
-    nameKey: "Aprendiz de Mago",
-    descriptionKey:
-      "Diz a lenda que ele ainda está aprendendo a não explodir coisas.",
-    effects: { type: "DRAW_CARD", targetSide: "OWNER", value: 1 },
-    manaCost: 1,
-    atk: 35,
-    def: 60,
-    imageKey: "apprentice_wizard",
-    atlasKey: "card_illustrations_monsters",
-    width: 300,
-    height: 400,
-  },
-  BANDIT_ARCHER: {
-    id: "BANDIT_ARCHER",
-    type: "EFFECT_MONSTER",
-    nameKey: "Bandido arqueiro",
-    descriptionKey: "Diz a lenda que ele se inspira em algum 'Wood'.",
-    effects: { type: "BURN", targetSide: "OPPONENT", value: 10 },
-    manaCost: 1,
-    atk: 52,
-    def: 20,
-    imageKey: "bandit_archer",
-    atlasKey: "card_illustrations_monsters",
-    width: 300,
-    height: 400,
-  },
+
   POT_OF_LUCK: {
     id: "POT_OF_LUCK",
     type: "SPELL",
@@ -215,6 +404,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   REGEN_FLOWER: {
     id: "REGEN_FLOWER",
     type: "SPELL",
@@ -226,6 +416,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   MANA_CRYSTAL: {
     id: "MANA_CRYSTAL",
     type: "SPELL",
@@ -237,6 +428,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
   ICE_SHIELD: {
     id: "ICE_SHIELD",
     type: "SPELL",
@@ -248,6 +440,20 @@ export const CARD_DATABASE: Record<string, CardData> = {
     width: 300,
     height: 400,
   },
+
+  //trap
+  DARK_TRAP: {
+    id: "DARK_TRAP",
+    type: "TRAP",
+    nameKey: "Armadilha Sombria",
+    descriptionKey: "Destrua um monstro em campo do seu oponente.",
+    effects: { type: "DESTROY", targetSide: "OPPONENT", targetType: "MONSTER" },
+    manaCost: 1,
+    imageKey: "",
+    width: 300,
+    height: 400,
+  },
+
   REVERSE_TRAP: {
     id: "REVERSE_TRAP",
     type: "TRAP",
@@ -258,5 +464,7 @@ export const CARD_DATABASE: Record<string, CardData> = {
     imageKey: "revive_example",
     width: 300,
     height: 400,
-  },
-};
+  },  
+} satisfies Record<string, CardData>;
+
+export type CardId = keyof typeof CARD_DATABASE;

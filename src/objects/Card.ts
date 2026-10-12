@@ -5,6 +5,7 @@ import type { CardLocation, CardData, CardType } from "../types/CardTypes";
 import { EventBus } from "../events/EventBus";
 import { GameEvent } from "../events/GameEvents";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { LanguageManager } from "../managers/language/LanguageManager";
 
 export class Card extends Phaser.GameObjects.Container {
   //obj control
@@ -73,6 +74,23 @@ export class Card extends Phaser.GameObjects.Container {
     this.setSize(width, height);
     this.setInteractive({ useHandCursor: true, draggable: false });
     scene.add.existing(this);
+  }
+
+  public getName(): string {
+    return LanguageManager.getInstance().getCardTranslation(
+      this.getCardData().id,
+    ).name;
+  }
+
+  public getDescription(): string {
+    const fullDesc = LanguageManager.getInstance().getCardTranslation(
+      this.getCardData().id,
+    ).description;
+
+    const effectMatch = fullDesc.match(/\[.*?$/s);
+    if (effectMatch) return effectMatch[0].trim();
+
+    return fullDesc;
   }
 
   private setupContainer() {
@@ -175,7 +193,7 @@ export class Card extends Phaser.GameObjects.Container {
     }
 
     this.nameText = this.scene.add
-      .text(DEFAULT.NAME.x, DEFAULT.NAME.y, data.nameKey.toUpperCase(), {
+      .text(DEFAULT.NAME.x, DEFAULT.NAME.y, this.getName().toUpperCase(), {
         ...CARD_CONFIG.STYLES.NAME,
         align: "center",
         fixedWidth: 160,
@@ -191,11 +209,20 @@ export class Card extends Phaser.GameObjects.Container {
       )
       .setOrigin(0.5);
 
+    //dynamic ajust for description txt (lore + effect)
+    const descContent = this.getDescription() || "...";
+
     this.descText = this.scene.add
-      .text(DEFAULT.DESC.x, DEFAULT.DESC.y, data.descriptionKey || "...", {
-        ...CARD_CONFIG.STYLES.DESC,
+      .text(DEFAULT.DESC.x, DEFAULT.DESC.y, descContent, {
+        fontSize: "13px",
+        color: "#3a2d1d",
+        fontStyle: "bold",
+        fontFamily: "Arial",
+        align: "center",
+        lineSpacing: 2,
+        wordWrap: { width: 185 },
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5, 0.5);
 
     this.visualElements.add([this.nameText, this.manaText, this.descText]);
   }
@@ -340,7 +367,7 @@ export class Card extends Phaser.GameObjects.Container {
       this.manaText.setVisible(true);
       this.nameText.setVisible(true);
       this.descText.setVisible(true);
-      
+
       if (this.fieldManaText) this.fieldManaText.setVisible(false);
     }
   }
@@ -408,8 +435,8 @@ export class Card extends Phaser.GameObjects.Container {
       }
     }
 
-    this.nameText.setText(data.nameKey.toUpperCase());
-    this.descText.setText(data.descriptionKey || "");
+    this.nameText.setText(this.getName().toUpperCase());
+    this.descText.setText(this.getDescription());
     this.manaText.setText(data.manaCost.toString());
 
     const isMonster = data.type == "MONSTER" || data.type == "EFFECT_MONSTER";

@@ -1,5 +1,8 @@
 import type { ILanguageManager } from "./ILanguageManager";
-import type { Lang } from "../../types/GameTypes";
+import type { CardTranslation, Lang } from "../../types/GameTypes";
+import { TRANSLATIONS } from "../../constants/Translations";
+import { CARD_DATABASE } from "../../constants/CardDatabase";
+import type { CardData } from "../../types/CardTypes";
 
 export class LanguageManager implements ILanguageManager {
   private static instance: LanguageManager;
@@ -38,5 +41,21 @@ export class LanguageManager implements ILanguageManager {
 
     //default language for: german, french, portuguese, and others
     return "en" as Lang;
+  }
+
+  public getCardTranslation(cardId: string): CardTranslation {
+    const currentTranslation = TRANSLATIONS[this.currentLang];
+    const cardText =
+      currentTranslation.cards[cardId as keyof typeof currentTranslation.cards];
+
+    if (cardText) return cardText;
+
+    const baseCard = (CARD_DATABASE as Record<string, CardData>)[cardId];
+
+    //security fallback (for cases where card doesn't yet have translation)
+    return {
+      name: cardId,
+      description: baseCard?.descriptionKey ?? "",
+    };
   }
 }

@@ -1,5 +1,6 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { LanguageManager } from "../managers/language/LanguageManager";
 import type { CardData } from "../types/CardTypes";
 import { Card } from "./Card";
 
@@ -20,6 +21,7 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
   private typeBadgeBg!: Phaser.GameObjects.Graphics;
   private panelConfig!: CardGridPanelConfig;
   private cardScale: number = 0.28;
+  private languageManager: LanguageManager = LanguageManager.getInstance();
 
   constructor(
     scene: Phaser.Scene,
@@ -134,6 +136,9 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
     if (firstCardItem) {
       const detailCenterX = gridWidth + MODAL.LIST.DETAIL_WIDTH / 2;
       const textPaddingY = MODAL.LIST.TEXT_Y_START;
+      const { name, description } = this.languageManager.getCardTranslation(
+        firstCardItem.id,
+      );
 
       this.cardDetailView = new Card(
         this.scene,
@@ -145,15 +150,10 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
       ).setScale(0.75);
 
       this.detailNameText = this.scene.add
-        .text(
-          detailCenterX,
-          textPaddingY,
-          firstCardItem.nameKey.toUpperCase(),
-          {
-            ...FONTS.STYLES.CARD_NAME,
-            wordWrap: { width: MODAL.LIST.DETAIL_WIDTH },
-          },
-        )
+        .text(detailCenterX, textPaddingY, name, {
+          ...FONTS.STYLES.CARD_NAME,
+          wordWrap: { width: MODAL.LIST.DETAIL_WIDTH },
+        })
         .setOrigin(0.5);
 
       this.detailTypeText = this.scene.add
@@ -171,17 +171,12 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
         .setOrigin(0.5, 0.5);
 
       this.detailDescText = this.scene.add
-        .text(
-          detailCenterX,
-          textPaddingY + 60,
-          firstCardItem.descriptionKey || "",
-          {
-            ...FONTS.STYLES.MODAL_CONTENT,
-            fontSize: "14px",
-            fontFamily: FONTS.FAMILY_DISPLAY,
-            wordWrap: { width: MODAL.LIST.DETAIL_WIDTH - 40 },
-          },
-        )
+        .text(detailCenterX, textPaddingY + 60, description || "", {
+          ...FONTS.STYLES.MODAL_CONTENT,
+          fontSize: "14px",
+          fontFamily: FONTS.FAMILY_DISPLAY,
+          wordWrap: { width: MODAL.LIST.DETAIL_WIDTH - 40 },
+        })
         .setOrigin(0.5, 0);
 
       this.add([
@@ -199,10 +194,13 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
   }
 
   private updateDetailView(data: CardData) {
+    const { name, description } = this.languageManager.getCardTranslation(
+      data.id,
+    );
     this.cardDetailView.updateData(data);
 
-    this.detailNameText.setText(data.nameKey.toUpperCase());
-    this.detailDescText.setText(data.descriptionKey);
+    this.detailNameText.setText(name);
+    this.detailDescText.setText(description);
 
     this.detailTypeText.setText(this.formatTypeLabel(data.type));
     this.detailTypeText.setColor("#FFFFFF");

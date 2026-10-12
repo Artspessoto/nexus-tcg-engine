@@ -41,7 +41,7 @@ export interface IBattleContext {
     type: "MONSTER" | "SPELL",
     slot: Slot,
     mode: PlacementMode,
-  ): void;
+  ): Promise<void>;
   cardActivation(
     card: Card,
     side: GameSide,

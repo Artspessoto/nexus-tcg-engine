@@ -6,14 +6,14 @@ export type CardLocation = "HAND" | "FIELD" | "GRAVEYARD" | "DECK";
 export interface CardData {
   id: string;
   type: CardType;
-  nameKey: string;
+  nameKey?: string; //optional since spells and traps don't yet have translations
+  descriptionKey?: string; //optional since spells and traps don't yet have translations
   atk?: number;
   def?: number;
   effects?: CardEffect;
   manaCost: number;
   imageKey: string;
   atlasKey?: string;
-  descriptionKey: string;
   width?: number;
   height?: number;
 }

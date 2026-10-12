@@ -1,3 +1,4 @@
+import type { CardId } from "../constants/CardDatabase";
 import type { CardData } from "../types/CardTypes";
 import type { GameSide, GamePhase } from "../types/GameTypes";
 
@@ -6,7 +7,7 @@ export interface IGameState {
   readonly currentPhase: GamePhase;
   readonly currentTurn: number;
   readonly isDragging: boolean;
-  readonly playerDeck: string[];
+  readonly playerDeck: CardId[];
 
   getHP(side: GameSide): number;
   getMana(side: GameSide): number;
@@ -22,5 +23,5 @@ export interface IGameState {
   setDragging(value: boolean): void;
   setDeckState(side: GameSide): CardData | null;
   getDeckCount(side: GameSide): number;
-  initializeDecks(playerDeck?: string[], opponentDeck?: string[]): void;
+  initializeDecks(playerDeck?: CardId[], opponentDeck?: CardId[]): void;
 }

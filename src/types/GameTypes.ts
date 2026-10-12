@@ -5,14 +5,20 @@ export type Difficulty = "EASY" | "MEDIUM" | "HARD";
 export type GamePhase = "DRAW" | "MAIN" | "BATTLE" | "CHANGE_TURN";
 export type PlacementMode = "ATK" | "DEF" | "FACE_UP" | "SET";
 
+export type CardTranslation = {
+  name: string;
+  description: string;
+};
+
 type Languages = keyof typeof TRANSLATIONS;
 export type TranslationStructure = (typeof TRANSLATIONS)[Languages];
 export type Lang = "pt-BR" | "en";
 export type NameTranslations = TranslationStructure["name_scene"];
 export type TutorialTranslations = TranslationStructure["tutorial"];
 export type BattleTranslations = TranslationStructure["battle_scene"];
-export type HistoryLogTranslations = TranslationStructure["history_log"]
+export type HistoryLogTranslations = TranslationStructure["history_log"];
 export type DeckPreviewTranslations = TranslationStructure["deck_preview"];
+export type CardTranslations = TranslationStructure["cards"];
 
 export type GameSide = "PLAYER" | "OPPONENT";
 export type Notice = "PHASE" | "WARNING" | "TURN" | "NEUTRAL";

@@ -4,6 +4,7 @@ import { Card } from "./Card";
 import { ToonButton } from "./ToonButton";
 import type { CardData, CardLocation } from "../types/CardTypes";
 import type { GameSide } from "../types/GameTypes";
+import { LanguageManager } from "../managers/language/LanguageManager";
 
 interface CardDetailsData {
   cardData: CardData;
@@ -40,6 +41,8 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
     const { SCREEN, MODAL } = LAYOUT_CONFIG;
     const { COLORS, FONTS } = THEME_CONFIG;
     const { DETAIL } = MODAL;
+    const { name, description } =
+      LanguageManager.getInstance().getCardTranslation(this.cardData.id);
 
     const startX = SCREEN.CENTER_X - DETAIL.WIDTH / 2;
     const startY = SCREEN.CENTER_Y - DETAIL.HEIGHT / 2;
@@ -92,10 +95,10 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
     const titleText = this.scene.add.text(
       textStartX,
       startY + DETAIL.TEXT_START_Y,
-      this.cardData.nameKey.toUpperCase(),
+      name,
       FONTS.STYLES.CARD_NAME,
     );
-    
+
     const badgeY = startY + DETAIL.TEXT_START_Y + 55;
     const paddingX = 14;
     const badgeHeight = 28;
@@ -119,23 +122,30 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
     const badgeRectY = badgeY - badgeHeight / 2;
 
     this.typeBadgeBg.fillStyle(0x242424, 0.9);
-    this.typeBadgeBg.fillRoundedRect(badgeX, badgeRectY, badgeWidth, badgeHeight, 12);
+    this.typeBadgeBg.fillRoundedRect(
+      badgeX,
+      badgeRectY,
+      badgeWidth,
+      badgeHeight,
+      12,
+    );
 
     this.typeBadgeBg.lineStyle(2, borderColor, 0.9);
-    this.typeBadgeBg.strokeRoundedRect(badgeX, badgeRectY, badgeWidth, badgeHeight, 12);
-
-    const descText = this.scene.add.text(
-      textStartX,
-      badgeY + 35,
-      this.cardData.descriptionKey,
-      {
-        fontSize: "16px",
-        fontFamily: FONTS.FAMILY_DISPLAY,
-        color: "#DDDDDD",
-        wordWrap: { width: textWidth },
-        lineSpacing: 8,
-      },
+    this.typeBadgeBg.strokeRoundedRect(
+      badgeX,
+      badgeRectY,
+      badgeWidth,
+      badgeHeight,
+      12,
     );
+
+    const descText = this.scene.add.text(textStartX, badgeY + 35, description, {
+      fontSize: "16px",
+      fontFamily: FONTS.FAMILY_DISPLAY,
+      color: "#DDDDDD",
+      wordWrap: { width: textWidth },
+      lineSpacing: 8,
+    });
 
     // this.scene.add.text(textStartX, startY + 350, '"Só o básico..."', {
     //   fontSize: "18px",

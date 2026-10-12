@@ -1,4 +1,4 @@
-import { CARD_DATABASE } from "../constants/CardDatabase";
+import { CARD_DATABASE, type CardId } from "../constants/CardDatabase";
 import { PLAYER_INITIAL_DECK } from "../constants/DeckConfig";
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
@@ -38,7 +38,7 @@ export class DeckPreviewScene extends Phaser.Scene {
   private playerName!: string;
   private difficulty!: string;
 
-  private playerDeckIds!: string[];
+  private playerDeckIds!: CardId[];
   private playerDeckData!: CardData[];
 
   private currentFilter: FilterOption = "ALL";
@@ -49,12 +49,17 @@ export class DeckPreviewScene extends Phaser.Scene {
   constructor() {
     super({ key: "DeckPreviewScene" });
 
+    const languageManager = LanguageManager.getInstance();
+
     const sortAlpha = (data: CardData[]) =>
-      data.sort((a, b) =>
-        this.currentSort == "DESC"
-          ? a.nameKey.localeCompare(b.nameKey)
-          : b.nameKey.localeCompare(a.nameKey),
-      );
+      data.sort((a, b) => {
+        const nameA = languageManager.getCardTranslation(a.id).name;
+        const nameB = languageManager.getCardTranslation(b.id).name;
+
+        return this.currentSort == "DESC"
+          ? nameA.localeCompare(nameB)
+          : nameB.localeCompare(nameA);
+      });
 
     this.filterHanders = {
       ALL: (data) => sortAlpha(data),

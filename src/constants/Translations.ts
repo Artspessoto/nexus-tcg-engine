@@ -216,6 +216,93 @@ export const TRANSLATIONS = {
         "{attackerName} atacou diretamente causando {damage} de dano!",
       effect_activated: "Efeito de {cardName} ativado ({effectType})",
     },
+    cards: {
+      IRON_SENTINEL: {
+        name: "Sentinela de Ferro",
+        description:
+          "Um guardião ancestral que nunca dorme, vigiando as catacumbas com escudo impenetrável.",
+      },
+      ALLIGATOR_WARRIOR: {
+        name: "Jacaré Guerreiro",
+        description:
+          "Um guerreiro incomum e maluco, mas tome cuidado! Suas habilidades com a colher são anormais.",
+      },
+      KING_KNIGHT: {
+        name: "Rei Esqueleto",
+        description:
+          "Um monarca de um império esquecido, comandando sua corte espectral do topo do trono.",
+      },
+      LITTLE_KNIGHT: {
+        name: "Cavaleiro Toon",
+        description:
+          "Montado em seu confiável cavalinho de madeira, treinando para se tornar um paladino lendário.",
+      },
+      GOBLIN_HORDE: {
+        name: "Bando de Goblins",
+        description:
+          "Pequenos e barulhentos batedores da floresta sombria que compensam o tamanho atacando em bando.",
+      },
+      RED_DRAGON: {
+        name: "Dragão Vermelho",
+        description:
+          "O terror alado dos picos montanhosos. Busca sempre almoçar oponentes desavisados.",
+      },
+      APPRENTICE_WIZARD: {
+        name: "Aprendiz de Mago",
+        description:
+          "Ainda está aprendendo a não explodir coisas.\n\n[Ao Invocar]: Compre 1 carta.",
+      },
+      PIED_PIPER_RAT: {
+        name: "Rato Flautista",
+        description:
+          "Com uma melodia hipnótica ele encanta pequenas criaturas.\n\n[Ao Invocar]: Ao tocar sua flauta, compre 1 carta.",
+      },
+      BARD: {
+        name: "Bardo Errante",
+        description:
+          "Suas canções revigoram o ânimo do grupo nas tavernas.\n\n[Ao Invocar]: Restaura 25 LP do jogador.",
+      },
+      PRIESTESS: {
+        name: "Clériga da Luz",
+        description:
+          "Canaliza preces aos céus para curar os feridos.\n\n[Ao Invocar]: Abençoa o jogador restaurando 35 LP.",
+      },
+      BANDIT_ARCHER: {
+        name: "Bandido Arqueiro",
+        description:
+          "Diz a lenda que ele se inspira em algum 'Wood'.\n\n[Ao Invocar]: Causa 10 de dano direto ao oponente.",
+      },
+      BABY_DRAGON: {
+        name: "Filhote de Dragão",
+        description:
+          "Solta uma baforada de fogo na empolgação de nascer.\n\n[Ao Invocar]: Causa 15 de dano ao oponente.",
+      },
+      APPRENTICE_WARRIOR: {
+        name: "Escudeiro Treinante",
+        description:
+          "Destrambelhado, mas distrai o inimigo.\n\n[Turno Seguinte]: Altere a posição de um monstro no campo.",
+      },
+      AMAZON_WARRIOR: {
+        name: "Amazona",
+        description:
+          "Guardiã implacável da selva sagrada.\n\n[Turno Seguinte]: Reduz o ataque de um monstro inimigo em 15 pontos.",
+      },
+      BOWLER: {
+        name: "Batedor",
+        description:
+          "Pega impulso com seu javali para triturar blindagens.\n\n[Turno Seguinte]: Reduz a defesa de um monstro inimigo em 20 pontos.",
+      },
+      DARKNESS_WIZARD: {
+        name: "Mago das Trevas",
+        description:
+          "Canaliza as artes proibidas da necromancia.\n\n[Turno Seguinte]: Retorne um monstro inimigo do campo para a mão do oponente.",
+      },
+      VALKYRIE: {
+        name: "Valquíria Celestial",
+        description:
+          "Canaliza a graça dos salões eternos para erguer os caídos.\n\n[Turno Seguinte]: Escolha um monstro de qualquer cemitério e reviva-o no seu campo.",
+      },
+    },
   },
   en: {
     menu: {
@@ -431,6 +518,93 @@ export const TRANSLATIONS = {
       direct_attack:
         "{attackerName} attacked directly dealing {damage} damage!",
       effect_activated: "{cardName}'s effect was activated ({effectType})",
+    },
+    cards: {
+      IRON_SENTINEL: {
+        name: "Iron Sentinel",
+        description:
+          "An ancient guardian who never sleeps, guarding the catacombs with an impenetrable shield.",
+      },
+      ALLIGATOR_WARRIOR: {
+        name: "Alligator Warrior",
+        description:
+          "An eccentric and wacky warrior, but beware! His skills with a spoon are beyond ordinary.",
+      },
+      KING_KNIGHT: {
+        name: "Skeleton King",
+        description:
+          "A monarch of a forgotten empire, commanding his spectral court from atop his throne.",
+      },
+      LITTLE_KNIGHT: {
+        name: "Toon Knight",
+        description:
+          "Mounted on his trusty wooden horse, training to become a legendary paladin.",
+      },
+      GOBLIN_HORDE: {
+        name: "Goblin Horde",
+        description:
+          "Small and noisy scouts of the dark woods who make up for their size by attacking in swarms.",
+      },
+      RED_DRAGON: {
+        name: "Red Dragon",
+        description:
+          "The winged dread of the mountain peaks. Always looking to make a meal out of unsuspecting foes.",
+      },
+      APPRENTICE_WIZARD: {
+        name: "Apprentice Wizard",
+        description:
+          "Still learning how not to blow things up.\n\n[On Summon]: Draw 1 card.",
+      },
+      PIED_PIPER_RAT: {
+        name: "Pied Piper Rat",
+        description:
+          "With a hypnotic melody he charms little critters.\n\n[On Summon]: Draw 1 card.",
+      },
+      BARD: {
+        name: "Wandering Bard",
+        description:
+          "His songs lift spirits across tavern halls.\n\n[On Summon]: Restore 25 of the player's LP.",
+      },
+      PRIESTESS: {
+        name: "Priestess of Light",
+        description:
+          "Channels heavenly prayers to mend the wounded.\n\n[On Summon]: Bless the player restoring 35 LP.",
+      },
+      BANDIT_ARCHER: {
+        name: "Bandit Archer",
+        description:
+          "Legend says he takes cues from a certain 'Wood'.\n\n[On Summon]: Deal 10 direct damage to the opponent.",
+      },
+      BABY_DRAGON: {
+        name: "Baby Dragon",
+        description:
+          "Spits an eager burst of flame upon hatching.\n\n[On Summon]: Deal 15 damage to the opponent.",
+      },
+      APPRENTICE_WARRIOR: {
+        name: "Trainee Squire",
+        description:
+          "Clumsy, but a great distraction.\n\n[Next Turn]: Change a monster's battle position on the field.",
+      },
+      AMAZON_WARRIOR: {
+        name: "Amazon Warrior",
+        description:
+          "Relentless guardian of the sacred jungle.\n\n[Next Turn]: Reduce an enemy monster's attack by 15.",
+      },
+      BOWLER: {
+        name: "Boar Rider",
+        description:
+          "Charges in with his boar to crush defenses.\n\n[Next Turn]: Reduce an enemy monster's defense by 20.",
+      },
+      DARKNESS_WIZARD: {
+        name: "Darkness Wizard",
+        description:
+          "Channels forbidden arts of necromancy.\n\n[Next Turn]: Return an enemy monster to the opponent's hand.",
+      },
+      VALKYRIE: {
+        name: "Celestial Valkyrie",
+        description:
+          "Channels eternal grace to lift the fallen.\n\n[Next Turn]: Choose a monster from any graveyard and revive it on your field.",
+      },
     },
   },
 };

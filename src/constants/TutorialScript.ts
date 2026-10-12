@@ -48,7 +48,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 180,
       y: HAND.PLAYER.NORMAL_Y,
-      id: ["HAND_CARD_TOON_KNIGHT"],
+      id: ["HAND_CARD_LITTLE_KNIGHT"],
     },
   },
   {
@@ -57,7 +57,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 300,
       y: HAND.PLAYER.NORMAL_Y,
-      id: ["HAND_CARD_MAGE_APPRENTICE"],
+      id: ["HAND_CARD_APPRENTICE_WIZARD"],
     },
   },
   {
@@ -178,7 +178,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 200,
       y: HAND.PLAYER.NORMAL_Y,
-      id: ["HAND_CARD_TOON_KNIGHT", "FIELD_MONSTER_ZONES"],
+      id: ["HAND_CARD_LITTLE_KNIGHT", "FIELD_MONSTER_ZONES"],
       disabled_hover: true,
     },
     requireAction: true,
@@ -210,7 +210,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: SCREEN.CENTER_X - 50,
       y: SCREEN.CENTER_Y + 50,
-      id: ["FIELD_CARD_TOON_KNIGHT"],
+      id: ["FIELD_CARD_LITTLE_KNIGHT"],
       disabled_hover: true,
     },
     requireAction: true,
@@ -222,7 +222,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: SCREEN.CENTER_X - 50,
       y: SCREEN.CENTER_Y + 50,
-      id: ["FIELD_CARD_TOON_KNIGHT"],
+      id: ["FIELD_CARD_LITTLE_KNIGHT"],
       disabled_hover: true,
     },
     requireAction: true,
@@ -233,7 +233,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: SCREEN.CENTER_X - 50,
       y: SCREEN.CENTER_Y + 50,
-      id: ["FIELD_CARD_TOON_KNIGHT"],
+      id: ["FIELD_CARD_LITTLE_KNIGHT"],
       disabled_hover: true,
     },
     requireAction: true,
@@ -300,7 +300,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 50,
       y: SCREEN.CENTER_Y + 50,
-      id: ["FIELD_CARD_TOON_KNIGHT"],
+      id: ["FIELD_CARD_LITTLE_KNIGHT"],
       disabled_hover: true,
     },
     requireAction: true,
@@ -325,7 +325,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: SCREEN.CENTER_X - 40,
       y: 270,
-      id: ["OPPONENT_FIELD_CARD_MAGE_APPRENTICE"],
+      id: ["OPPONENT_FIELD_CARD_APPRENTICE_WIZARD"],
       disabled_hover: true,
     },
   },
@@ -335,7 +335,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 50,
       y: SCREEN.CENTER_Y + 50,
-      id: ["FIELD_CARD_TOON_KNIGHT"],
+      id: ["FIELD_CARD_LITTLE_KNIGHT"],
       disabled_hover: true,
     },
     requireAction: true,
@@ -346,7 +346,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: 50,
       y: 270,
-      id: ["OPPONENT_FIELD_CARD_MAGE_APPRENTICE", "FIELD_CARD_TOON_KNIGHT"],
+      id: ["OPPONENT_FIELD_CARD_APPRENTICE_WIZARD", "FIELD_CARD_LITTLE_KNIGHT"],
       disabled_hover: true,
     },
     requireAction: true,
@@ -358,7 +358,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     focusTarget: {
       x: SCREEN.CENTER_X - 50,
       y: SCREEN.CENTER_Y + 50,
-      id: ["FIELD_CARD_TOON_KNIGHT"],
+      id: ["FIELD_CARD_LITTLE_KNIGHT"],
       disabled_hover: true,
     },
   },

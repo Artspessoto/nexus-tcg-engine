@@ -166,7 +166,7 @@ export class EffectManager implements IEffectManager {
 
       if (validator && !validator(aiTarget, effect)) {
         Logger.error(
-          `EffectManager: action blocked. Card: ${source.getCardData().nameKey} try to apply ${effect.type} on an invalid target ${aiTarget}`,
+          `EffectManager: action blocked. Card: ${source.getDescription()} try to apply ${effect.type} on an invalid target ${aiTarget}`,
           {
             sourceCard: source,
             invalidTarget: aiTarget,

@@ -92,7 +92,7 @@ export abstract class BaseStrategy implements IAIStrategy {
   public async executeMove(move: Move): Promise<void> {
     switch (move.type) {
       case "PLAY_MONSTER":
-        this.context.executePlay(
+        await this.context.executePlay(
           move.card,
           this.side,
           "MONSTER",
@@ -101,7 +101,7 @@ export abstract class BaseStrategy implements IAIStrategy {
         );
         break;
       case "PLAY_SPELL":
-        this.context.executePlay(
+        await this.context.executePlay(
           move.card,
           this.side,
           "SPELL",

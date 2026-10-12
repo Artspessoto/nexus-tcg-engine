@@ -5,7 +5,7 @@ export const CARD_CONFIG = {
     DEFAULT: {
       MANA: { x: 123, y: -174 },
       NAME: { x: 0, y: 70 },
-      DESC: { x: 0, y: 110 },
+      DESC: { x: 0, y: 120 },
       ATK: { x: -122, y: 160 },
       DEF: { x: 122, y: 160 },
     },
@@ -24,10 +24,11 @@ export const CARD_CONFIG = {
       fontFamily: "Arial",
     },
     DESC: {
-      fontSize: "14px",
+      fontSize: "12px",
+      // lineSpacing: 1,
       color: "#4a3d28",
       wordWrap: { width: 200 },
-      align: "left",
+      align: "center",
       fontFamily: "Arial",
       fontStyle: "bold",
     },

@@ -1,26 +1,35 @@
-import { CARD_DATABASE } from "./CardDatabase";
+import { type CardId } from "./CardDatabase";
 
-export type DeckList = Array<keyof typeof CARD_DATABASE>;
+export type DeckList = CardId[];
 
 export const PLAYER_INITIAL_DECK: DeckList = [
-  "TOON_KNIGHT",
-  "TOON_KNIGHT",
+  // "LITTLE_KNIGHT",
+  "RED_DRAGON",
+  // "LITTLE_KNIGHT",
+  "AMAZON_WARRIOR",
   "KING_KNIGHT",
   "ALLIGATOR_WARRIOR",
   "BANDIT_ARCHER",
-  "SENTINEL_01",
-  "MAGE_APPRENTICE",
-  "MAGE_APPRENTICE",
+  // "IRON_SENTINEL",
+  // "APPRENTICE_WIZARD",
+  "BABY_DRAGON",
+  "APPRENTICE_WIZARD",
   "FIRE_BALL",
   "FIRE_BALL",
-  "POT_OF_LUCK",
+  // "POT_OF_LUCK",
+  "BOWLER",
+  "BARD",
   "POT_OF_LUCK",
   "BOOST_ATK",
-  "BOOST_ATK",
+  // "BOOST_ATK",
+  "PIED_PIPER_RAT",
   "DARK_TRAP",
-  "DARK_TRAP",
+  // "DARK_TRAP",
+  "VALKYRIE",
+  "APPRENTICE_WARRIOR",
   "REGEN_FLOWER",
-  "MANA_CRYSTAL",
-  "ICE_SHIELD",
+  // "MANA_CRYSTAL",
+  // "ICE_SHIELD",
+  "PRIESTESS",
   "REVERSE_TRAP",
 ];

@@ -367,12 +367,16 @@ export class UIManager implements IUIManager {
     const currentTurn = this.context.gameState.currentTurn;
     const hasWaited = currentTurn > card.setTurn;
     const cardType = card.getType();
+    const cardTriggerEffect = card.getCardData().effects?.trigger;
 
     let canActivate = false;
 
     if (cardType == "TRAP") {
       canActivate = card.isFaceDown && hasWaited;
-    } else if (cardType == "EFFECT_MONSTER") {
+    } else if (
+      cardType == "EFFECT_MONSTER" &&
+      cardTriggerEffect == "NEXT_TURN"
+    ) {
       canActivate = hasWaited && !card.hasActivatedEffect;
     } else if (cardType == "SPELL") {
       canActivate = true;
