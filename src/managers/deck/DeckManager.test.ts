@@ -40,7 +40,7 @@ describe("DeckManager", () => {
 
       expect(mockContext.engine.add.container).toHaveBeenCalledWith(
         LAYOUT_CONFIG.DECK.PLAYER.x,
-        LAYOUT_CONFIG.DECK.PLAYER.y
+        LAYOUT_CONFIG.DECK.PLAYER.y,
       );
 
       expect(mockContext.engine.add.plane).toHaveBeenCalledTimes(9);
@@ -88,9 +88,13 @@ describe("DeckManager", () => {
 
       vi.mocked(mockContext.gameState.getDeckCount).mockReturnValue(19);
 
-      const textMock = vi.mocked(mockContext.engine.add.text).mock.results[0].value;
+      const textMock = vi.mocked(mockContext.engine.add.text).mock.results[0]
+        .value;
 
-      EventBus.emit(GameEvent.CARD_DRAW, { side: "PLAYER", card: createMockCard() });
+      EventBus.emit(GameEvent.CARD_DRAW, {
+        side: "PLAYER",
+        card: createMockCard(),
+      });
 
       expect(textMock.setText).toHaveBeenCalledWith("19");
       expect(mockContext.engine.tweens.add).toHaveBeenCalled();
@@ -101,25 +105,61 @@ describe("DeckManager", () => {
 
       vi.mocked(mockContext.gameState.getDeckCount).mockReturnValue(3);
 
-      const textMock = vi.mocked(mockContext.engine.add.text).mock.results[0].value;
+      const textMock = vi.mocked(mockContext.engine.add.text).mock.results[0]
+        .value;
 
-      EventBus.emit(GameEvent.CARD_DRAW, { side: "PLAYER", card: createMockCard() });
+      EventBus.emit(GameEvent.CARD_DRAW, {
+        side: "PLAYER",
+        card: createMockCard(),
+      });
 
       expect(textMock.setColor).toHaveBeenCalledWith("#FF4d4d");
     });
 
     it("should react to EventBus CARD_DRAW for the correct side", () => {
       deckManager.createDeckVisual();
-      const textMock = vi.mocked(mockContext.engine.add.text).mock.results[0].value;
-      
-      vi.clearAllMocks(); 
+      const textMock = vi.mocked(mockContext.engine.add.text).mock.results[0]
+        .value;
+
+      vi.clearAllMocks();
       vi.mocked(mockContext.gameState.getDeckCount).mockReturnValue(15);
 
-      EventBus.emit(GameEvent.CARD_DRAW, { side: "OPPONENT", card: createMockCard() });
+      EventBus.emit(GameEvent.CARD_DRAW, {
+        side: "OPPONENT",
+        card: createMockCard(),
+      });
       expect(textMock.setText).not.toHaveBeenCalled();
 
-      EventBus.emit(GameEvent.CARD_DRAW, { side: "PLAYER", card: createMockCard() });
+      EventBus.emit(GameEvent.CARD_DRAW, {
+        side: "PLAYER",
+        card: createMockCard(),
+      });
       expect(textMock.setText).toHaveBeenCalledWith("15");
+    });
+
+    it("should not configure interaction when side is OPPONENT", () => {
+      const opponentDeckManager = new DeckManager(mockContext, "OPPONENT");
+      const planeMock = vi.mocked(mockContext.engine.add.plane);
+
+      opponentDeckManager.createDeckVisual();
+
+      const lastCard =
+        planeMock.mock.results[planeMock.mock.results.length - 1].value;
+      // Garante que o evento de clique não foi registrado para o oponente
+      expect(lastCard.on).not.toHaveBeenCalledWith(
+        "pointerdown",
+        expect.any(Function),
+      );
+    });
+
+    it("should not configure interaction if topCard is null/undefined", () => {
+      vi.spyOn(deckManager["view"], "getTopCard").mockReturnValue(undefined);
+
+      expect(() => {
+        deckManager.createDeckVisual();
+      }).not.toThrow();
+
+      expect(mockContext.handlePlayerCard).not.toHaveBeenCalled();
     });
   });
 });

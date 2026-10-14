@@ -87,6 +87,7 @@ export const createMockCard = (overrides: Partial<Card> = {}): Card => {
     setAngle: vi.fn(),
     setScale: vi.fn(),
     setOwner: vi.fn(),
+    isAtkMode: vi.fn(),
     disableInteractive: vi.fn(),
     setInteractive: vi.fn(),
     removeAllListeners: vi.fn(),
@@ -201,6 +202,7 @@ export const createMockBattleContext = (): IBattleContext => {
         SPELL: "MAGIA",
         TRAP: "ARMADILHA",
         EFFECT_MONSTER: "MONSTRO DE EFEITO",
+        EFFECT: "EFEITO",
       },
       combat_notices: {
         select_attack_target: "",
@@ -220,6 +222,7 @@ export const createMockBattleContext = (): IBattleContext => {
         confirm_btn: "",
         cancel_btn: "",
         select_valid_response: "",
+        sent_to_graveyard: "",
       },
     },
     tweens: mockTweens,

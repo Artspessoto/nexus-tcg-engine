@@ -237,4 +237,109 @@ describe("FieldManager", () => {
     expect(card.hasChangedPosition).toBe(false);
     expect(card.setAlpha).toHaveBeenCalledWith(1);
   });
+
+  describe("Event Listeners & Turn Transitions", () => {
+    it("should call resetFieldFlags on CHANGE_TURN phase event", () => {
+      const resetSpy = vi.spyOn(fieldManager, "resetFieldFlags");
+
+      EventBus.emit(GameEvent.PHASE_CHANGED, {
+        newPhase: "CHANGE_TURN",
+        activePlayer: "PLAYER",
+      });
+
+      expect(resetSpy).toHaveBeenCalled();
+    });
+
+    it("should not call resetFieldFlags on other phases", () => {
+      const resetSpy = vi.spyOn(fieldManager, "resetFieldFlags");
+
+      EventBus.emit(GameEvent.PHASE_CHANGED, {
+        newPhase: "MAIN",
+        activePlayer: "PLAYER",
+      });
+
+      expect(resetSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("releaseSlot from Graveyard", () => {
+    it("should remove card from graveyard if not present in field slots", () => {
+      const card = createMockCard();
+      const emitSpy = vi.spyOn(EventBus, "emit");
+
+      // Coloca a carta diretamente no cemitério do jogador
+      fieldManager.graveyardSlot.PLAYER = [card];
+
+      fieldManager.releaseSlot(card, "PLAYER");
+
+      expect(fieldManager.graveyardSlot.PLAYER).toHaveLength(0);
+      expect(emitSpy).toHaveBeenCalledWith(
+        GameEvent.CARD_REMOVED_FROM_GRAVEYARD,
+        { card, side: "PLAYER" },
+      );
+    });
+  });
+
+  describe("playCardToZone placements", () => {
+    it("should set card face down when played in DEF mode", async () => {
+      const card = createMockCard({
+        getType: vi.fn().mockReturnValue("EFFECT_MONSTER"),
+      });
+
+      await fieldManager.playCardToZone(card, 100, 100, "DEF");
+
+      expect(card.setFaceDown).toHaveBeenCalled();
+    });
+
+    it("should set card face down when played in SET mode", async () => {
+      const card = createMockCard({
+        getType: vi.fn().mockReturnValue("SPELL"),
+      });
+
+      await fieldManager.playCardToZone(card, 100, 100, "SET");
+
+      expect(card.setFaceDown).toHaveBeenCalled();
+    });
+  });
+
+  describe("moveToGraveyard with existing cards", () => {
+    it("should deactivate previous top card in graveyard", () => {
+      const firstCard = createMockCard({ active: true });
+      const secondCard = createMockCard({ active: true });
+
+      // Adiciona a primeira carta
+      fieldManager.moveToGraveyard(firstCard);
+      expect(firstCard.active).toBe(true);
+
+      // Ao adicionar a segunda carta, a primeira deve ser desativada
+      fieldManager.moveToGraveyard(secondCard);
+      expect(firstCard.active).toBe(false);
+      expect(secondCard.active).toBe(true);
+      expect(fieldManager.graveyardSlot.PLAYER[0]).toBe(secondCard);
+    });
+  });
+
+  describe("resetFieldFlags for both sides", () => {
+    it("should reset flags and kill tweens for opponent monsters as well", () => {
+      const opponentCard = createMockCard({
+        hasAttacked: true,
+        hasChangedPosition: true,
+        setAlpha: vi.fn(),
+      });
+
+      fieldManager.monsterSlots.OPPONENT[0] = opponentCard;
+
+      fieldManager.resetFieldFlags();
+
+      expect(opponentCard.hasAttacked).toBe(false);
+      expect(opponentCard.hasChangedPosition).toBe(false);
+      expect(opponentCard.setAlpha).toHaveBeenCalledWith(1);
+      expect(mockContext.tweens.killTweensOf).toHaveBeenCalledWith(
+        opponentCard,
+      );
+      expect(mockContext.tweens.killTweensOf).toHaveBeenCalledWith(
+        opponentCard.visualElements,
+      );
+    });
+  });
 });

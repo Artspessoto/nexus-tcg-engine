@@ -78,6 +78,7 @@ describe("CombatManager", () => {
   describe("prepareTargeting", () => {
     it("direct attack when opponent field empty", async () => {
       const attacker = setupTestCard({ owner: "PLAYER", atk: 500 });
+      attacker.location = "FIELD";
 
       mockContext.field.monsterSlots.OPPONENT = [null, null];
 
