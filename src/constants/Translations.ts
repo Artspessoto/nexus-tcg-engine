@@ -185,6 +185,7 @@ export const TRANSLATIONS = {
         SPELL: "MAGIA",
         TRAP: "ARMADILHA",
         EFFECT_MONSTER: "MONSTRO DE EFEITO",
+        EFFECT: "EFEITO",
       },
       combat_notices: {
         select_attack_target: "SELECIONE O ALVO DO ATAQUE",
@@ -199,6 +200,7 @@ export const TRANSLATIONS = {
         select_graveyard: "SELECIONE UM CEMITÉRIO",
         action_canceled: "AÇÃO CANCELADA",
         field_full: "CAMPO CHEIO!",
+        sent_to_graveyard: "MÃO CHEIA! {targetName} FOI AO CEMITÉRIO",
         response_title: "JANELA DE RESPOSTA",
         response_message:
           "Um ataque foi declarado. Deseja ativar um card ou efeito?",
@@ -250,57 +252,57 @@ export const TRANSLATIONS = {
       APPRENTICE_WIZARD: {
         name: "Aprendiz de Mago",
         description:
-          "Ainda está aprendendo a não explodir coisas.\n\n[Ao Invocar]: Compre 1 carta.",
+          "Ainda está aprendendo a não explodir coisas.\n\nAo Invocar: Compre 1 carta.",
       },
       PIED_PIPER_RAT: {
         name: "Rato Flautista",
         description:
-          "Com uma melodia hipnótica ele encanta pequenas criaturas.\n\n[Ao Invocar]: Ao tocar sua flauta, compre 1 carta.",
+          "Com uma melodia hipnótica ele encanta pequenas criaturas.\n\nAo Invocar: Ao tocar sua flauta, compre 1 carta.",
       },
       BARD: {
         name: "Bardo Errante",
         description:
-          "Suas canções revigoram o ânimo do grupo nas tavernas.\n\n[Ao Invocar]: Restaura 25 LP do jogador.",
+          "Suas canções revigoram o ânimo do grupo nas tavernas.\n\nAo Invocar: Restaura 25 LP do jogador.",
       },
       PRIESTESS: {
         name: "Clériga da Luz",
         description:
-          "Canaliza preces aos céus para curar os feridos.\n\n[Ao Invocar]: Abençoa o jogador restaurando 35 LP.",
+          "Canaliza preces aos céus para curar os feridos.\n\nAo Invocar: Abençoa o jogador restaurando 35 LP.",
       },
       BANDIT_ARCHER: {
         name: "Bandido Arqueiro",
         description:
-          "Diz a lenda que ele se inspira em algum 'Wood'.\n\n[Ao Invocar]: Causa 10 de dano direto ao oponente.",
+          "Diz a lenda que ele se inspira em algum 'Wood'.\n\nAo Invocar: Causa 10 de dano direto ao oponente.",
       },
       BABY_DRAGON: {
         name: "Filhote de Dragão",
         description:
-          "Solta uma baforada de fogo na empolgação de nascer.\n\n[Ao Invocar]: Causa 15 de dano ao oponente.",
+          "Solta uma baforada de fogo na empolgação de nascer.\n\nAo Invocar: Causa 15 de dano ao oponente.",
       },
       APPRENTICE_WARRIOR: {
         name: "Escudeiro Treinante",
         description:
-          "Destrambelhado, mas distrai o inimigo.\n\n[Turno Seguinte]: Altere a posição de um monstro no campo.",
+          "Destrambelhado, mas distrai o inimigo.\n\nTurno Seguinte: Altere a posição de um monstro no campo.",
       },
       AMAZON_WARRIOR: {
         name: "Amazona",
         description:
-          "Guardiã implacável da selva sagrada.\n\n[Turno Seguinte]: Reduz o ataque de um monstro inimigo em 15 pontos.",
+          "Guardiã implacável da selva sagrada.\n\nTurno Seguinte: Reduz o ataque de um monstro inimigo em 15 pontos.",
       },
       BOWLER: {
         name: "Batedor",
         description:
-          "Pega impulso com seu javali para triturar blindagens.\n\n[Turno Seguinte]: Reduz a defesa de um monstro inimigo em 20 pontos.",
+          "Pega impulso com seu javali para triturar blindagens.\n\nTurno Seguinte: Reduz a defesa de um monstro inimigo em 20 pontos.",
       },
       DARKNESS_WIZARD: {
         name: "Mago das Trevas",
         description:
-          "Canaliza as artes proibidas da necromancia.\n\n[Turno Seguinte]: Retorne um monstro inimigo do campo para a mão do oponente.",
+          "Canaliza as artes proibidas da necromancia.\n\nTurno Seguinte: Retorne um monstro inimigo do campo para a mão do oponente.",
       },
       VALKYRIE: {
         name: "Valquíria Celestial",
         description:
-          "Canaliza a graça dos salões eternos para erguer os caídos.\n\n[Turno Seguinte]: Escolha um monstro de qualquer cemitério e reviva-o no seu campo.",
+          "Canaliza a graça dos salões eternos para erguer os caídos.\n\nTurno Seguinte: Escolha um monstro de qualquer cemitério e reviva-o no seu campo.",
       },
     },
   },
@@ -488,6 +490,7 @@ export const TRANSLATIONS = {
         SPELL: "SPELL",
         TRAP: "TRAP",
         EFFECT_MONSTER: "EFFECT MONSTER",
+        EFFECT: "EFFECT",
       },
       combat_notices: {
         select_attack_target: "SELECT THE ATTACK TARGET",
@@ -502,6 +505,7 @@ export const TRANSLATIONS = {
         select_graveyard: "SELECT A GRAVEYARD",
         action_canceled: "ACTION CANCELED",
         field_full: "FIELD FULL!",
+        sent_to_graveyard: "HAND LIMIT REACHED! {targetName} SENT TO GRAVEYARD",
         response_title: "RESPONSE WINDOW",
         response_message:
           "An attack has been declared. Would you like to activate a card or effect?",
@@ -553,57 +557,57 @@ export const TRANSLATIONS = {
       APPRENTICE_WIZARD: {
         name: "Apprentice Wizard",
         description:
-          "Still learning how not to blow things up.\n\n[On Summon]: Draw 1 card.",
+          "Still learning how not to blow things up.\n\nOn Summon: Draw 1 card.",
       },
       PIED_PIPER_RAT: {
         name: "Pied Piper Rat",
         description:
-          "With a hypnotic melody he charms little critters.\n\n[On Summon]: Draw 1 card.",
+          "With a hypnotic melody he charms little critters.\n\nOn Summon: Draw 1 card.",
       },
       BARD: {
         name: "Wandering Bard",
         description:
-          "His songs lift spirits across tavern halls.\n\n[On Summon]: Restore 25 of the player's LP.",
+          "His songs lift spirits across tavern halls.\n\nOn Summon: Restore 25 of the player's LP.",
       },
       PRIESTESS: {
         name: "Priestess of Light",
         description:
-          "Channels heavenly prayers to mend the wounded.\n\n[On Summon]: Bless the player restoring 35 LP.",
+          "Channels heavenly prayers to mend the wounded.\n\nOn Summon: Bless the player restoring 35 LP.",
       },
       BANDIT_ARCHER: {
         name: "Bandit Archer",
         description:
-          "Legend says he takes cues from a certain 'Wood'.\n\n[On Summon]: Deal 10 direct damage to the opponent.",
+          "Legend says he takes cues from a certain 'Wood'.\n\nOn Summon: Deal 10 direct damage to the opponent.",
       },
       BABY_DRAGON: {
         name: "Baby Dragon",
         description:
-          "Spits an eager burst of flame upon hatching.\n\n[On Summon]: Deal 15 damage to the opponent.",
+          "Spits an eager burst of flame upon hatching.\n\nOn Summon: Deal 15 damage to the opponent.",
       },
       APPRENTICE_WARRIOR: {
         name: "Trainee Squire",
         description:
-          "Clumsy, but a great distraction.\n\n[Next Turn]: Change a monster's battle position on the field.",
+          "Clumsy, but a great distraction.\n\nNext Turn: Change a monster's battle position on the field.",
       },
       AMAZON_WARRIOR: {
         name: "Amazon Warrior",
         description:
-          "Relentless guardian of the sacred jungle.\n\n[Next Turn]: Reduce an enemy monster's attack by 15.",
+          "Relentless guardian of the sacred jungle.\n\nNext Turn: Reduce an enemy monster's attack by 15.",
       },
       BOWLER: {
         name: "Boar Rider",
         description:
-          "Charges in with his boar to crush defenses.\n\n[Next Turn]: Reduce an enemy monster's defense by 20.",
+          "Charges in with his boar to crush defenses.\n\nNext Turn: Reduce an enemy monster's defense by 20.",
       },
       DARKNESS_WIZARD: {
         name: "Darkness Wizard",
         description:
-          "Channels forbidden arts of necromancy.\n\n[Next Turn]: Return an enemy monster to the opponent's hand.",
+          "Channels forbidden arts of necromancy.\n\nNext Turn: Return an enemy monster to the opponent's hand.",
       },
       VALKYRIE: {
         name: "Celestial Valkyrie",
         description:
-          "Channels eternal grace to lift the fallen.\n\n[Next Turn]: Choose a monster from any graveyard and revive it on your field.",
+          "Channels eternal grace to lift the fallen.\n\nNext Turn: Choose a monster from any graveyard and revive it on your field.",
       },
     },
   },

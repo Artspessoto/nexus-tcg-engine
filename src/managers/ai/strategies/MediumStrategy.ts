@@ -64,11 +64,19 @@ export class MediumStrategy extends BaseStrategy {
         );
 
         if (slot !== null) {
+          const mode = this.determineOptimalPlacementMode(card, snapshot);
+          const effect = card.getCardData().effects;
+          const target =
+            effect?.trigger === "ON_SUMMON"
+              ? this.evaluator.getBestTarget(effect, snapshot)
+              : null;
+
           moves.push({
             card,
-            mode: this.determineOptimalPlacementMode(card, snapshot),
+            mode,
             slot,
             type: "PLAY_MONSTER",
+            params: { target },
           });
         }
       }
@@ -172,12 +180,15 @@ export class MediumStrategy extends BaseStrategy {
     moves: Move[],
   ): void {
     const effect = monster.getCardData().effects;
+
+    //on summon effects trigger the moment the card is played
+    if (!effect || effect.trigger == "ON_SUMMON") return;
+
     const currentTurn = this.context.gameState.currentTurn;
     const hasWaited = currentTurn > monster.setTurn;
 
     if (
       // !monster.isFaceDown ||
-      !effect ||
       !hasWaited ||
       monster.hasActivatedEffect
     )

@@ -45,9 +45,14 @@ export class CombatManager implements ICombatManager {
     if (!existsMonstersIntoField) {
       await this.triggerActivation(opponentSide);
 
-      const isExecuteDirectAttackValid = attacker && attacker.active;
+      const isExecuteDirectAttackValid =
+        attacker && this.canAttackerStillAttack(attacker);
 
       if (!isExecuteDirectAttackValid) {
+        if (attacker) {
+          //apply turn attack to block bug or loop
+          attacker.hasAttacked = true;
+        }
         this.cancelTarget();
         return;
       }
@@ -117,12 +122,16 @@ export class CombatManager implements ICombatManager {
 
     const isCombatStillValid =
       this.currentAttacker &&
-      this.currentAttacker.active &&
+      this.canAttackerStillAttack(this.currentAttacker) &&
       target &&
       target.active &&
       target.location === "FIELD";
 
     if (!isCombatStillValid) {
+      if (this.currentAttacker) {
+        //apply turn attack for block other attacks in the same turn (loop)
+        this.currentAttacker.hasAttacked = true;
+      }
       this.cancelTarget();
       return;
     }
@@ -164,13 +173,15 @@ export class CombatManager implements ICombatManager {
 
     if (
       !this.currentAttacker ||
-      !this.currentAttacker.active ||
-      this.currentAttacker.location !== "FIELD"
+      !this.canAttackerStillAttack(this.currentAttacker)
     ) {
       Logger.debug(
         "COMBAT",
-        "Attack canceled. The attacking monster/warrior was negated/destroyed by the effect",
+        "Attack canceled. The attacking monster/warrior was negated/switched position or destroyed by the effect",
       );
+      if (this.currentAttacker) {
+        this.currentAttacker.hasAttacked = true;
+      }
       this.cancelTarget();
       return;
     }
@@ -434,13 +445,25 @@ export class CombatManager implements ICombatManager {
     const spells = this.context.field.spellSlots[defenderSide];
 
     const hasValidEffectMonster = monsters.some(
-      (c) => c?.getType() === "EFFECT_MONSTER" && !c.hasActivatedEffect,
+      (c) =>
+        c?.getType() === "EFFECT_MONSTER" &&
+        !c.hasActivatedEffect &&
+        c.getCardData().effects?.trigger !== "ON_SUMMON",
     );
     const hasTrap = spells.some((c) => c?.getType() === "TRAP");
 
     if (!hasValidEffectMonster && !hasTrap) return false;
 
     return await this.context.getUI("PLAYER").showTrapResponseAction();
+  }
+
+  private canAttackerStillAttack(attacker: Card): boolean {
+    if (!attacker || !attacker.active || attacker.location !== "FIELD") return false;
+
+    if (attacker.isDefMode || attacker.isFaceDown || !attacker.isAtkMode)
+      return false;
+
+    return true;
   }
 
   private delay(ms: number) {

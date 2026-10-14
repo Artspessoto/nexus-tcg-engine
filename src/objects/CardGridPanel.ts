@@ -1,5 +1,6 @@
 import { LAYOUT_CONFIG } from "../constants/LayoutConfig";
 import { THEME_CONFIG } from "../constants/ThemeConfig";
+import { TRANSLATIONS } from "../constants/Translations";
 import { LanguageManager } from "../managers/language/LanguageManager";
 import type { CardData } from "../types/CardTypes";
 import { Card } from "./Card";
@@ -15,10 +16,9 @@ export interface CardGridPanelConfig {
 export class CardGridPanel extends Phaser.GameObjects.Container {
   private cardDetailView!: Card;
   private detailNameText!: Phaser.GameObjects.Text;
-  private detailTypeText!: Phaser.GameObjects.Text;
+  private badgesContainer!: Phaser.GameObjects.Container;
   private detailDescText!: Phaser.GameObjects.Text;
   private selectionHighlight!: Phaser.GameObjects.Graphics;
-  private typeBadgeBg!: Phaser.GameObjects.Graphics;
   private panelConfig!: CardGridPanelConfig;
   private cardScale: number = 0.28;
   private languageManager: LanguageManager = LanguageManager.getInstance();
@@ -61,7 +61,6 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
     const cellHeight = MODAL.LIST.CELL_HEIGHT;
 
     const panel = this.scene.add.graphics();
-    this.typeBadgeBg = this.scene.add.graphics();
 
     //panel (background and border)
     panel.fillStyle(COLORS.PANEL_BG, 1); //0.95
@@ -74,7 +73,9 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
     //vertical line divisor between the zones
     panel.lineBetween(gridWidth, 20, gridWidth, config.height - 20);
 
-    this.add([panel, this.typeBadgeBg]);
+    this.badgesContainer = this.scene.add.container(0, 0);
+
+    this.add([panel, this.badgesContainer]);
 
     this.selectionHighlight = this.scene.add.graphics();
     this.selectionHighlight.setDepth(DEPTHS.UI_BASE + 1);
@@ -156,20 +157,6 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
         })
         .setOrigin(0.5);
 
-      this.detailTypeText = this.scene.add
-        .text(
-          detailCenterX,
-          textPaddingY + 30,
-          this.formatTypeLabel(firstCardItem.type),
-          {
-            fontSize: "13px",
-            color: "#FFFFFF",
-            fontStyle: "bold",
-            fontFamily: FONTS.FAMILY_DISPLAY,
-          },
-        )
-        .setOrigin(0.5, 0.5);
-
       this.detailDescText = this.scene.add
         .text(detailCenterX, textPaddingY + 60, description || "", {
           ...FONTS.STYLES.MODAL_CONTENT,
@@ -179,14 +166,9 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
         })
         .setOrigin(0.5, 0);
 
-      this.add([
-        this.cardDetailView,
-        this.detailNameText,
-        this.detailTypeText,
-        this.detailDescText,
-      ]);
+      this.add([this.cardDetailView, this.detailNameText, this.detailDescText]);
 
-      this.renderTypeBadge(firstCardItem.type);
+      this.renderTypeBadges(firstCardItem);
 
       //marks first card as 'select' by default
       this.updateHighlight(cellWidth / 2, 100);
@@ -202,10 +184,7 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
     this.detailNameText.setText(name);
     this.detailDescText.setText(description);
 
-    this.detailTypeText.setText(this.formatTypeLabel(data.type));
-    this.detailTypeText.setColor("#FFFFFF");
-
-    this.renderTypeBadge(data.type);
+    this.renderTypeBadges(data);
   }
 
   private updateHighlight(x: number, y: number) {
@@ -235,26 +214,81 @@ export class CardGridPanel extends Phaser.GameObjects.Container {
     return colorMap[type] || COLORS.GOLD_GLOW;
   }
 
-  private formatTypeLabel(type: string): string {
-    //transform effect_monster into "effect monster" or remove underline
-    return type.replace("_", " ");
-  }
+  private renderTypeBadges(cardData: CardData) {
+    const { MODAL } = LAYOUT_CONFIG;
+    const { FONTS } = THEME_CONFIG;
 
-  private renderTypeBadge(type: string) {
-    const colorHex = this.getTypeColor(type);
-    const colorNum = Phaser.Display.Color.HexStringToColor(colorHex).color;
+    this.badgesContainer.removeAll(true);
 
-    this.typeBadgeBg.clear();
+    const gridWidth = this.panelConfig.width - MODAL.LIST.DETAIL_WIDTH; //x - 300
+    const centerX = gridWidth + MODAL.LIST.DETAIL_WIDTH / 2; //x + 150
+    const badgeY = MODAL.LIST.TEXT_Y_START + 30; //380 + 30
 
-    const width = this.detailTypeText.width + 24;
-    const height = 24;
-    const x = this.detailTypeText.x - width / 2;
-    const y = this.detailTypeText.y - height / 2;
+    const lang = this.languageManager.currentLang;
+    const cardTypeTranslations = TRANSLATIONS[lang].battle_scene.card_types;
 
-    this.typeBadgeBg.fillStyle(0x242424, 0.9);
-    this.typeBadgeBg.fillRoundedRect(x, y, width, height, 12);
+    const isEffect = cardData.type == "EFFECT_MONSTER";
+    const primaryType = isEffect ? "MONSTER" : cardData.type;
+    console.log(gridWidth, centerX, badgeY);
 
-    this.typeBadgeBg.lineStyle(2, colorNum, 0.9);
-    this.typeBadgeBg.strokeRoundedRect(x, y, width, height, 12);
+    const badges: { text: string; color: number }[] = [
+      {
+        text:
+          cardTypeTranslations[
+            primaryType as keyof typeof cardTypeTranslations
+          ] || primaryType,
+        color: Phaser.Display.Color.HexStringToColor(
+          this.getTypeColor(primaryType),
+        ).color,
+      },
+    ];
+
+    if (isEffect) {
+      badges.push({
+        text: cardTypeTranslations.EFFECT,
+        color: 0x9c27b0,
+      });
+    }
+
+    const badgeHeight = 24;
+    const paddingX = 14;
+    const gap = 10;
+
+    //create the texts to calc a total group large
+    const badgeElements = badges.map((badge) => {
+      const text = this.scene.add.text(0, 0, badge.text, {
+        fontSize: "12px",
+        color: "#FFFFFF",
+        fontStyle: "bold",
+        fontFamily: FONTS.FAMILY_DISPLAY,
+      });
+      return { text, color: badge.color };
+    });
+
+    const totalWidth =
+      badgeElements.reduce((acc, el) => acc + el.text.width + paddingX * 2, 0) +
+      (badgeElements.length - 1) * gap;
+
+    let currentX = centerX - totalWidth / 2;
+
+    badgeElements.forEach(({ text, color }) => {
+      const chipWidth = text.width + paddingX * 2;
+      const chipHeight = badgeHeight;
+      const chipX = currentX;
+      const chipY = badgeY - chipHeight / 2;
+
+      const bg = this.scene.add.graphics();
+      bg.fillStyle(0x242424, 0.95);
+      bg.fillRoundedRect(chipX, chipY, chipWidth, chipHeight, 12);
+      bg.lineStyle(2, color, 0.9);
+      bg.strokeRoundedRect(chipX, chipY, chipWidth, chipHeight, 12);
+
+      text.setPosition(chipX + paddingX, badgeY);
+      text.setOrigin(0, 0.5);
+
+      this.badgesContainer.add([bg, text]);
+
+      currentX += chipWidth + gap;
+    });
   }
 }

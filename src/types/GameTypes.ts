@@ -35,7 +35,13 @@ export type EffectInstructions = {
 };
 
 export type Move =
-  | { type: "PLAY_MONSTER"; card: Card; slot: Slot; mode: "ATK" | "DEF" }
+  | {
+      type: "PLAY_MONSTER";
+      card: Card;
+      slot: Slot;
+      mode: "ATK" | "DEF";
+      params?: EffectInstructions;
+    }
   | {
       type: "PLAY_SPELL";
       card: Card;

@@ -441,9 +441,11 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
         //fast spell activation
         const isSpellActivated = cardType == "SPELL" && mode == "FACE_UP";
 
-        //effect monster summoned fast activation (ON_SUMMONED)
+        //effect monster summoned fast activation (ON_SUMMONED and ATK position)
         const isMonsterOnSummon =
-          cardType == "EFFECT_MONSTER" && effect?.trigger == "ON_SUMMON";
+          cardType == "EFFECT_MONSTER" &&
+          mode == "ATK" &&
+          effect?.trigger == "ON_SUMMON";
 
         if (isSpellActivated || isMonsterOnSummon) {
           await new Promise((resolve) => this.time.delayedCall(500, resolve));
@@ -501,7 +503,7 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
     this.field.occupySlot(side, type, slot.index, card);
     await this.field.playCardToZone(card, slot.x, slot.y, mode);
 
-    Logger.debug("SYSTEM", `Card ${card.getCardData().nameKey} is set`);
+    Logger.debug("SYSTEM", `Card ${card.getName()} is set`);
   }
 
   private handleInteractionOrchestrator(card: Card) {
@@ -620,37 +622,37 @@ export class BattleScene extends Phaser.Scene implements IBattleContext {
 
               // move card to graveyard
               this.field.moveToGraveyard(card);
+            } else {
+              await new Promise<void>((done) => {
+                //effect monster returns into original position after active effect
+                this.tweens.add({
+                  targets: card,
+                  x: originalPos.x,
+                  y: originalPos.y,
+                  angle: originalPos.angle,
+                  scale: originalPos.scale,
+                  duration: ANIMATIONS.DURATIONS.MEDIUM_SLOW,
+                  ease: ANIMATIONS.EASING.SMOOTH,
+                  onComplete: () => {
+                    card.setHandVisuals();
+                    card.fieldStatsBadge?.setVisible(true);
+                    this.currentHand.showHand();
+
+                    card.setInteractive({ useHandCursor: true });
+                    card.setDepth(10); //back to default card depth in field
+                    card.resumeHighlights();
+
+                    done();
+                  },
+                });
+              });
             }
 
-            await this.effects.applyCardEffect(card, instructions);
-
-            if (isEffectMonster) {
-              //effect monster returns into original position after active effect
-              this.tweens.add({
-                targets: card,
-                x: originalPos.x,
-                y: originalPos.y,
-                angle: originalPos.angle,
-                scale: originalPos.scale,
-                duration: ANIMATIONS.DURATIONS.MEDIUM_SLOW,
-                ease: ANIMATIONS.EASING.SMOOTH,
-                onComplete: () => {
-                  card.setHandVisuals();
-                  card.fieldStatsBadge?.setVisible(true);
-                  this.currentHand.showHand();
-
-                  card.setInteractive({ useHandCursor: true });
-                  card.setDepth(10); //back to default card depth in field
-                  card.resumeHighlights();
-
-                  resolve();
-                },
-              });
-            } else {
-              card.setInteractive({ useHandCursor: true });
-              card.setDepth(10);
-              card.resumeHighlights();
-
+            try {
+              await this.effects.applyCardEffect(card, instructions);
+            } catch (error) {
+              Logger.error("Erro durante a execução do efeito:", error);
+            } finally {
               resolve();
             }
           },

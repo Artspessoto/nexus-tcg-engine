@@ -91,7 +91,7 @@ export abstract class BaseStrategy implements IAIStrategy {
 
   public async executeMove(move: Move): Promise<void> {
     switch (move.type) {
-      case "PLAY_MONSTER":
+      case "PLAY_MONSTER": {
         await this.context.executePlay(
           move.card,
           this.side,
@@ -99,7 +99,24 @@ export abstract class BaseStrategy implements IAIStrategy {
           move.slot,
           move.mode,
         );
+
+        const monsterEffect = move.card.getCardData().effects;
+        if (
+          move.mode == "ATK" &&
+          monsterEffect?.trigger == "ON_SUMMON" &&
+          !move.card.hasActivatedEffect
+        ) {
+          await this.delay(800);
+
+          const snapshot = this.createFieldSnapshot();
+          const target =
+            move.params?.target ??
+            this.evaluator.getBestTarget(monsterEffect, snapshot);
+
+          await this.context.cardActivation(move.card, this.side, { target });
+        }
         break;
+      }
       case "PLAY_SPELL":
         await this.context.executePlay(
           move.card,

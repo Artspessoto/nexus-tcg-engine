@@ -5,6 +5,7 @@ import { ToonButton } from "./ToonButton";
 import type { CardData, CardLocation } from "../types/CardTypes";
 import type { GameSide } from "../types/GameTypes";
 import { LanguageManager } from "../managers/language/LanguageManager";
+import { TRANSLATIONS } from "../constants/Translations";
 
 interface CardDetailsData {
   cardData: CardData;
@@ -18,7 +19,7 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
   private cardData!: CardData;
   private owner!: GameSide;
   private originalOwner!: GameSide;
-  private typeBadgeBg!: Phaser.GameObjects.Graphics;
+  private badgesContainer!: Phaser.GameObjects.Container;
   private onClose?: () => void;
 
   constructor(scene: Phaser.Scene, data: CardDetailsData) {
@@ -68,7 +69,6 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
       .setInteractive();
 
     const panel = this.scene.add.graphics();
-    this.typeBadgeBg = this.scene.add.graphics();
     panel.fillStyle(COLORS.PANEL_BG, 0.95);
     panel.lineStyle(4, borderColor, 1);
 
@@ -100,44 +100,9 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
     );
 
     const badgeY = startY + DETAIL.TEXT_START_Y + 55;
-    const paddingX = 14;
-    const badgeHeight = 28;
 
-    const typeText = this.scene.add
-      .text(
-        textStartX + paddingX,
-        badgeY,
-        this.formatTypeLabel(this.cardData.type),
-        {
-          fontSize: "14px",
-          color: "#FFFFFF",
-          fontStyle: "bold",
-          fontFamily: FONTS.FAMILY_DISPLAY,
-        },
-      )
-      .setOrigin(0, 0.5);
-
-    const badgeWidth = typeText.width + paddingX * 2;
-    const badgeX = textStartX;
-    const badgeRectY = badgeY - badgeHeight / 2;
-
-    this.typeBadgeBg.fillStyle(0x242424, 0.9);
-    this.typeBadgeBg.fillRoundedRect(
-      badgeX,
-      badgeRectY,
-      badgeWidth,
-      badgeHeight,
-      12,
-    );
-
-    this.typeBadgeBg.lineStyle(2, borderColor, 0.9);
-    this.typeBadgeBg.strokeRoundedRect(
-      badgeX,
-      badgeRectY,
-      badgeWidth,
-      badgeHeight,
-      12,
-    );
+    this.badgesContainer = this.scene.add.container(0, 0);
+    this.renderBadges(textStartX, badgeY);
 
     const descText = this.scene.add.text(textStartX, badgeY + 35, description, {
       fontSize: "16px",
@@ -168,13 +133,78 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
     this.add([
       overlay,
       panel,
-      this.typeBadgeBg,
+      this.badgesContainer,
       displayCard,
       titleText,
-      typeText,
       descText,
       closeBtn,
     ]);
+  }
+
+  private renderBadges(startX: number, y: number) {
+    const { FONTS, COLORS } = THEME_CONFIG;
+    const lang = LanguageManager.getInstance().currentLang;
+    const cardTypeTranslations = TRANSLATIONS[lang].battle_scene.card_types;
+
+    const isEffect = this.cardData.type === "EFFECT_MONSTER";
+    const primaryType = isEffect ? "MONSTER" : this.cardData.type;
+
+    const typeColors: Record<string, string> = {
+      SPELL: COLORS.TYPE_SPELL,
+      MONSTER: COLORS.TYPE_MONSTER,
+      TRAP: COLORS.TYPE_TRAP,
+    };
+
+    const primaryColorHex = typeColors[primaryType] || COLORS.GOLD_GLOW;
+    const primaryColorNum =
+      Phaser.Display.Color.HexStringToColor(primaryColorHex).color;
+
+    const badges: { text: string; color: number }[] = [
+      {
+        text:
+          cardTypeTranslations[
+            primaryType as keyof typeof cardTypeTranslations
+          ] || primaryType,
+        color: primaryColorNum,
+      },
+    ];
+
+    if (isEffect) {
+      badges.push({
+        text: cardTypeTranslations.EFFECT,
+        color: 0x9c27b0,
+      });
+    }
+
+    const badgeHeight = 26;
+    const paddingX = 14;
+    const gap = 10;
+    let currentX = startX;
+
+    badges.forEach(({ text, color }) => {
+      const textObj = this.scene.add
+        .text(currentX + paddingX, y, text, {
+          fontSize: "13px",
+          color: "#FFFFFF",
+          fontStyle: "bold",
+          fontFamily: FONTS.FAMILY_DISPLAY,
+        })
+        .setOrigin(0, 0.5);
+
+      const chipWidth = textObj.width + paddingX * 2;
+      const chipHeight = badgeHeight;
+      const chipY = y - chipHeight / 2;
+
+      const bg = this.scene.add.graphics();
+      bg.fillStyle(0x242424, 0.95);
+      bg.fillRoundedRect(currentX, chipY, chipWidth, chipHeight, 12);
+      bg.lineStyle(2, color, 0.9);
+      bg.strokeRoundedRect(currentX, chipY, chipWidth, chipHeight, 12);
+
+      this.badgesContainer.add([bg, textObj]);
+
+      currentX += chipWidth + gap;
+    });
   }
 
   private closeModal() {
@@ -189,10 +219,5 @@ export class CardDetailsModal extends Phaser.GameObjects.Container {
         this.onClose?.();
       },
     });
-  }
-
-  private formatTypeLabel(type: string): string {
-    //transform effect_monster into "effect monster" or remove underline
-    return type.replace("_", " ");
   }
 }

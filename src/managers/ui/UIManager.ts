@@ -240,10 +240,14 @@ export class UIManager implements IUIManager {
   public showFieldCardMenu(x: number, y: number, card: Card) {
     this.context.clearAllMenus();
 
+    const isPlayerCard = card.owner === "PLAYER";
+
+    //oponent's card face down don't open details menu
+    if (!isPlayerCard && card.isFaceDown) return;
+
     const options: MenuOption[] = [];
     const menuArgs: MenuOptionParams = { card, options };
 
-    const isPlayerCard = card.owner === "PLAYER";
     const myTurn = this.context.gameState.activePlayer == "PLAYER";
     const isResponseWindow = this.context.effects.isSelectingResponse;
     const currentPhase = this.context.currentPhase;
@@ -263,7 +267,15 @@ export class UIManager implements IUIManager {
       }
     }
 
-    this.addDetailsButton(menuArgs);
+    if (!card.isFaceDown || isPlayerCard) {
+      this.addDetailsButton(menuArgs);
+    }
+
+    //if any option has added blocks to show overlay
+    if (options.length === 0) {
+      return;
+    }
+
     this.actionMenuView.renderMenu(x, y, options, () => {
       if (!this.context.effects.isSelectingResponse) {
         this.context.getHand("PLAYER").showHand();
@@ -408,24 +420,21 @@ export class UIManager implements IUIManager {
     const battleTexts = this.translations["battle_scene"];
     const buttonTexts = battleTexts.battle_buttons;
 
-    //details btn always visible
-    if (!card.isFaceDown || card.owner === "PLAYER") {
-      options.push({
-        label: buttonTexts.details,
-        offsetX: -70,
-        action: () => {
-          new CardDetailsModal(this.context.engine, {
-            cardData: card.getCardData(),
-            owner: card.owner,
-            originalOwner: card.originalOwner,
-            location: card.location,
-            onClose: () => {
-              this.context.getHand("PLAYER").showHand();
-            },
-          });
-        },
-      });
-    }
+    options.push({
+      label: buttonTexts.details,
+      offsetX: -70,
+      action: () => {
+        new CardDetailsModal(this.context.engine, {
+          cardData: card.getCardData(),
+          owner: card.owner,
+          originalOwner: card.originalOwner,
+          location: card.location,
+          onClose: () => {
+            this.context.getHand("PLAYER").showHand();
+          },
+        });
+      },
+    });
   }
 
   public handleFlipSummon(card: Card) {

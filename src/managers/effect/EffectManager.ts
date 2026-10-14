@@ -410,18 +410,38 @@ export class EffectManager implements IEffectManager {
   }
 
   private resolveBounce(target: Card) {
+    const targetOwner = target.originalOwner;
     //returns to the original owner
-    const hand = this.context.getHand(target.originalOwner);
+    const handManager = this.context.getHand(target.originalOwner);
 
     //remove from controller
     this.context.field.releaseSlot(target, target.owner);
 
     target.resetStats();
-    target.setLocation("HAND");
     target.hasActivatedEffect = false;
+    target.setOwner(targetOwner);
 
-    target.setOwner(target.originalOwner);
-    hand.addCardBack(target);
+    //hand full
+    if (handManager.hand.length >= handManager.maxHandSize) {
+      const message =
+        this.context.translationText.effect_notices.sent_to_graveyard.replace(
+          "{targetName}",
+          target.getName(),
+        );
+      EventBus.emit(GameEvent.NOTICE_REQUESTED, {
+        message,
+        type: "WARNING",
+      });
+
+      //move direct to graveyard (destroyCard method has slot validation)
+      target.disableInteractive();
+      target.stopTargetHighlight?.();
+      this.context.field.moveToGraveyard(target);
+      return;
+    }
+
+    target.setLocation("HAND");
+    handManager.addCardBack(target);
   }
 
   private resolveRevive(

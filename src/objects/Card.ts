@@ -87,8 +87,10 @@ export class Card extends Phaser.GameObjects.Container {
       this.getCardData().id,
     ).description;
 
-    const effectMatch = fullDesc.match(/\[.*?$/s);
-    if (effectMatch) return effectMatch[0].trim();
+    if (fullDesc.includes("\n\n")) {
+      const parts = fullDesc.split("\n\n");
+      return parts[1].trim();
+    }
 
     return fullDesc;
   }
