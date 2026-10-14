@@ -38,6 +38,13 @@ export class UIManager implements IUIManager {
       });
     }
 
+    EventBus.on(GameEvent.GAME_OVER, (data) => {
+      const isWinner = data.loserSide !== this.side;
+      if (isWinner) {
+        this.statsView.setVictoryExpression();
+      }
+    });
+
     EventBus.on(GameEvent.NOTICE_REQUESTED, (data) => {
       if (this.side == "PLAYER") {
         this.showNotice(data.message, data.type);

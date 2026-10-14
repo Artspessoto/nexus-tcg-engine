@@ -12,6 +12,8 @@ export interface PlayerStatsViewConfig {
 
 export class PlayerStatsView {
   private scene: Phaser.Scene;
+  private side: GameSide;
+  private maxLP: number;
 
   public lpContainer: Phaser.GameObjects.Container;
   private lpText!: Phaser.GameObjects.Text;
@@ -21,20 +23,18 @@ export class PlayerStatsView {
   private manaIcon!: Phaser.GameObjects.Image;
   private manaAura!: Phaser.GameObjects.Image;
 
-  private enemyAvatarImage?: Phaser.GameObjects.Image;
-  private playerAvatarImage?: Phaser.GameObjects.Image;
-  private maxLP: number;
+  private avatarImage?: Phaser.GameObjects.Image;
 
   constructor(config: PlayerStatsViewConfig) {
     this.scene = config.scene;
+    this.maxLP = config.initialLP;
+    this.side = config.side;
 
     this.lpContainer = this.buildLPBar(
       config.side,
       config.playerName,
       config.initialLP,
     );
-
-    this.maxLP = config.initialLP;
 
     this.manaContainer = this.buildManaDisplay(config.side, config.initialMana);
   }
@@ -122,21 +122,16 @@ export class PlayerStatsView {
     labelLP.setPosition(110, 60);
     this.lpText.setPosition(145, 60);
 
-    if (side === "OPPONENT") {
-      this.enemyAvatarImage = this.scene.add
-        .image(55, HEIGHT / 2, "avatars_profile", "enemy_face_1")
-        .setOrigin(0.5, 0.5)
-        .setDisplaySize(105, 105);
+    const isNPC = this.side == "OPPONENT";
+    const defaultAvatarTexture = isNPC ? "enemy_face_1" : "player_face_1";
+    const avatarSize = isNPC ? 105 : 120;
 
-      elementsToRender.push(this.enemyAvatarImage);
-    } else {
-      this.playerAvatarImage = this.scene.add
-        .image(55, HEIGHT / 2, "avatars_profile", "player_face_1")
-        .setOrigin(0.5, 0.5)
-        .setDisplaySize(120, 120);
+    this.avatarImage = this.scene.add
+      .image(55, HEIGHT / 2, "avatars_profile", defaultAvatarTexture)
+      .setOrigin(0.5, 0.5)
+      .setDisplaySize(avatarSize, avatarSize);
 
-      elementsToRender.push(this.playerAvatarImage);
-    }
+    elementsToRender.push(this.avatarImage);
 
     container.add(elementsToRender);
 
@@ -182,6 +177,9 @@ export class PlayerStatsView {
 
   public animateLPChange(amount: number, startLP: number, targetLP: number) {
     const { ANIMATIONS } = THEME_CONFIG;
+    const isDamage = amount < 0;
+
+    if (isDamage) this.setAvatarFace(4);
 
     this.animateLPImpact(amount);
 
@@ -245,19 +243,29 @@ export class PlayerStatsView {
     }
   }
 
-  private updateAvatarExpression(currentLP: number): void {
-    if (!this.enemyAvatarImage) return;
+  private setAvatarFace(faceNumber: number): void {
+    if (!this.avatarImage) return;
 
+    const prefix = this.side === "PLAYER" ? "player_face" : "enemy_face";
+    this.avatarImage.setTexture("avatars_profile", `${prefix}_${faceNumber}`);
+  }
+
+  private updateAvatarExpression(currentLP: number): void {
     const healthPercent = Math.max(0, currentLP / this.maxLP);
 
-    if (healthPercent > 0.75) {
-      this.enemyAvatarImage.setTexture("avatars_profile", "enemy_face_1");
-    } else if (healthPercent > 0.4) {
-      this.enemyAvatarImage.setTexture("avatars_profile", "enemy_face_5");
-    } else if (healthPercent > 0.15) {
-      this.enemyAvatarImage.setTexture("avatars_profile", "enemy_face_4");
-    } else {
-      this.enemyAvatarImage.setTexture("avatars_profile", "enemy_face_2");
+    if (healthPercent == 0) {
+      this.setAvatarFace(3);
     }
+    if (healthPercent <= 0.3) {
+      this.setAvatarFace(3);
+    } else if (healthPercent <= 0.7) {
+      this.setAvatarFace(5);
+    } else {
+      this.setAvatarFace(1);
+    }
+  }
+
+  public setVictoryExpression(): void {
+    this.setAvatarFace(2);
   }
 }
